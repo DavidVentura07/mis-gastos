@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MisGastos">
+<title>MisGastos</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0c'/%3E%3Crect x='16' y='16' width='148' height='148' rx='28' fill='%231c1c21'/%3E%3Ctext x='90' y='76' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='700' fill='%23c8f55a'%3Emis%3C/text%3E%3Ctext x='90' y='116' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='700' fill='%23eeeae3'%3Egastos%3C/text%3E%3Cline x1='38' y1='132' x2='142' y2='132' stroke='%23c8f55a' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0a0c'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='sans-serif' font-size='18' font-weight='700' fill='%23c8f55a'%3E%24%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0c;--bg2:#131316;--bg3:#1c1c21;--bg4:#242429;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#eeeae3;--muted:rgba(238,234,227,0.4);--muted2:rgba(238,234,227,0.65);
+  --accent:#c8f55a;--danger:#ff5f5f;--warn:#ffb347;--info:#5ab4ff;--success:#5affa0;
+  --r:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;overflow:hidden;}
+.screen{display:none;flex-direction:column;height:100%;overflow:hidden;}
+.screen.active{display:flex;}
+.hdr{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-logo{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;}
+.hdr-logo span{color:var(--accent);}
+.icon-btn{background:var(--bg2);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative;}
+.notif-dot{position:absolute;top:1px;right:1px;width:8px;height:8px;background:var(--danger);border-radius:50%;border:2px solid var(--bg);}
+
+/* STICKY COLLAPSIBLE HEADER */
+.sticky-top{flex-shrink:0;}
+.summary{margin:0 16px 10px;background:var(--accent);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;transition:padding .25s;}
+.summary::after{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(0,0,0,.06);border-radius:50%;}
+.sum-label{font-size:11px;font-weight:600;color:rgba(0,0,0,.45);letter-spacing:.8px;text-transform:uppercase;transition:opacity .2s,height .2s;}
+.sum-top-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.sum-total{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#0a0a0c;letter-spacing:-1px;line-height:1.1;transition:font-size .25s;}
+.sum-msi-chip{font-size:11px;color:rgba(0,0,0,.5);text-align:right;line-height:1.5;flex-shrink:0;}
+.sum-row{display:flex;margin-top:12px;transition:opacity .2s,max-height .25s,margin .25s;max-height:60px;overflow:hidden;}
+.sum-item{flex:1;font-size:12px;color:rgba(0,0,0,.45);}
+.sum-item strong{display:block;font-size:14px;font-weight:600;color:rgba(0,0,0,.7);}
+.sum-alert{margin-top:10px;border-radius:8px;padding:7px 10px;font-size:12px;display:flex;align-items:center;gap:6px;transition:opacity .2s,max-height .25s,margin .25s;max-height:50px;overflow:hidden;}
+.sum-alert.warn{background:rgba(255,100,0,.15);color:#7a3a00;}
+.sum-alert.ok{background:rgba(0,120,60,.15);color:#004d28;}
+.sum-alert.info-msi{background:rgba(90,180,255,.12);color:#1a5a90;}
+/* collapsed */
+.sticky-top.collapsed .summary{padding:10px 20px;margin-bottom:8px;}
+.sticky-top.collapsed .sum-label{opacity:0;height:0;overflow:hidden;}
+.sticky-top.collapsed .sum-total{font-size:20px;}
+.sticky-top.collapsed .sum-row{opacity:0;max-height:0;margin-top:0;}
+.sticky-top.collapsed .sum-alert{opacity:0;max-height:0;margin-top:0;}
+.sticky-top.collapsed .cycle-bar{padding:7px 16px;margin-bottom:8px;}
+.sticky-top.collapsed .cycle-dates{display:none;}
+.sticky-top.collapsed .cycle-progress{margin-top:3px;}
+
+/* CYCLE BAR */
+.cycle-bar{margin:0 16px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;transition:padding .25s,margin .25s;}
+.cycle-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.cycle-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.cycle-arrows{display:flex;gap:6px;}
+.arr-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);font-size:14px;}
+.cycle-dates{display:flex;gap:14px;}
+.cdate{font-size:12px;color:var(--muted);}
+.cdate strong{color:var(--text);font-weight:500;display:block;font-size:13px;}
+.cycle-progress{margin-top:8px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.cycle-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .4s;}
+
+/* TABS */
+.tabs{display:flex;gap:5px;padding:0 16px 10px;flex-shrink:0;overflow-x:auto;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:7px 14px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.tab.active{background:var(--bg3);border-color:var(--border2);color:var(--text);}
+
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;padding:0 16px;-webkit-overflow-scrolling:touch;}
+.scroll::-webkit-scrollbar{display:none;}
+.day-lbl{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;padding:0 2px;margin:12px 0 7px;}
+
+/* EXPENSE ITEM */
+.expense-item{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:6px;}
+.expense-item.confirmed{border-left:3px solid var(--success);}
+.expense-item.disputed{border-left:3px solid var(--danger);}
+.expense-item.recurrent{border-left:3px solid var(--info);}
+.expense-item.is-msi{border-left:3px solid var(--accent);}
+.exp-icon{width:38px;height:38px;border-radius:11px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.exp-info{flex:1;min-width:0;}
+.exp-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exp-meta{font-size:12px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot-pending{background:var(--warn);}
+.dot-confirmed{background:var(--success);}
+.dot-disputed{background:var(--danger);}
+.exp-amount{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;flex-shrink:0;}
+.exp-amount-sub{font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400;text-align:right;}
+.exp-actions{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
+.exp-act-btn{font-size:11px;padding:3px 9px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* CAT GRID */
+.cat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;}
+.cat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;}
+.cat-icon{font-size:20px;margin-bottom:7px;}
+.cat-lbl{font-size:12px;color:var(--muted);}
+.cat-amt{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-top:3px;}
+.cat-bar-wrap{height:3px;background:var(--bg3);border-radius:2px;margin-top:9px;overflow:hidden;}
+.cat-bar{height:100%;background:var(--accent);border-radius:2px;}
+
+/* MSI SCREEN */
+.msi-summary-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.msi-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.msi-total-label{font-size:13px;color:var(--muted2);}
+.msi-total-amount{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.msi-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;}
+.msi-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;}
+.msi-name{font-size:14px;font-weight:500;}
+.msi-badge{font-size:11px;padding:3px 9px;border-radius:100px;background:rgba(90,180,255,.12);color:var(--info);font-weight:500;white-space:nowrap;flex-shrink:0;}
+.msi-badge.done{background:rgba(90,255,160,.1);color:var(--success);}
+.msi-amounts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.msi-amt-item{text-align:center;}
+.msi-amt-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.msi-amt-value{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.msi-prog-wrap{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.msi-prog-bar{height:100%;background:var(--accent);border-radius:2px;}
+.msi-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+
+/* CONCILIAR */
+.concil-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.concil-title{font-size:13px;font-weight:500;color:var(--muted2);margin-bottom:10px;}
+.concil-big{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.5px;}
+.concil-big.ok{color:var(--success);}
+.concil-big.diff{color:var(--danger);}
+.concil-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.concil-row:last-child{border-bottom:none;}
+.concil-key{color:var(--muted);}
+.concil-val{font-weight:500;}
+
+/* CONFIG */
+.cfg-section{margin-bottom:20px;}
+.cfg-section-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+.color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;transition:transform .15s,box-shadow .15s;flex-shrink:0;}
+.color-swatch:active{transform:scale(.9);}
+.color-swatch.active-swatch{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--accent);}
+
+/* FIELDS */
+.field{margin-bottom:12px;}
+.field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;}
+.pfx-wrap{position:relative;}
+.pfx-wrap::before{content:'$';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;}
+.pfx-wrap input{padding-left:26px;}
+
+/* MSI TOGGLE in modal */
+.msi-toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:12px 14px;margin-bottom:12px;cursor:pointer;}
+.msi-toggle-label{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;}
+.toggle-switch{width:44px;height:24px;background:var(--bg4);border-radius:12px;position:relative;transition:background .2s;border:1px solid var(--border2);}
+.toggle-switch.on{background:var(--accent);}
+.toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s;}
+.toggle-switch.on .toggle-knob{left:22px;}
+.msi-fields{background:rgba(90,180,255,.06);border:1px solid rgba(90,180,255,.15);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.msi-fields .field:last-child{margin-bottom:0;}
+
+/* FAB */
+.fab-wrap{padding:10px 16px 0;flex-shrink:0;}
+.fab{width:100%;height:52px;background:var(--accent);color:#0a0a0c;border:none;border-radius:100px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 4px 20px rgba(200,245,90,.2);}
+.fab:active{opacity:.9;transform:scale(.98);}
+
+/* BOTTOM NAV */
+.bnav{display:flex;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;}
+.bnav-btn{flex:1;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;font-family:'DM Sans',sans-serif;}
+.bnav-btn.active{color:var(--accent);}
+.bnav-icon{font-size:19px;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(3px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{width:100%;max-width:430px;margin:0 auto;background:var(--bg2);border-radius:22px 22px 0 0;padding:8px 18px 40px;transform:translateY(100%);transition:transform .28s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto;}
+.overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:34px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:18px;}
+.cat-pills{display:flex;flex-wrap:wrap;gap:7px;}
+.cpill{padding:7px 13px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.cpill.sel{background:var(--accent);border-color:var(--accent);color:#0a0a0c;font-weight:600;}
+.save-btn{width:100%;padding:15px;background:var(--accent);color:#0a0a0c;border:none;border-radius:100px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:18px;}
+.save-btn:active{opacity:.9;}
+.btn-row{display:flex;gap:8px;margin-top:8px;}
+.sec-btn{flex:1;padding:13px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:var(--text);}
+.danger-btn{background:rgba(255,95,95,.12);border-color:rgba(255,95,95,.3);color:var(--danger);}
+.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty-icon{font-size:44px;margin-bottom:12px;}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border2);border-radius:100px;padding:10px 20px;font-size:13px;color:var(--text);z-index:300;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+.msi-preview-box{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<!-- ══ INICIO ══ -->
+<div class="screen active" id="scr-main">
+  <div class="hdr">
+    <div class="hdr-logo">mis<span>gastos</span></div>
+    <div class="icon-btn" id="btn-notif">🔔<div class="notif-dot" id="notif-dot" style="display:none"></div></div>
+  </div>
+  <div class="sticky-top" id="sticky-top">
+    <div class="summary">
+      <div class="sum-label">Total estimado del ciclo</div>
+      <div class="sum-top-row">
+        <div class="sum-total" id="sum-total">$0.00</div>
+        <div class="sum-msi-chip" id="sum-msi-chip" style="display:none"></div>
+      </div>
+      <div class="sum-row">
+        <div class="sum-item"><strong id="sum-count">0</strong>gastos</div>
+        <div class="sum-item"><strong id="sum-confirmed">0</strong>confirmados</div>
+        <div class="sum-item"><strong id="sum-pending">0</strong>pendientes</div>
+      </div>
+      <div class="sum-alert" id="sum-alert" style="display:none"></div>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-nav">
+        <span class="cycle-name" id="cycle-name">Cargando...</span>
+        <div class="cycle-arrows">
+          <div class="arr-btn" id="btn-prev">‹</div>
+          <div class="arr-btn" id="btn-next">›</div>
+        </div>
+      </div>
+      <div class="cycle-dates" id="cycle-dates"></div>
+      <div class="cycle-progress"><div class="cycle-progress-bar" id="cycle-prog-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="todos">Todos</button>
+    <button class="tab" data-tab="pendientes">Pendientes</button>
+    <button class="tab" data-tab="categorias">Categorías</button>
+    <button class="tab" data-tab="recurrentes">Recurrentes</button>
+  </div>
+  <div class="scroll" id="main-scroll">
+    <div id="tab-todos"></div>
+    <div id="tab-pendientes" style="display:none"></div>
+    <div id="tab-categorias" style="display:none"></div>
+    <div id="tab-recurrentes" style="display:none"></div>
+    <div style="height:14px"></div>
+  </div>
+  <div class="fab-wrap">
+    <button class="fab" id="fab-add">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="#0a0a0c" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Agregar gasto
+    </button>
+  </div>
+  <div class="bnav">
+    <button class="bnav-btn active" data-nav="main"><div class="bnav-icon">🏠</div>Inicio</button>
+    <button class="bnav-btn" data-nav="msi"><div class="bnav-icon">📅</div>A meses</button>
+    <button class="bnav-btn" data-nav="conciliar"><div class="bnav-icon">🔍</div>Conciliar</button>
+    <button class="bnav-btn" data-nav="config"><div class="bnav-icon">⚙️</div>Config</button>
+  </div>
+</div>
+
+<!-- ══ A MESES ══ -->
+<div class="screen" id="scr-msi">
+  <div class="hdr"><div class="hdr-logo">a<span>meses</span></div></div>
+  <div class="scroll" style="padding:0 16px;">
+    <div class="msi-summary-card">
+      <div class="msi-total-row">
+        <span class="msi-total-label">Mensualidad total MSI</span>
+        <span class="msi-total-amount" id="msi-monthly-total">$0.00</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;" id="msi-active-count">0 compras activas</div>
+      <div style="padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;">
+        <span style="color:var(--muted);">Total pendiente por liquidar</span>
+        <span style="font-weight:500;" id="msi-remaining-total">$0.00</span>
+      </div>
+    </div>
+    <div id="msi-list"></div>
+    <div style="height:14px"></div>
+  </div>
+  <div class="bnav">
+    <button class="bnav-btn" data-nav="main"><div class="bnav-icon">🏠</div>Inicio</button>
+    <button class="bnav-btn active" data-nav="msi"><div class="bnav-icon">📅</div>A meses</button>
+    <button class="bnav-btn" data-nav="conciliar"><div class="bnav-icon">🔍</div>Conciliar</button>
+    <button class="bnav-btn" data-nav="config"><div class="bnav-icon">⚙️</div>Config</button>
+  </div>
+</div>
+
+<!-- ══ CONCILIAR ══ -->
+<div class="screen" id="scr-conciliar">
+  <div class="hdr">
+    <div class="hdr-logo">con<span>ciliar</span></div>
+    <div class="icon-btn" id="btn-export-csv">📤</div>
+  </div>
+  <div class="scroll" style="padding:0 16px;">
+    <div class="concil-card">
+      <div class="concil-title">Ciclo activo</div>
+      <div style="font-size:13px;color:var(--muted2)" id="concil-cycle-name">—</div>
+    </div>
+    <div class="field">
+      <label>Monto en estado de cuenta del banco ($)</label>
+      <div class="pfx-wrap"><input type="number" id="bank-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div>
+    </div>
+    <div class="concil-card" id="concil-result" style="display:none">
+      <div class="concil-title">Resultado</div>
+      <div class="concil-big" id="concil-diff">$0.00</div>
+      <div style="margin-top:12px;" id="concil-rows"></div>
+    </div>
+    <div class="concil-card">
+      <div class="concil-title">Gastos no confirmados</div>
+      <div id="pending-list"></div>
+    </div>
+    <div class="concil-card" id="disputed-card" style="display:none">
+      <div class="concil-title" style="color:var(--danger)">⚠️ Cobros disputados</div>
+      <div id="disputed-list"></div>
+    </div>
+    <div style="height:14px"></div>
+  </div>
+  <div class="bnav">
+    <button class="bnav-btn" data-nav="main"><div class="bnav-icon">🏠</div>Inicio</button>
+    <button class="bnav-btn" data-nav="msi"><div class="bnav-icon">📅</div>A meses</button>
+    <button class="bnav-btn active" data-nav="conciliar"><div class="bnav-icon">🔍</div>Conciliar</button>
+    <button class="bnav-btn" data-nav="config"><div class="bnav-icon">⚙️</div>Config</button>
+  </div>
+</div>
+
+<!-- ══ CONFIG ══ -->
+<div class="screen" id="scr-config">
+  <div class="hdr"><div class="hdr-logo">con<span>fig</span></div></div>
+  <div class="scroll" style="padding:0 16px;">
+    <div class="cfg-section">
+      <div class="cfg-section-title">Ciclo de tarjeta</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px;">Selecciona las fechas de tu estado de cuenta más reciente. La app deduce todos los ciclos futuros automáticamente.</p>
+      <div class="field"><label>Nombre de la tarjeta</label><input type="text" id="cfg-cardname" placeholder="ej. Visa Santander"></div>
+      <div class="field">
+        <label>📅 Fecha de corte de este ciclo</label>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">La fecha en que el banco cerró (o cerrará) el periodo actual</div>
+        <input type="date" id="cfg-cutdate" style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;padding:12px 14px;width:100%;outline:none;-webkit-appearance:none;appearance:none;">
+      </div>
+      <div class="field">
+        <label>💳 Fecha límite de pago</label>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">La fecha máxima para pagar el ciclo anterior sin intereses</div>
+        <input type="date" id="cfg-paydate" style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;padding:12px 14px;width:100%;outline:none;-webkit-appearance:none;appearance:none;">
+      </div>
+      <div id="cfg-preview" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;">
+        <div style="color:var(--muted);margin-bottom:6px;">Vista previa del ciclo</div>
+        <div id="cfg-preview-text" style="color:var(--text);line-height:1.7;"></div>
+      </div>
+      <button class="save-btn" id="cfg-save">Guardar configuración</button>
+    </div>
+    <div class="cfg-section">
+      <div class="cfg-section-title">Color de acento</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Cambia el color principal de la app.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+        <div class="color-swatch" data-color="#c8f55a" style="background:#c8f55a;"></div>
+        <div class="color-swatch" data-color="#5ab4ff" style="background:#5ab4ff;"></div>
+        <div class="color-swatch" data-color="#ff7b5a" style="background:#ff7b5a;"></div>
+        <div class="color-swatch" data-color="#b47bff" style="background:#b47bff;"></div>
+        <div class="color-swatch" data-color="#5affa0" style="background:#5affa0;"></div>
+        <div class="color-swatch" data-color="#ffdb5a" style="background:#ffdb5a;"></div>
+        <div class="color-swatch" data-color="#ff5ab4" style="background:#ff5ab4;"></div>
+        <div class="color-swatch" data-color="#ffffff" style="background:#fff;border:1px solid rgba(255,255,255,.2);"></div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Color personalizado</label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="color" id="cfg-color-custom" value="#c8f55a" style="width:52px;height:44px;padding:4px;background:var(--bg3);border:1px solid var(--border);border-radius:11px;cursor:pointer;">
+          <span style="font-size:13px;color:var(--muted2);" id="cfg-color-hex">#c8f55a</span>
+        </div>
+      </div>
+    </div>
+    <div class="cfg-section">
+      <div class="cfg-section-title">Respaldo y exportación</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">El respaldo JSON guarda <b style="color:var(--text)">todos</b> tus datos: gastos, MSI y configuración.</p>
+      <button class="sec-btn" id="cfg-export-json" style="width:100%;margin-bottom:8px;">📦 Exportar respaldo completo (JSON)</button>
+      <button class="sec-btn" id="cfg-import-json-btn" style="width:100%;margin-bottom:8px;">📥 Importar respaldo (JSON)</button>
+      <input type="file" id="cfg-import-file" accept=".json" style="display:none;">
+      <button class="sec-btn" id="cfg-export-all" style="width:100%;margin-bottom:8px;">📊 Exportar a Excel (CSV)</button>
+      <button class="sec-btn danger-btn" id="cfg-clear" style="width:100%;">🗑 Borrar todos los datos</button>
+    </div>
+    <div class="cfg-section">
+      <div class="cfg-section-title">🔔 Notificaciones</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Recibe avisos de corte y pago próximos. Requiere que la app esté instalada en pantalla de inicio (Safari → Agregar a pantalla de inicio).</p>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:14px;font-weight:500;">Estado</span>
+          <button id="cfg-notif-toggle" style="padding:8px 16px;border-radius:100px;border:1px solid var(--border);background:var(--bg4);color:var(--muted2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Activar</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5;" id="cfg-notif-status">No activadas aún</div>
+      </div>
+      <div class="field">
+        <label>Avisar con cuántos días de anticipación</label>
+        <select id="cfg-notif-days">
+          <option value="1">1 día antes</option>
+          <option value="2">2 días antes</option>
+          <option value="3" selected>3 días antes</option>
+          <option value="5">5 días antes</option>
+          <option value="7">7 días antes</option>
+        </select>
+      </div>
+      <button class="sec-btn" id="cfg-test-notif" style="width:100%;">🔔 Enviar notificación de prueba</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;padding-bottom:16px;">MisGastos · datos guardados en tu dispositivo</div>
+    <div style="height:20px;"></div>
+  </div>
+  <div class="bnav">
+    <button class="bnav-btn" data-nav="main"><div class="bnav-icon">🏠</div>Inicio</button>
+    <button class="bnav-btn" data-nav="msi"><div class="bnav-icon">📅</div>A meses</button>
+    <button class="bnav-btn" data-nav="conciliar"><div class="bnav-icon">🔍</div>Conciliar</button>
+    <button class="bnav-btn active" data-nav="config"><div class="bnav-icon">⚙️</div>Config</button>
+  </div>
+</div>
+
+<!-- ══ MODAL UNIFICADO: AGREGAR / EDITAR GASTO ══ -->
+<div class="overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-add-title">Nuevo gasto</div>
+
+    <!-- Toggle MSI -->
+    <div class="msi-toggle-row" id="msi-toggle-row">
+      <span class="msi-toggle-label">📅 Compra a meses sin intereses</span>
+      <div class="toggle-switch" id="msi-toggle-sw"><div class="toggle-knob"></div></div>
+    </div>
+
+    <!-- Campos siempre visibles -->
+    <div class="field"><label>Descripción</label><input type="text" id="inp-name" placeholder="¿En qué gastaste?" autocomplete="off"></div>
+    <div class="field"><label>Monto <span id="inp-amount-label">total ($)</span></label><div class="pfx-wrap"><input type="number" id="inp-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
+
+    <!-- Campos MSI (ocultos por defecto) -->
+    <div id="msi-fields-wrap" class="msi-fields" style="display:none;">
+      <div class="field">
+        <label>Meses sin intereses</label>
+        <select id="inp-msi-months">
+          <option value="3">3 meses</option>
+          <option value="6">6 meses</option>
+          <option value="9">9 meses</option>
+          <option value="12" selected>12 meses</option>
+          <option value="18">18 meses</option>
+          <option value="24">24 meses</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Meses ya pagados</label>
+        <input type="number" id="inp-msi-paid" placeholder="0" min="0" inputmode="numeric">
+      </div>
+    </div>
+
+    <!-- Preview MSI -->
+    <div id="msi-inline-preview" class="msi-preview-box" style="display:none;">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Vista previa MSI</div>
+      <div id="msi-inline-preview-text" style="color:var(--text);"></div>
+    </div>
+
+    <!-- Campos normales -->
+    <div id="normal-fields">
+      <div class="field"><label>Categoría</label><div class="cat-pills" id="cat-pills"></div></div>
+      <div class="field"><label>Fecha</label><input type="date" id="inp-date"></div>
+      <div class="field" id="field-status-wrap">
+        <label>Estado</label>
+        <select id="inp-status">
+          <option value="pending">⏳ Pendiente de confirmar</option>
+          <option value="confirmed">✅ Confirmado en estado de cuenta</option>
+          <option value="disputed">⚠️ Cobro no reconocido / disputado</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>¿Es recurrente?</label>
+        <select id="inp-recurrent">
+          <option value="no">No, es un gasto único</option>
+          <option value="yes">Sí, se repite cada ciclo</option>
+        </select>
+      </div>
+      <div class="field" id="field-notes" style="display:none">
+        <label>Nota / motivo de disputa</label>
+        <textarea id="inp-notes" rows="2" placeholder="Detalle..." style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;padding:11px 13px;width:100%;resize:none;outline:none;"></textarea>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="sec-btn" id="modal-cancel">Cancelar</button>
+      <button class="save-btn" id="modal-save" style="flex:2;margin-top:0;">Guardar</button>
+    </div>
+    <div id="edit-delete-row" style="display:none;margin-top:10px;">
+      <button class="sec-btn danger-btn" id="modal-delete" style="width:100%;">Eliminar este gasto</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──
+const CATS=[
+  {id:'comida',name:'Comida',icon:'🍽️'},{id:'transporte',name:'Transporte',icon:'🚌'},
+  {id:'super',name:'Súper',icon:'🛒'},{id:'salud',name:'Salud',icon:'💊'},
+  {id:'entreten',name:'Entret.',icon:'🎬'},{id:'ropa',name:'Ropa',icon:'👕'},
+  {id:'servicios',name:'Servicios',icon:'💡'},{id:'suscripciones',name:'Suscripción',icon:'🔄'},
+  {id:'otro',name:'Otro',icon:'📦'},
+];
+const getConfig=()=>{try{return JSON.parse(localStorage.getItem('mg_config')||'{}');}catch(e){return{};}};
+const saveConfig=c=>localStorage.setItem('mg_config',JSON.stringify(c));
+const getExpenses=k=>{try{return JSON.parse(localStorage.getItem('mg_exp_'+k)||'[]');}catch(e){return[];}};
+const saveExpenses=(k,d)=>localStorage.setItem('mg_exp_'+k,JSON.stringify(d));
+const getMSI=()=>{try{return JSON.parse(localStorage.getItem('mg_msi')||'[]');}catch(e){return[];}};
+const saveMSI=d=>localStorage.setItem('mg_msi',JSON.stringify(d));
+function getAllExpenses(){
+  const all=[];
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_exp_')){try{all.push(...JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){}}}
+  return all;
+}
+const fmt=n=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(n);
+const fmtDate=d=>d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+
+// ── CYCLE ──
+let currentCycleIndex=0;
+function getCycleForOffset(offset){
+  const cfg=getConfig();
+  let cutDay=15,payDay=5;
+  if(cfg.cutDate)cutDay=new Date(cfg.cutDate+'T12:00:00').getDate();
+  if(cfg.payDate)payDay=new Date(cfg.payDate+'T12:00:00').getDate();
+  const now=new Date();
+  let csm=now.getDate()>=cutDay?now.getMonth():now.getMonth()-1,csy=now.getFullYear();
+  if(csm<0){csm=11;csy--;}
+  csm+=offset;
+  while(csm>11){csm-=12;csy++;}while(csm<0){csm+=12;csy--;}
+  const startDate=new Date(csy,csm,cutDay);
+  let em=csm+1,ey=csy;if(em>11){em=0;ey++;}
+  const endDate=new Date(ey,em,cutDay-1);
+  let pm=em+1,py=ey;if(pm>11){pm=0;py++;}
+  const payDate=new Date(py,pm,payDay);
+  const key=`${csy}${String(csm+1).padStart(2,'0')}`;
+  const FM=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return{key,label:`${FM[csm]} ${csy}`,startDate,endDate,payDate};
+}
+
+function renderCycleBar(){
+  const c=getCycleForOffset(currentCycleIndex);
+  document.getElementById('cycle-name').textContent=c.label;
+  const now=new Date(),total=c.endDate-c.startDate,elapsed=Math.min(now-c.startDate,total);
+  document.getElementById('cycle-prog-bar').style.width=(total>0?Math.max(0,Math.min(100,(elapsed/total)*100)):0).toFixed(0)+'%';
+  document.getElementById('cycle-dates').innerHTML=`<div class="cdate"><strong>✂️ Corte</strong>${fmtDate(c.endDate)}</div><div class="cdate"><strong>💳 Pago límite</strong>${fmtDate(c.payDate)}</div>`;
+}
+
+// ── MSI HELPERS ──
+function getMsiMonthly(m){return m.totalAmount/m.months;}
+function getMsiRemaining(m){return Math.max(0,m.months-(m.paidMonths||0));}
+
+// ── RENDER SUMMARY ──
+function renderSummary(expenses){
+  // Gastos normales del ciclo (excluir MSI porque van por separado)
+  const normalExp=expenses.filter(e=>!e.isMsi);
+  const total=normalExp.reduce((s,e)=>s+e.amount,0);
+  const confirmed=expenses.filter(e=>e.status==='confirmed').length;
+  const pending=expenses.filter(e=>e.status==='pending').length;
+  const disputed=expenses.filter(e=>e.status==='disputed').length;
+
+  // MSI mensualidades activas
+  const msiList=getMSI();
+  const msiMonthly=msiList.filter(m=>getMsiRemaining(m)>0).reduce((s,m)=>s+getMsiMonthly(m),0);
+
+  // MSI diferido del ciclo (mensualidad de cada gasto MSI registrado en este ciclo)
+  const msiExp=expenses.filter(e=>e.isMsi);
+  const msiExpMonthly=msiExp.reduce((s,e)=>s+(e.amount/(e.msiMonths||12)),0);
+
+  const grandTotal=total+msiMonthly;
+
+  document.getElementById('sum-total').textContent=fmt(grandTotal);
+  const chip=document.getElementById('sum-msi-chip');
+  if(msiMonthly>0){
+    chip.style.display='';
+    chip.innerHTML=`gastos ${fmt(total)}<br>📅 MSI ${fmt(msiMonthly)}`;
+  } else chip.style.display='none';
+
+  document.getElementById('sum-count').textContent=expenses.length;
+  document.getElementById('sum-confirmed').textContent=confirmed;
+  document.getElementById('sum-pending').textContent=pending;
+
+  const al=document.getElementById('sum-alert');
+  if(disputed>0){al.style.display='flex';al.className='sum-alert warn';al.innerHTML=`⚠️ ${disputed} cobro(s) disputado(s) sin resolver`;}
+  else if(pending===0&&expenses.length>0&&msiMonthly===0){al.style.display='flex';al.className='sum-alert ok';al.innerHTML='✅ Todo confirmado en este ciclo';}
+  else if(msiMonthly>0&&pending===0&&disputed===0){al.style.display='flex';al.className='sum-alert info-msi';al.innerHTML=`📅 Incluye ${fmt(msiMonthly)}/mes de compras a meses`;}
+  else al.style.display='none';
+}
+
+// ── EXPENSE HTML ──
+// En lista de inicio los gastos MSI muestran la mensualidad diferida, no el total
+function expenseHTML(e,showActions=true){
+  const cat=CATS.find(c=>c.id===e.cat)||CATS[CATS.length-1];
+  const dotCls={pending:'dot-pending',confirmed:'dot-confirmed',disputed:'dot-disputed'}[e.status]||'dot-pending';
+  const lbl={pending:'Pendiente',confirmed:'Confirmado',disputed:'Disputado'}[e.status]||'Pendiente';
+  let cls=e.status==='disputed'?'disputed':e.status==='confirmed'?'confirmed':e.isRecurrent?'recurrent':'';
+  if(e.isMsi) cls='is-msi';
+
+  // Monto a mostrar: si es MSI, mostrar mensualidad
+  const displayAmount=e.isMsi?(e.amount/(e.msiMonths||12)):e.amount;
+  const amountSub=e.isMsi?`<div class="exp-amount-sub">de ${fmt(e.amount)} total · ${e.msiMonths}MSI</div>`:'';
+
+  const acts=showActions?`<div class="exp-actions">
+    ${e.status!=='confirmed'?`<button class="exp-act-btn" onclick="quickStatus('${e.id}','confirmed')">✅ Confirmar</button>`:''}
+    ${e.status!=='disputed'?`<button class="exp-act-btn" onclick="quickStatus('${e.id}','disputed')">⚠️ Disputar</button>`:''}
+    <button class="exp-act-btn" onclick="openEdit('${e.id}')">✏️ Editar</button>
+  </div>`:'';
+
+  return`<div class="expense-item ${cls}">
+    <div class="exp-icon">${e.isMsi?'📅':cat.icon}</div>
+    <div class="exp-info">
+      <div class="exp-name">${e.name}</div>
+      <div class="exp-meta">
+        <span class="status-dot ${dotCls}"></span><span>${lbl}</span>
+        <span>·</span><span>${e.isMsi?'A meses':cat.name}</span>
+        ${e.isRecurrent?'<span>🔄</span>':''}
+      </div>
+      ${e.notes?`<div style="font-size:12px;color:var(--muted);margin-top:3px;font-style:italic">${e.notes}</div>`:''}
+      ${acts}
+    </div>
+    <div>
+      <div class="exp-amount">${fmt(displayAmount)}<span style="font-size:11px;font-weight:400;">/mes</span></div>
+      ${amountSub}
+    </div>
+  </div>`;
+}
+
+function renderTabs(){
+  const cycle=getCycleForOffset(currentCycleIndex);
+  const expenses=getExpenses(cycle.key);
+  renderSummary(expenses);
+
+  // TODOS
+  const todosEl=document.getElementById('tab-todos');
+  if(!expenses.length){todosEl.innerHTML=`<div class="empty"><div class="empty-icon">💸</div><p>Sin gastos en este ciclo.<br>Toca el botón para agregar.</p></div>`;}
+  else{
+    const byDay={};
+    expenses.forEach(e=>{const d=e.date||'sin-fecha';if(!byDay[d])byDay[d]=[];byDay[d].push(e);});
+    todosEl.innerHTML=Object.keys(byDay).sort((a,b)=>b.localeCompare(a)).map(day=>{
+      const lbl=day==='sin-fecha'?'Sin fecha':new Date(day+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'long'});
+      return`<div class="day-lbl">${lbl}</div>${byDay[day].map(e=>expenseHTML(e)).join('')}`;
+    }).join('');
+  }
+  // PENDIENTES
+  const pend=expenses.filter(e=>e.status==='pending'||e.status==='disputed');
+  document.getElementById('tab-pendientes').innerHTML=!pend.length?`<div class="empty"><div class="empty-icon">✅</div><p>¡Todo confirmado!</p></div>`:pend.map(e=>expenseHTML(e)).join('');
+  // CATEGORIAS
+  const totals={};
+  expenses.filter(e=>!e.isMsi).forEach(e=>{totals[e.cat]=(totals[e.cat]||0)+e.amount;});
+  const maxAmt=Math.max(...Object.values(totals),1);
+  const activeCats=CATS.filter(c=>totals[c.id]);
+  document.getElementById('tab-categorias').innerHTML=!activeCats.length?`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos aún.</p></div>`:
+    `<div class="cat-grid">${activeCats.sort((a,b)=>(totals[b.id]||0)-(totals[a.id]||0)).map(c=>`<div class="cat-card"><div class="cat-icon">${c.icon}</div><div class="cat-lbl">${c.name}</div><div class="cat-amt">${fmt(totals[c.id]||0)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round(((totals[c.id]||0)/maxAmt)*100)}%"></div></div></div>`).join('')}</div>`;
+  // RECURRENTES
+  const rec=expenses.filter(e=>e.isRecurrent);
+  document.getElementById('tab-recurrentes').innerHTML=!rec.length?`<div class="empty"><div class="empty-icon">🔄</div><p>Sin gastos recurrentes.</p></div>`:rec.map(e=>expenseHTML(e)).join('');
+}
+
+// ── MSI SCREEN ──
+function renderMSI(){
+  const list=getMSI();
+  const active=list.filter(m=>getMsiRemaining(m)>0);
+  const monthlyTotal=active.reduce((s,m)=>s+getMsiMonthly(m),0);
+  const remainingTotal=list.reduce((s,m)=>s+getMsiRemaining(m)*getMsiMonthly(m),0);
+  document.getElementById('msi-monthly-total').textContent=fmt(monthlyTotal);
+  document.getElementById('msi-active-count').textContent=`${active.length} compra${active.length!==1?'s':''} activa${active.length!==1?'s':''}`;
+  document.getElementById('msi-remaining-total').textContent=fmt(remainingTotal);
+  const listEl=document.getElementById('msi-list');
+  if(!list.length){listEl.innerHTML=`<div class="empty"><div class="empty-icon">📅</div><p>Sin compras a meses registradas.<br>Regístralas desde "Agregar gasto".</p></div>`;return;}
+  listEl.innerHTML=list.map(m=>{
+    const monthly=getMsiMonthly(m);
+    const paid=m.paidMonths||0;
+    const remaining=getMsiRemaining(m);
+    const pct=Math.round((paid/m.months)*100);
+    const done=remaining===0;
+    return`<div class="msi-card">
+      <div class="msi-card-header">
+        <div class="msi-name">${m.name}</div>
+        <span class="msi-badge${done?' done':''}">${done?'✅ Terminado':`${remaining} meses restantes`}</span>
+      </div>
+      <div class="msi-amounts">
+        <div class="msi-amt-item"><div class="msi-amt-label">Total</div><div class="msi-amt-value">${fmt(m.totalAmount)}</div></div>
+        <div class="msi-amt-item"><div class="msi-amt-label">Por mes</div><div class="msi-amt-value" style="color:var(--accent)">${fmt(monthly)}</div></div>
+        <div class="msi-amt-item"><div class="msi-amt-label">Pendiente</div><div class="msi-amt-value">${fmt(remaining*monthly)}</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${paid} de ${m.months} meses pagados</div>
+      <div class="msi-prog-wrap"><div class="msi-prog-bar" style="width:${pct}%"></div></div>
+      <div class="msi-actions">
+        ${!done?`<button class="exp-act-btn" onclick="msiPay('${m.id}')">✅ Registrar mes pagado</button>`:''}
+        <button class="exp-act-btn" onclick="openEditMSI('${m.id}')">✏️ Editar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function msiPay(id){
+  const list=getMSI();const m=list.find(x=>x.id===id);if(!m)return;
+  if(getMsiRemaining(m)===0){showToast('Esta compra ya está liquidada');return;}
+  m.paidMonths=(m.paidMonths||0)+1;
+  saveMSI(list);renderMSI();
+  showToast(`✅ Mes ${m.paidMonths} de ${m.months} — ${fmt(getMsiMonthly(m))}`);
+}
+
+function openEditMSI(id){
+  const m=getMSI().find(x=>x.id===id);if(!m)return;
+  // Open unified modal pre-filled as MSI
+  editingId='msi:'+id;
+  isMsiMode=true;
+  document.getElementById('modal-add-title').textContent='Editar compra a meses';
+  document.getElementById('inp-name').value=m.name;
+  document.getElementById('inp-amount').value=m.totalAmount;
+  document.getElementById('inp-amount-label').textContent='total ($)';
+  document.getElementById('inp-msi-months').value=m.months;
+  document.getElementById('inp-msi-paid').value=m.paidMonths||0;
+  document.getElementById('inp-date').value=m.startDate||new Date().toISOString().split('T')[0];
+  document.getElementById('inp-status').value='pending';
+  document.getElementById('inp-recurrent').value='no';
+  document.getElementById('inp-notes').value='';
+  document.getElementById('field-notes').style.display='none';
+  document.getElementById('edit-delete-row').style.display='';
+  setMsiMode(true);
+  selectedCat='otro';buildCatPills();
+  updateMsiPreview();
+  document.getElementById('modal-add').classList.add('open');
+}
+
+// ── CONCILIAR ──
+function renderConciliar(){
+  const cycle=getCycleForOffset(currentCycleIndex);
+  const expenses=getExpenses(cycle.key);
+  document.getElementById('concil-cycle-name').textContent=`${cycle.label} · corte ${fmtDate(cycle.endDate)} · pago ${fmtDate(cycle.payDate)}`;
+  const pending=expenses.filter(e=>e.status==='pending');
+  document.getElementById('pending-list').innerHTML=!pending.length?`<p style="font-size:13px;color:var(--muted)">✅ Todos los gastos están confirmados</p>`:
+    pending.map(e=>{
+      const amt=e.isMsi?`${fmt(e.amount/(e.msiMonths||12))}/mes (total ${fmt(e.amount)})`:fmt(e.amount);
+      return`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--muted2)">${e.name}${e.isMsi?' 📅':''}</span><span>${amt}</span></div>`;
+    }).join('');
+  const disputed=expenses.filter(e=>e.status==='disputed');
+  const dc=document.getElementById('disputed-card');
+  if(disputed.length){dc.style.display='';document.getElementById('disputed-list').innerHTML=disputed.map(e=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><div><div style="color:var(--danger)">${e.name}</div>${e.notes?`<div style="font-size:11px;color:var(--muted)">${e.notes}</div>`:''}</div><span>${fmt(e.isMsi?e.amount/(e.msiMonths||12):e.amount)}</span></div>`).join('');}
+  else dc.style.display='none';
+  calcConcil(expenses);
+}
+
+function calcConcil(expenses){
+  const bankAmt=parseFloat(document.getElementById('bank-amount').value)||0;
+  if(!bankAmt){document.getElementById('concil-result').style.display='none';return;}
+  // For conciliation, use monthly amounts for MSI items
+  const myTotal=expenses.reduce((s,e)=>s+(e.isMsi?e.amount/(e.msiMonths||12):e.amount),0);
+  const confirmedTotal=expenses.filter(e=>e.status==='confirmed').reduce((s,e)=>s+(e.isMsi?e.amount/(e.msiMonths||12):e.amount),0);
+  const diff=bankAmt-myTotal;
+  document.getElementById('concil-result').style.display='';
+  const diffEl=document.getElementById('concil-diff');
+  diffEl.textContent=(diff>=0?'+':'')+fmt(diff);
+  diffEl.className='concil-big '+(Math.abs(diff)<1?'ok':'diff');
+  document.getElementById('concil-rows').innerHTML=`
+    <div class="concil-row"><span class="concil-key">Banco cobra</span><span class="concil-val">${fmt(bankAmt)}</span></div>
+    <div class="concil-row"><span class="concil-key">Mis registros</span><span class="concil-val">${fmt(myTotal)}</span></div>
+    <div class="concil-row"><span class="concil-key">Solo confirmados</span><span class="concil-val">${fmt(confirmedTotal)}</span></div>
+    <div class="concil-row"><span class="concil-key">Diferencia</span><span class="concil-val" style="color:${Math.abs(diff)<1?'var(--success)':'var(--danger)'}">${(diff>=0?'+':'')}${fmt(diff)}</span></div>`;
+}
+document.getElementById('bank-amount').addEventListener('input',()=>calcConcil(getExpenses(getCycleForOffset(currentCycleIndex).key)));
+
+// ── MODAL UNIFICADO ──
+let editingId=null,selectedCat='comida',isMsiMode=false;
+
+function setMsiMode(on){
+  isMsiMode=on;
+  const sw=document.getElementById('msi-toggle-sw');
+  sw.classList.toggle('on',on);
+  document.getElementById('msi-fields-wrap').style.display=on?'':'none';
+  document.getElementById('inp-amount-label').textContent=on?'total ($)':'($)';
+  if(!on){document.getElementById('msi-inline-preview').style.display='none';}
+  else updateMsiPreview();
+}
+
+function updateMsiPreview(){
+  const total=parseFloat(document.getElementById('inp-amount').value)||0;
+  const months=parseInt(document.getElementById('inp-msi-months').value)||12;
+  const prev=document.getElementById('msi-inline-preview');
+  if(!total||!isMsiMode){prev.style.display='none';return;}
+  const monthly=total/months;
+  document.getElementById('msi-inline-preview-text').innerHTML=
+    `Mensualidad: <b style="color:var(--accent)">${fmt(monthly)}</b> &nbsp;·&nbsp; ${months} pagos = ${fmt(total)} total`;
+  prev.style.display='';
+}
+
+document.getElementById('msi-toggle-row').addEventListener('click',()=>{
+  if(editingId&&editingId.startsWith('msi:'))return; // no toggle en edición MSI
+  setMsiMode(!isMsiMode);
+});
+document.getElementById('inp-amount').addEventListener('input',updateMsiPreview);
+document.getElementById('inp-msi-months').addEventListener('change',updateMsiPreview);
+
+function buildCatPills(){
+  const el=document.getElementById('cat-pills');
+  el.innerHTML=CATS.map(c=>`<button class="cpill${c.id===selectedCat?' sel':''}" data-cat="${c.id}">${c.icon} ${c.name}</button>`).join('');
+  el.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{selectedCat=p.dataset.cat;el.querySelectorAll('.cpill').forEach(x=>x.classList.remove('sel'));p.classList.add('sel');}));
+}
+
+function openAdd(){
+  editingId=null;selectedCat='comida';
+  document.getElementById('modal-add-title').textContent='Nuevo gasto';
+  ['inp-name','inp-amount','inp-notes','inp-msi-paid'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('inp-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('inp-status').value='pending';
+  document.getElementById('inp-recurrent').value='no';
+  document.getElementById('inp-msi-months').value='12';
+  document.getElementById('field-notes').style.display='none';
+  document.getElementById('edit-delete-row').style.display='none';
+  document.getElementById('msi-toggle-row').style.opacity='1';
+  setMsiMode(false);
+  buildCatPills();
+  document.getElementById('modal-add').classList.add('open');
+  setTimeout(()=>document.getElementById('inp-name').focus(),350);
+}
+
+function openEdit(id){
+  const cycle=getCycleForOffset(currentCycleIndex);
+  const e=getExpenses(cycle.key).find(x=>x.id===id);if(!e)return;
+  editingId=id;selectedCat=e.cat||'comida';
+  document.getElementById('modal-add-title').textContent='Editar gasto';
+  document.getElementById('inp-name').value=e.name;
+  document.getElementById('inp-amount').value=e.isMsi?e.amount:e.amount;
+  document.getElementById('inp-date').value=e.date||'';
+  document.getElementById('inp-status').value=e.status||'pending';
+  document.getElementById('inp-recurrent').value=e.isRecurrent?'yes':'no';
+  document.getElementById('inp-notes').value=e.notes||'';
+  document.getElementById('field-notes').style.display=e.status==='disputed'?'':'none';
+  document.getElementById('edit-delete-row').style.display='';
+  document.getElementById('inp-msi-months').value=e.msiMonths||12;
+  document.getElementById('inp-msi-paid').value=0;
+  setMsiMode(!!e.isMsi);
+  if(e.isMsi){document.getElementById('msi-toggle-row').style.opacity='.5';}
+  buildCatPills();
+  document.getElementById('modal-add').classList.add('open');
+}
+
+function quickStatus(id,status){
+  const cycle=getCycleForOffset(currentCycleIndex);
+  const expenses=getExpenses(cycle.key);
+  const e=expenses.find(x=>x.id===id);if(!e)return;
+  e.status=status;saveExpenses(cycle.key,expenses);renderTabs();
+  showToast(status==='confirmed'?'✅ Confirmado':'⚠️ Marcado como disputado');
+}
+
+document.getElementById('inp-status').addEventListener('change',function(){
+  document.getElementById('field-notes').style.display=this.value==='disputed'?'':'none';
+});
+
+document.getElementById('modal-save').addEventListener('click',()=>{
+  const name=document.getElementById('inp-name').value.trim();
+  const amount=parseFloat(document.getElementById('inp-amount').value);
+  if(!name||!amount||amount<=0){showToast('⚠️ Completa nombre y monto');return;}
+
+  // Si es edición de MSI standalone (desde pantalla A meses)
+  if(editingId&&editingId.startsWith('msi:')){
+    const msiId=editingId.slice(4);
+    const list=getMSI();
+    const idx=list.findIndex(x=>x.id===msiId);
+    if(idx>-1){
+      list[idx].name=name;list[idx].totalAmount=amount;
+      list[idx].months=parseInt(document.getElementById('inp-msi-months').value)||12;
+      list[idx].paidMonths=parseInt(document.getElementById('inp-msi-paid').value)||0;
+      list[idx].startDate=document.getElementById('inp-date').value;
+    }
+    saveMSI(list);
+    document.getElementById('modal-add').classList.remove('open');
+    renderMSI();renderTabs();showToast('✏️ Compra a meses actualizada');
+    return;
+  }
+
+  const cycle=getCycleForOffset(currentCycleIndex);
+  const expenses=getExpenses(cycle.key);
+
+  if(isMsiMode){
+    // Guardar en gastos del ciclo (mensualidad diferida) Y en MSI standalone
+    const months=parseInt(document.getElementById('inp-msi-months').value)||12;
+    const paid=parseInt(document.getElementById('inp-msi-paid').value)||0;
+    const startDate=document.getElementById('inp-date').value;
+    const msiId=editingId&&!editingId.startsWith('msi:')?editingId:Date.now().toString();
+
+    // Gasto en el ciclo: guarda monto TOTAL pero se muestra como mensualidad
+    const expObj={
+      id:editingId&&!editingId.startsWith('msi:')?editingId:Date.now().toString(),
+      name,amount,cat:selectedCat,
+      date:startDate,
+      status:document.getElementById('inp-status').value,
+      isRecurrent:false,notes:'',
+      isMsi:true,msiMonths:months,msiPaid:paid,
+    };
+    if(editingId&&!editingId.startsWith('msi:')){
+      const idx=expenses.findIndex(x=>x.id===editingId);
+      if(idx>-1)expenses[idx]=expObj;
+    } else expenses.push(expObj);
+    saveExpenses(cycle.key,expenses);
+
+    // También guardar/actualizar en MSI standalone
+    const msiList=getMSI();
+    const existingMsi=msiList.find(x=>x.linkedExpId===expObj.id);
+    const msiObj={
+      id:existingMsi?existingMsi.id:Date.now().toString()+'m',
+      name,totalAmount:amount,months,paidMonths:paid,startDate,
+      linkedExpId:expObj.id,
+    };
+    if(existingMsi){const mi=msiList.findIndex(x=>x.linkedExpId===expObj.id);msiList[mi]=msiObj;}
+    else msiList.push(msiObj);
+    saveMSI(msiList);
+
+  } else {
+    // Gasto normal
+    const obj={
+      id:editingId||Date.now().toString(),
+      name,amount,cat:selectedCat,
+      date:document.getElementById('inp-date').value,
+      status:document.getElementById('inp-status').value,
+      isRecurrent:document.getElementById('inp-recurrent').value==='yes',
+      notes:document.getElementById('inp-notes').value.trim(),
+      isMsi:false,
+    };
+    if(editingId){const idx=expenses.findIndex(x=>x.id===editingId);if(idx>-1)expenses[idx]=obj;}
+    else expenses.push(obj);
+    saveExpenses(cycle.key,expenses);
+  }
+
+  document.getElementById('modal-add').classList.remove('open');
+  renderCycleBar();renderTabs();renderMSI();
+  showToast(editingId?'✏️ Gasto actualizado':'💾 Gasto guardado');
+});
+
+document.getElementById('modal-delete').addEventListener('click',()=>{
+  if(!editingId)return;
+  if(!confirm('¿Eliminar este gasto?'))return;
+
+  if(editingId.startsWith('msi:')){
+    const msiId=editingId.slice(4);
+    saveMSI(getMSI().filter(x=>x.id!==msiId));
+    document.getElementById('modal-add').classList.remove('open');
+    renderMSI();renderTabs();showToast('🗑 Compra a meses eliminada');
+    return;
+  }
+  const cycle=getCycleForOffset(currentCycleIndex);
+  const expenses=getExpenses(cycle.key);
+  const exp=expenses.find(x=>x.id===editingId);
+  if(exp&&exp.isMsi){
+    // También eliminar de MSI standalone
+    saveMSI(getMSI().filter(x=>x.linkedExpId!==editingId));
+  }
+  saveExpenses(cycle.key,expenses.filter(x=>x.id!==editingId));
+  document.getElementById('modal-add').classList.remove('open');
+  renderTabs();renderMSI();showToast('🗑 Gasto eliminado');
+});
+
+document.getElementById('modal-cancel').addEventListener('click',()=>document.getElementById('modal-add').classList.remove('open'));
+document.getElementById('modal-add').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+// ── CONFIG ──
+function applyAccent(color){
+  document.documentElement.style.setProperty('--accent',color);
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('active-swatch',s.dataset.color===color));
+  document.getElementById('cfg-color-custom').value=color;
+  document.getElementById('cfg-color-hex').textContent=color;
+}
+
+function loadConfig(){
+  const cfg=getConfig();
+  document.getElementById('cfg-cutdate').value=cfg.cutDate||'';
+  document.getElementById('cfg-paydate').value=cfg.payDate||'';
+  document.getElementById('cfg-cardname').value=cfg.cardName||'';
+  if(cfg.notifDays)document.getElementById('cfg-notif-days').value=cfg.notifDays;
+  applyAccent(cfg.accentColor||'#c8f55a');
+  updateCfgPreview();
+  updateNotifStatus();
+}
+
+function updateCfgPreview(){
+  const cv=document.getElementById('cfg-cutdate').value,pv=document.getElementById('cfg-paydate').value;
+  const prev=document.getElementById('cfg-preview');
+  if(!cv||!pv){prev.style.display='none';return;}
+  const cutDay=new Date(cv+'T12:00:00').getDate(),payDay=new Date(pv+'T12:00:00').getDate();
+  const fmtD=d=>d.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+  const now=new Date();
+  let csm=now.getDate()>=cutDay?now.getMonth():now.getMonth()-1,csy=now.getFullYear();
+  if(csm<0){csm=11;csy--;}
+  const cs=new Date(csy,csm,cutDay);
+  let em=csm+1,ey=csy;if(em>11){em=0;ey++;}
+  const ce=new Date(ey,em,cutDay-1);
+  let pm=em+1,py=ey;if(pm>11){pm=0;py++;}
+  document.getElementById('cfg-preview-text').innerHTML=`<b style="color:var(--accent)">Ciclo actual</b><br>Inicio: ${fmtD(cs)}<br>Corte: ${fmtD(ce)}<br>Pago límite: ${fmtD(new Date(py,pm,payDay))}`;
+  prev.style.display='';
+}
+
+document.getElementById('cfg-cutdate').addEventListener('change',updateCfgPreview);
+document.getElementById('cfg-paydate').addEventListener('change',updateCfgPreview);
+document.querySelectorAll('.color-swatch').forEach(s=>s.addEventListener('click',()=>applyAccent(s.dataset.color)));
+document.getElementById('cfg-color-custom').addEventListener('input',function(){
+  applyAccent(this.value);document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active-swatch'));
+});
+document.getElementById('cfg-save').addEventListener('click',()=>{
+  const cutDate=document.getElementById('cfg-cutdate').value,payDate=document.getElementById('cfg-paydate').value;
+  if(!cutDate||!payDate){showToast('⚠️ Selecciona ambas fechas');return;}
+  saveConfig({...getConfig(),cutDate,payDate,cardName:document.getElementById('cfg-cardname').value.trim(),accentColor:document.getElementById('cfg-color-custom').value});
+  renderCycleBar();renderTabs();showToast('✅ Configuración guardada');
+});
+
+// ── EXPORT / IMPORT ──
+document.getElementById('cfg-export-json').addEventListener('click',()=>{
+  const backup={version:3,exportedAt:new Date().toISOString(),config:getConfig(),msi:getMSI(),expenses:{}};
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_exp_')){try{backup.expenses[k]=JSON.parse(localStorage.getItem(k));}catch(e){}}}
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`misgastos_respaldo_${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('📦 Respaldo JSON descargado');
+});
+document.getElementById('cfg-import-json-btn').addEventListener('click',()=>document.getElementById('cfg-import-file').click());
+document.getElementById('cfg-import-file').addEventListener('change',function(){
+  const file=this.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const backup=JSON.parse(e.target.result);
+      if(!backup.version||!backup.config){showToast('⚠️ Archivo no válido');return;}
+      if(!confirm(`¿Importar respaldo del ${(backup.exportedAt||'').split('T')[0]||'fecha desconocida'}?\n\nEsto reemplazará TODOS tus datos actuales.`))return;
+      const toDel=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
+      toDel.forEach(k=>localStorage.removeItem(k));
+      saveConfig(backup.config);
+      if(backup.msi)saveMSI(backup.msi);
+      if(backup.expenses)Object.entries(backup.expenses).forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)));
+      applyAccent(backup.config.accentColor||'#c8f55a');
+      currentCycleIndex=0;renderCycleBar();renderTabs();renderMSI();
+      showToast('✅ Datos restaurados correctamente');
+    }catch(err){showToast('⚠️ Error al leer el archivo');}
+  };
+  reader.readAsText(file);this.value='';
+});
+function exportCSV(){
+  const all=getAllExpenses();
+  if(!all.length){showToast('Sin datos para exportar');return;}
+  const rows=[['Fecha','Descripción','Categoría','Monto total','Mensualidad','Es MSI','Meses','Estado','Recurrente','Notas']];
+  all.forEach(e=>{
+    const cat=CATS.find(c=>c.id===e.cat)||CATS[CATS.length-1];
+    const monthly=e.isMsi?e.amount/(e.msiMonths||12):e.amount;
+    rows.push([e.date||'',e.name,e.isMsi?'A meses':cat.name,e.amount.toFixed(2),monthly.toFixed(2),e.isMsi?'Sí':'No',e.msiMonths||'',e.status,e.isRecurrent?'Sí':'No',e.notes||'']);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`misgastos_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('📊 CSV descargado');
+}
+document.getElementById('cfg-export-all').addEventListener('click',exportCSV);
+document.getElementById('btn-export-csv').addEventListener('click',exportCSV);
+document.getElementById('cfg-clear').addEventListener('click',()=>{
+  if(!confirm('¿Borrar TODOS los datos?'))return;
+  const toDel=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
+  toDel.forEach(k=>localStorage.removeItem(k));
+  currentCycleIndex=0;renderCycleBar();renderTabs();renderMSI();showToast('🗑 Datos borrados');
+});
+
+// ── NOTIFICACIONES ──
+function checkNotifDays(){
+  const cfg=getConfig();if(!cfg.cutDate||!cfg.payDate)return;
+  const days=parseInt(cfg.notifDays||3);
+  const now=new Date(),cycle=getCycleForOffset(0);
+  const cutDiff=Math.ceil((cycle.endDate-now)/(1000*60*60*24));
+  const payDiff=Math.ceil((cycle.payDate-now)/(1000*60*60*24));
+  document.getElementById('notif-dot').style.display=((cutDiff>=0&&cutDiff<=days)||(payDiff>=0&&payDiff<=days))?'':'none';
+}
+async function scheduleNotifications(){
+  const cfg=getConfig();if(!cfg.cutDate||!cfg.payDate){showToast('⚠️ Configura primero las fechas');return;}
+  if(!('Notification' in window)){showToast('Tu navegador no soporta notificaciones');return;}
+  const perm=await Notification.requestPermission();
+  updateNotifStatus();
+  if(perm==='granted'){showToast('✅ Notificaciones activadas');scheduleNotifTimers(cfg);}
+  else showToast('⚠️ Permiso denegado por el navegador');
+}
+function scheduleNotifTimers(cfg){
+  const days=parseInt(cfg.notifDays||3);
+  const cycle=getCycleForOffset(0),now=new Date();
+  function fireIfClose(date,title,body){
+    const diff=(date-now)/(1000*60*60*24);
+    if(diff>=0&&diff<=days)setTimeout(()=>{if(Notification.permission==='granted')new Notification(title,{body});},1000);
+  }
+  fireIfClose(cycle.endDate,'✂️ Fecha de corte próxima',`Tu tarjeta corta el ${fmtDate(cycle.endDate)}. Revisa tus gastos.`);
+  fireIfClose(cycle.payDate,'💳 Límite de pago próximo',`Tienes hasta el ${fmtDate(cycle.payDate)} para pagar sin intereses.`);
+}
+function updateNotifStatus(){
+  const st=document.getElementById('cfg-notif-status'),btn=document.getElementById('cfg-notif-toggle');
+  if(!('Notification' in window)){st.textContent='Tu navegador no soporta notificaciones';btn.textContent='No disponible';btn.disabled=true;return;}
+  const perm=Notification.permission;
+  if(perm==='granted'){st.textContent='✅ Activadas — recibirás avisos de corte y pago';btn.textContent='Desactivar';btn.style.color='var(--danger)';}
+  else if(perm==='denied'){st.textContent='🚫 Bloqueadas. Ve a Ajustes > Safari > Notificaciones.';btn.textContent='Bloqueadas';btn.disabled=true;}
+  else{st.textContent='No activadas aún. Toca "Activar" para pedir permiso.';btn.textContent='Activar';btn.style.color='';}
+}
+document.getElementById('btn-notif').addEventListener('click',()=>{
+  const cycle=getCycleForOffset(0),now=new Date();
+  const cutDiff=Math.ceil((cycle.endDate-now)/(1000*60*60*24));
+  const payDiff=Math.ceil((cycle.payDate-now)/(1000*60*60*24));
+  let msg='';
+  if(cutDiff>=0&&cutDiff<=7)msg+=`✂️ Corte en ${cutDiff} día${cutDiff!==1?'s':''} (${fmtDate(cycle.endDate)}) `;
+  if(payDiff>=0&&payDiff<=7)msg+=`💳 Pago en ${payDiff} día${payDiff!==1?'s':''} (${fmtDate(cycle.payDate)})`;
+  showToast(msg||'Sin fechas próximas en 7 días');
+});
+document.getElementById('cfg-notif-toggle').addEventListener('click',()=>{
+  if(Notification.permission==='granted')showToast('Para desactivar ve a Ajustes > Safari > Notificaciones');
+  else scheduleNotifications();
+});
+document.getElementById('cfg-notif-days').addEventListener('change',function(){
+  const cfg=getConfig();saveConfig({...cfg,notifDays:this.value});showToast(`✅ Aviso ${this.value} día(s) antes guardado`);
+});
+document.getElementById('cfg-test-notif').addEventListener('click',async()=>{
+  if(Notification.permission!=='granted'){const p=await Notification.requestPermission();if(p!=='granted'){showToast('⚠️ Permiso denegado');return;}}
+  new Notification('🔔 MisGastos — Prueba',{body:'Las notificaciones funcionan correctamente.'});
+  showToast('✅ Notificación enviada');
+});
+
+// ── NAV ──
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('scr-'+name).classList.add('active');
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===name));
+  if(name==='conciliar')renderConciliar();
+  if(name==='config')loadConfig();
+  if(name==='msi')renderMSI();
+}
+document.querySelectorAll('.bnav-btn').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.nav)));
+document.getElementById('fab-add').addEventListener('click',openAdd);
+document.getElementById('btn-prev').addEventListener('click',()=>{currentCycleIndex--;renderCycleBar();renderTabs();});
+document.getElementById('btn-next').addEventListener('click',()=>{currentCycleIndex++;renderCycleBar();renderTabs();});
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ['todos','pendientes','categorias','recurrentes'].forEach(t=>{document.getElementById('tab-'+t).style.display=btn.dataset.tab===t?'':'none';});
+  });
+});
+
+// ── SCROLL COLLAPSE ──
+const mainScroll=document.getElementById('main-scroll');
+const stickyTop=document.getElementById('sticky-top');
+mainScroll.addEventListener('scroll',()=>{
+  stickyTop.classList.toggle('collapsed',mainScroll.scrollTop>55);
+},{passive:true});
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ── INIT ──
+(function init(){
+  const cfg=getConfig();
+  if(cfg.accentColor)applyAccent(cfg.accentColor);
+  if(cfg.notifDays)document.getElementById('cfg-notif-days').value=cfg.notifDays;
+  if(!cfg.cutDate){showToast('⚙️ Configura tu fecha de corte primero');setTimeout(()=>showScreen('config'),800);}
+  renderCycleBar();renderTabs();
+  checkNotifDays();
+  if(typeof Notification!=='undefined'&&Notification.permission==='granted')scheduleNotifTimers(cfg);
+})();
+</script>
+</body>
+</html>
