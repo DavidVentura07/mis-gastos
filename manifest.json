@@ -1,0 +1,19 @@
+{
+  "name": "MisGastos",
+  "short_name": "MisGastos",
+  "description": "Control personal de gastos de tarjeta de crédito",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F8F7",
+  "theme_color": "#6C63FF",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
