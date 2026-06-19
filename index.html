@@ -2,28 +2,33 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#F8F8F7">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F8F8F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MisGastos">
 <title>MisGastos</title>
+<meta name="description" content="Control personal de gastos de tarjeta de crédito. Ciclos, MSI y gastos fijos sin esfuerzo.">
+<meta property="og:title" content="MisGastos">
+<meta property="og:description" content="Control personal de gastos de tarjeta de crédito">
 <!-- ícono real PNG — súbelo junto con index.html en GitHub Pages -->
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
 <!-- Offline / PWA -->
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F8F8F7;--bg2:#FFFFFF;--bg3:#F1F0FE;--bg4:#E8E6FD;
+  --bg:#F8F8F7;--bg2:#FFFFFF;--bg3:#F2F2F0;--bg4:#E8E8E5;
   --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.13);
-  --text:#111111;--muted:rgba(17,17,17,0.38);--muted2:rgba(17,17,17,0.58);
-  --accent:#6C63FF;--accent-text:#FFFFFF;--accent-dark:#534AB7;
+  --text:#111111;--muted:rgba(17,17,17,0.52);--muted2:rgba(17,17,17,0.68);
+  --accent:#c8f55a;--accent-text:#111111;--accent-text-muted:rgba(17,17,17,0.58);--accent-dark:#8aad2a;
   --danger:#E24B4A;--warn:#BA7517;--info:#185FA5;--success:#3B6D11;
-  --card-shadow:0 1px 3px rgba(108,99,255,0.08);
+  --card-shadow:0 1px 3px rgba(0,0,0,0.06);
   --r:16px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -40,15 +45,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 /* COLLAPSIBLE TOP */
 .sticky-top{flex-shrink:0;}
-.summary{margin:0 16px 10px;background:var(--accent);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;transition:padding .25s;}
+.summary{margin:0 16px 10px;background:var(--accent);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;}
 .summary::after{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none;}
-.sum-label{font-size:11px;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.8px;text-transform:uppercase;transition:opacity .2s,height .2s,margin .2s;}
-.sum-total{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1;transition:font-size .25s;}
+.sum-label{font-size:11px;font-weight:600;color:rgba(255,255,255,0.72);letter-spacing:.4px;text-transform:uppercase;transition:opacity .25s ease-out;}
+.sum-total{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#ffffff;letter-spacing:-1px;line-height:1.1;font-variant-numeric:tabular-nums;}
 .sum-msi-row{display:flex;align-items:center;gap:8px;margin-top:4px;transition:opacity .2s,max-height .2s,margin .2s;max-height:30px;overflow:hidden;}
-.sum-msi-chip{font-size:12px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.18);border-radius:100px;padding:2px 8px;}
+.sum-msi-chip{font-size:12px;color:rgba(255,255,255,0.72);background:rgba(0,0,0,.10);border-radius:100px;padding:2px 8px;}
 .sum-row{display:flex;margin-top:10px;transition:opacity .2s,max-height .2s,margin .2s;max-height:50px;overflow:hidden;}
-.sum-item{flex:1;font-size:12px;color:rgba(255,255,255,.6);}
-.sum-item strong{display:block;font-size:14px;font-weight:600;color:rgba(255,255,255,.95);}
+.sum-item{flex:1;font-size:12px;color:rgba(255,255,255,0.72);}
+.sum-item strong{display:block;font-size:14px;font-weight:600;color:#ffffff;font-variant-numeric:tabular-nums;}
 .sticky-top.collapsed .summary{padding:10px 20px;margin-bottom:8px;}
 .sticky-top.collapsed .sum-label{opacity:0;height:0;margin:0;overflow:hidden;}
 .sticky-top.collapsed .sum-total{font-size:20px;}
@@ -88,7 +93,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .cycle-dates{display:flex;gap:14px;padding-top:6px;border-top:1px solid var(--border);}
 .cdate{font-size:11px;color:var(--muted);}
 .cdate strong{color:var(--text);font-weight:500;display:block;font-size:12px;}
-.cycle-open-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;background:rgba(108,99,255,.12);color:var(--accent);border-radius:100px;padding:2px 7px;font-weight:500;flex-shrink:0;}
+.cycle-open-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;background:rgba(59,109,17,.14);color:var(--success);border-radius:100px;padding:2px 7px;font-weight:500;flex-shrink:0;}
 
 /* SEARCH BAR */
 .search-bar{margin:0 16px 8px;position:relative;flex-shrink:0;}
@@ -107,12 +112,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 /* SCROLL */
 .scroll{flex:1;overflow-y:auto;padding:0 16px;-webkit-overflow-scrolling:touch;}
 .scroll::-webkit-scrollbar{display:none;}
-.day-lbl{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;padding:0 2px;margin:12px 0 7px;}
+.day-lbl{font-size:12px;font-weight:500;color:var(--muted);padding:0 2px;margin:12px 0 7px;}
 
 /* EXPENSE ITEM */
 .expense-item{display:flex;align-items:flex-start;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:6px;}
-.expense-item.is-msi{border-left:3px solid var(--accent);}
-.expense-item.is-recurrent{border-left:3px solid var(--info);}
+.expense-item.is-msi{background:rgba(200,245,90,0.07);}
+.expense-item.is-recurrent{background:rgba(24,95,165,0.06);}
 .exp-icon{width:38px;height:38px;border-radius:11px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;margin-top:1px;}
 .exp-info{flex:1;min-width:0;}
 .exp-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -145,7 +150,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .msi-amt-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
 .msi-amt-value{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
 .msi-prog-wrap{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
-.msi-prog-bar{height:100%;background:var(--accent);border-radius:2px;}
+.msi-prog-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .65s cubic-bezier(0.25,1,0.5,1);}
 .msi-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
 
 /* CONFIG */
@@ -157,8 +162,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 /* FIELDS */
 .field{margin-bottom:12px;}
-.field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:6px;}
-.field input,.field select,.field textarea{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;appearance:none;}
+.field label{font-size:12px;font-weight:600;color:var(--muted2);display:block;margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 150ms ease-out;}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);}
 .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;}
 .pfx-wrap{position:relative;}
@@ -191,7 +196,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   transition:box-shadow .15s,transform .15s;
 }
 .transport-main-btn.dragging{cursor:grabbing;box-shadow:0 8px 28px rgba(108,99,255,.4);transform:scale(1.08);}
-.transport-sub-btns{display:flex;flex-direction:column-reverse;gap:8px;overflow:hidden;transition:opacity .25s,max-height .3s cubic-bezier(.34,1.56,.64,1);}
+.transport-sub-btns{display:flex;flex-direction:column-reverse;gap:8px;overflow:hidden;transition:opacity .25s,max-height .3s cubic-bezier(0.2,0,0,1);}
 .transport-sub-btns.hidden{opacity:0;max-height:0;pointer-events:none;}
 .transport-sub-btns.visible{opacity:1;max-height:400px;}
 .transport-chip{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:8px 14px 8px 10px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.12);white-space:nowrap;font-size:13px;font-weight:500;}
@@ -202,8 +207,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 /* FAB */
 .fab-wrap{padding:10px 16px 0;flex-shrink:0;}
-.fab{width:100%;height:52px;background:var(--accent);color:#fff;border:none;border-radius:100px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 4px 16px rgba(108,99,255,.3);}
-.fab:active{opacity:.9;transform:scale(.98);}
+.fab{width:100%;height:52px;background:var(--accent);color:#fff;border:none;border-radius:100px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 4px 16px rgba(0,0,0,.12);transition:transform .15s,box-shadow .15s,opacity .15s;}
+@media (hover:hover) and (pointer:fine){.fab:hover{transform:translateY(-2px);box-shadow:0 7px 22px rgba(0,0,0,.18);}}
+.fab:active{opacity:.88;transform:scale(.98);}
 
 /* BNAV */
 .bnav{display:flex;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;}
@@ -214,15 +220,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(3px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s;}
 .overlay.open{opacity:1;pointer-events:all;}
-.modal{width:100%;max-width:430px;margin:0 auto;background:var(--bg2);border-radius:22px 22px 0 0;padding:8px 18px 40px;transform:translateY(100%);transition:transform .28s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto;}
+.modal{width:100%;max-width:430px;margin:0 auto;background:var(--bg2);border-radius:22px 22px 0 0;padding:8px 18px 40px;transform:translateY(100%);transition:transform .28s cubic-bezier(0.2,0,0,1);max-height:92vh;overflow-y:auto;}
 .overlay.open .modal{transform:translateY(0);}
 .modal-handle{width:34px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px;}
 .modal-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:18px;}
 .cat-pills{display:flex;flex-wrap:wrap;gap:7px;}
 .cpill{padding:7px 13px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.cpill.sel{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
-.save-btn{width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:100px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:18px;}
-.save-btn:active{opacity:.9;}
+.cpill.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600;}
+.save-btn{width:100%;padding:15px;background:var(--accent);color:var(--accent-text);border:none;border-radius:100px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:18px;transition:transform .15s,opacity .15s;}
+@media (hover:hover) and (pointer:fine){.save-btn:hover{opacity:.88;transform:translateY(-1px);}}
+.save-btn:active{opacity:.82;transform:scale(.98);}
 .btn-row{display:flex;gap:8px;margin-top:8px;}
 .sec-btn{flex:1;padding:13px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:var(--text);text-align:center;}
 .danger-btn{background:rgba(255,95,95,.12);border-color:rgba(255,95,95,.3);color:var(--danger);}
@@ -230,15 +237,112 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .toggle-label{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;}
 .toggle-sw{width:44px;height:24px;background:var(--bg4);border-radius:12px;position:relative;transition:background .2s;border:1px solid var(--border2);flex-shrink:0;}
 .toggle-sw.on{background:var(--accent);}
-.toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s;}
-.toggle-sw.on .toggle-knob{left:22px;}
-.msi-fields-box{background:rgba(90,180,255,.06);border:1px solid rgba(90,180,255,.15);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
-.msi-preview-box{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.8;}
+.toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .22s cubic-bezier(0.32,0.72,0,1);}
+.toggle-sw.on .toggle-knob{transform:translateX(20px);}
+.msi-fields-box{background:rgba(90,180,255,.06);border:1px solid rgba(90,180,255,.15);border-radius:12px;overflow:hidden;max-height:0;opacity:0;margin-bottom:0;transition:max-height .25s cubic-bezier(0.2,0,0,1),opacity .2s ease-out;}
+.msi-fields-box.open{max-height:220px;opacity:1;margin-bottom:12px;}
+.msi-fields-box-inner{padding:12px 14px;}
+.msi-preview-box{background:var(--bg3);border:1px solid var(--border);border-radius:11px;font-size:13px;line-height:1.8;overflow:hidden;max-height:0;opacity:0;margin-bottom:0;transition:max-height .22s cubic-bezier(0.2,0,0,1),opacity .18s ease-out;}
+.msi-preview-box.open{max-height:80px;opacity:1;margin-bottom:12px;}
+.msi-preview-box-inner{padding:12px 14px;}
 .empty{text-align:center;padding:48px 20px;color:var(--muted);}
 .empty-icon{font-size:44px;margin-bottom:12px;}
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border2);border-radius:100px;padding:10px 20px;font-size:13px;color:var(--text);z-index:400;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;}
+.toast{position:fixed;bottom:140px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);border:1px solid transparent;border-radius:100px;padding:10px 20px;font-size:13px;color:var(--bg);z-index:400;opacity:0;transition:opacity .22s cubic-bezier(0.23,1,0.32,1),transform .22s cubic-bezier(0.23,1,0.32,1);pointer-events:none;white-space:nowrap;max-width:calc(100vw - 40px);text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .info-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+
+/* HOVER + ACTIVE STATES */
+.sec-btn{transition:background .15s,transform .15s;}
+.sec-btn:active{transform:scale(.97);}
+.tab{transition:background .15s,color .15s,transform .1s;}
+.tab:active{transform:scale(.97);}
+.exp-act-btn{transition:background .15s,color .15s,transform .1s;}
+.exp-act-btn:active{transform:scale(.95);}
+.arr-btn{transition:background .15s,transform .1s;}
+.arr-btn:active{transform:scale(.88);}
+.icon-btn{transition:background .15s,transform .1s;}
+.icon-btn:active{transform:scale(.9);}
+.transport-chip{transition:background .15s,transform .1s;}
+.cpill{transition:background .15s,color .15s,border-color .15s,transform .1s;}
+.cpill:active{transform:scale(.94);}
+.cat-card{transition:border-color .15s,box-shadow .15s;}
+.bnav-btn{transition:color .15s,transform .12s;}
+.bnav-btn:active{transform:scale(.88);}
+.msi-card{transition:border-color .15s;}
+@media (hover:hover) and (pointer:fine){
+  .sec-btn:hover{background:var(--bg4);}
+  .tab:hover:not(.active){background:var(--bg3);color:var(--text);}
+  .exp-act-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--border2);}
+  .arr-btn:hover{background:var(--bg4);}
+  .icon-btn:hover{background:var(--bg3);}
+  .transport-chip:hover{background:var(--bg3);}
+  .cpill:hover:not(.sel){background:var(--bg3);color:var(--text);}
+  .cat-card:hover{border-color:var(--border2);box-shadow:var(--card-shadow);}
+  .color-swatch:hover{transform:scale(1.12);}
+  .bnav-btn:hover{color:var(--accent);}
+  .msi-card:hover{border-color:var(--border2);}
+}
+
+/* FOCUS VISIBLE */
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible{outline:none;}
+
+/* TABULAR NUMBERS */
+.exp-amount,.cat-amt,.msi-amt-value{font-variant-numeric:tabular-nums;}
+#msi-monthly-total,#msi-remaining-total{font-variant-numeric:tabular-nums;}
+
+/* MSI SCREEN UTILITY */
+.msi-sum-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.msi-sum-label{font-size:13px;color:var(--muted2);}
+.msi-sum-total{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
+.msi-sum-footer{padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;}
+.msi-sum-footer span:first-child{color:var(--muted);}
+.msi-sum-footer span:last-child{font-weight:500;}
+
+/* CONFIG UTILITY */
+.cfg-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.warn-btn{background:var(--warn)!important;color:#0a0a0c!important;}
+
+/* BUTTON RESETS for semantic conversions */
+.arr-btn{padding:0;line-height:1;-webkit-appearance:none;}
+.cat-icon-edit{border:none;line-height:1;-webkit-appearance:none;}
+.color-swatch{border:none;padding:0;-webkit-appearance:none;}
+
+/* DARK MODE */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#111111;--bg2:#1C1C1E;--bg3:#2C2C2E;--bg4:#3A3A3C;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --text:#F2F2F7;--muted:rgba(242,242,247,0.52);--muted2:rgba(242,242,247,0.68);
+    --card-shadow:0 1px 3px rgba(0,0,0,0.32);
+  }
+  .expense-item.is-msi{background:rgba(200,245,90,0.09);}
+  .expense-item.is-recurrent{background:rgba(24,95,165,0.10);}
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after{
+    transition-duration:0.01ms !important;
+    animation-duration:0.01ms !important;
+  }
+}
+
+/* SCREEN ENTRY */
+@keyframes screenIn{from{opacity:0;}to{opacity:1;}}
+.screen.active{animation:screenIn 200ms cubic-bezier(0.23,1,0.32,1) both;}
+
+/* EMPTY STATE FLOAT */
+@keyframes floatEmpty{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.empty-icon{animation:floatEmpty 3s ease-in-out infinite;}
+
+/* TUTORIAL BODY COLLAPSE */
+#tutorial-body{display:grid;grid-template-rows:0fr;opacity:0;overflow:hidden;transition:grid-template-rows .4s cubic-bezier(0.2,0,0,1),opacity .3s ease-out;}
+#tutorial-body.open{grid-template-rows:1fr;opacity:1;}
+#tutorial-body > div{overflow:hidden;}
+
+/* ARMED BUTTON STATE */
+.btn-armed{background:var(--danger)!important;color:#fff!important;transition:background 200ms ease-out,color 200ms ease-out!important;}
 </style>
 </head>
 <body>
@@ -256,17 +360,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
         <span class="sum-msi-chip" id="sum-msi-chip"></span>
       </div>
       <div class="sum-row">
-        <div class="sum-item"><strong id="sum-count">0</strong>gastos</div>
-        <div class="sum-item"><strong id="sum-msi-count">0</strong>a meses</div>
-        <div class="sum-item"><strong id="sum-recurrent-count">0</strong>recurrentes</div>
+        <div class="sum-item"><strong id="sum-count">0</strong> gastos</div>
+        <div class="sum-item"><strong id="sum-msi-count">0</strong> a meses</div>
+        <div class="sum-item"><strong id="sum-recurrent-count">0</strong> recurrentes</div>
       </div>
     </div>
-    <div class="cycle-bar" id="cycle-bar">
+    <div class="cycle-bar" id="cycle-bar" tabindex="0" role="button" aria-label="Ver detalle del ciclo">
       <div class="cycle-compact">
         <span class="cycle-name" id="cycle-name">Sin ciclo configurado</span>
         <div class="cycle-arrows">
-          <div class="arr-btn" id="btn-prev">‹</div>
-          <div class="arr-btn" id="btn-next">›</div>
+          <button class="arr-btn" id="btn-prev" aria-label="Ciclo anterior">‹</button>
+          <button class="arr-btn" id="btn-next" aria-label="Ciclo siguiente">›</button>
         </div>
       </div>
       <div class="cycle-progress-thin"><div class="cycle-progress-bar" id="cycle-prog-bar" style="width:0%"></div></div>
@@ -295,14 +399,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   </div>
   <div class="fab-wrap">
     <button class="fab" id="fab-add">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
       Agregar gasto
     </button>
   </div>
   <div class="bnav">
-    <button class="bnav-btn active" data-nav="main"><div class="bnav-icon">🏠</div>Inicio</button>
-    <button class="bnav-btn" data-nav="msi"><div class="bnav-icon">📅</div>A meses</button>
-    <button class="bnav-btn" data-nav="config"><div class="bnav-icon">⚙️</div>Config</button>
+    <button class="bnav-btn active" data-nav="main"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Inicio</button>
+    <button class="bnav-btn" data-nav="msi"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>A meses</button>
+    <button class="bnav-btn" data-nav="config"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>Config</button>
   </div>
 </div>
 
@@ -317,23 +421,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   <div class="hdr"><div class="hdr-logo">a<span>meses</span></div></div>
   <div class="scroll" style="padding:0 16px;">
     <div class="msi-summary-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span style="font-size:13px;color:var(--muted2);">Mensualidad total MSI</span>
-        <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;" id="msi-monthly-total">$0.00</span>
+      <div class="msi-sum-row">
+        <span class="msi-sum-label">Mensualidad total MSI</span>
+        <span class="msi-sum-total" id="msi-monthly-total">$0.00</span>
       </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;" id="msi-active-count">0 compras activas</div>
-      <div style="padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;">
-        <span style="color:var(--muted);">Total pendiente por liquidar</span>
-        <span style="font-weight:500;" id="msi-remaining-total">$0.00</span>
+      <div class="msi-sum-footer">
+        <span>Total pendiente por liquidar</span>
+        <span id="msi-remaining-total">$0.00</span>
       </div>
     </div>
     <div id="msi-list"></div>
     <div style="height:14px"></div>
   </div>
   <div class="bnav">
-    <button class="bnav-btn" data-nav="main"><div class="bnav-icon">🏠</div>Inicio</button>
-    <button class="bnav-btn active" data-nav="msi"><div class="bnav-icon">📅</div>A meses</button>
-    <button class="bnav-btn" data-nav="config"><div class="bnav-icon">⚙️</div>Config</button>
+    <button class="bnav-btn" data-nav="main"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Inicio</button>
+    <button class="bnav-btn active" data-nav="msi"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>A meses</button>
+    <button class="bnav-btn" data-nav="config"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>Config</button>
   </div>
 </div>
 
@@ -350,16 +454,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
         <button class="save-btn" id="cfg-open-cycle-btn" style="margin-top:0;">📅 Abrir primer ciclo</button>
       </div>
       <div id="cfg-close-cycle-section" style="display:none;">
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Cuando tu banco te envíe el estado de cuenta, cierra el ciclo ingresando la fecha real de corte.</p>
+        <p class="cfg-desc">Cuando tu banco te envíe el estado de cuenta, cierra el ciclo ingresando la fecha real de corte.</p>
         <div class="field">
           <label>📅 Fecha de corte (la del banco)</label>
-          <input type="date" id="cfg-cut-date-input" style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;padding:12px 14px;width:100%;outline:none;-webkit-appearance:none;appearance:none;">
+          <input type="date" id="cfg-cut-date-input">
         </div>
         <div class="field">
           <label>💳 Fecha límite de pago</label>
-          <input type="date" id="cfg-pay-date-input" style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;padding:12px 14px;width:100%;outline:none;-webkit-appearance:none;appearance:none;">
+          <input type="date" id="cfg-pay-date-input">
         </div>
-        <button class="save-btn" id="cfg-close-cycle-btn" style="background:var(--warn);color:#0a0a0c;">✂️ Cerrar ciclo y abrir uno nuevo</button>
+        <button class="save-btn warn-btn" id="cfg-close-cycle-btn">✂️ Cerrar ciclo y abrir uno nuevo</button>
       </div>
     </div>
 
@@ -373,7 +477,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
     <!-- TRANSPORTE RÁPIDO -->
     <div class="cfg-section">
       <div class="cfg-section-title">🚇 Transporte rápido</div>
-      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Configura hasta 5 atajos de transporte. Aparecen como botón flotante en Inicio para registrar con un toque.</p>
+      <p class="cfg-desc">Configura hasta 5 atajos de transporte. Aparecen como botón flotante en Inicio para registrar con un toque.</p>
       <div id="transport-config-list"></div>
       <button class="sec-btn" id="cfg-add-transport" style="width:100%;margin-top:4px;">+ Agregar atajo</button>
     </div>
@@ -381,7 +485,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
     <!-- CATEGORÍAS -->
     <div class="cfg-section">
       <div class="cfg-section-title">Gestionar categorías</div>
-      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Edita, reordena o elimina categorías. Los gastos existentes conservan su categoría aunque la edites.</p>
+      <p class="cfg-desc">Edita, reordena o elimina categorías. Los gastos existentes conservan su categoría aunque la edites.</p>
       <div id="cat-manage-list"></div>
       <button class="sec-btn" id="cfg-add-cat" style="width:100%;margin-top:4px;">+ Agregar categoría</button>
     </div>
@@ -390,14 +494,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
     <div class="cfg-section">
       <div class="cfg-section-title">Color de acento</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-        <div class="color-swatch" data-color="#c8f55a" style="background:#c8f55a;"></div>
-        <div class="color-swatch" data-color="#5ab4ff" style="background:#5ab4ff;"></div>
-        <div class="color-swatch" data-color="#ff7b5a" style="background:#ff7b5a;"></div>
-        <div class="color-swatch" data-color="#b47bff" style="background:#b47bff;"></div>
-        <div class="color-swatch" data-color="#5affa0" style="background:#5affa0;"></div>
-        <div class="color-swatch" data-color="#ffdb5a" style="background:#ffdb5a;"></div>
-        <div class="color-swatch" data-color="#ff5ab4" style="background:#ff5ab4;"></div>
-        <div class="color-swatch" data-color="#ffffff" style="background:#fff;border:1px solid rgba(255,255,255,.2);"></div>
+        <button class="color-swatch" data-color="#c8f55a" style="background:#c8f55a;" aria-label="Verde lima"></button>
+        <button class="color-swatch" data-color="#5ab4ff" style="background:#5ab4ff;" aria-label="Azul cielo"></button>
+        <button class="color-swatch" data-color="#ff7b5a" style="background:#ff7b5a;" aria-label="Coral"></button>
+        <button class="color-swatch" data-color="#b47bff" style="background:#b47bff;" aria-label="Violeta"></button>
+        <button class="color-swatch" data-color="#5affa0" style="background:#5affa0;" aria-label="Verde menta"></button>
+        <button class="color-swatch" data-color="#ffdb5a" style="background:#ffdb5a;" aria-label="Amarillo"></button>
+        <button class="color-swatch" data-color="#ff5ab4" style="background:#ff5ab4;" aria-label="Rosa"></button>
+        <button class="color-swatch" data-color="#ffffff" style="background:#fff;border:1px solid rgba(0,0,0,.15);" aria-label="Blanco"></button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <input type="color" id="cfg-color-custom" value="#c8f55a" style="width:52px;height:44px;padding:4px;background:var(--bg3);border:1px solid var(--border);border-radius:11px;cursor:pointer;">
@@ -425,7 +529,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
         <span>ℹ️ ¿Cómo funciona la app?</span>
         <span id="tutorial-arrow" style="font-size:14px;transition:transform .2s;">▼</span>
       </div>
-      <div id="tutorial-body" style="display:none;">
+      <div id="tutorial-body">
+        <div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:2px;">
 
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;">
@@ -460,27 +565,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
         </div>
         <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;">MisGastos · Versión 6</div>
+        </div>
       </div>
     </div>
 
     <div style="height:20px;"></div>
   </div>
   <div class="bnav">
-    <button class="bnav-btn" data-nav="main"><div class="bnav-icon">🏠</div>Inicio</button>
-    <button class="bnav-btn" data-nav="msi"><div class="bnav-icon">📅</div>A meses</button>
-    <button class="bnav-btn active" data-nav="config"><div class="bnav-icon">⚙️</div>Config</button>
+    <button class="bnav-btn" data-nav="main"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Inicio</button>
+    <button class="bnav-btn" data-nav="msi"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>A meses</button>
+    <button class="bnav-btn active" data-nav="config"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>Config</button>
   </div>
 </div>
 
 <!-- ══ MODAL: CICLO ══ -->
 <div class="overlay" id="modal-cycle">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-cycle-title">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-cycle-title">Abrir primer ciclo</div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;" id="modal-cycle-desc">Ingresa la fecha desde la que quieres empezar a registrar tus gastos de este ciclo.</p>
     <div class="field">
       <label>📅 Fecha de inicio del ciclo</label>
-      <input type="date" id="modal-cycle-start" style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;padding:12px 14px;width:100%;outline:none;-webkit-appearance:none;appearance:none;">
+      <input type="date" id="modal-cycle-start">
     </div>
     <button class="save-btn" id="modal-cycle-save">Abrir ciclo</button>
     <button class="sec-btn" id="modal-cycle-cancel" style="width:100%;margin-top:8px;">Cancelar</button>
@@ -489,7 +595,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 <!-- ══ MODAL: EXPORTAR CSV ══ -->
 <div class="overlay" id="modal-export">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Exportar a Excel">
     <div class="modal-handle"></div>
     <div class="modal-title">Exportar a Excel</div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Selecciona los ciclos a exportar:</p>
@@ -505,25 +611,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 <!-- ══ MODAL: GASTO ══ -->
 <div class="overlay" id="modal-add">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-add-title">Nuevo gasto</div>
-    <div class="toggle-row" id="msi-toggle-row">
+    <div class="toggle-row" id="msi-toggle-row" tabindex="0" role="switch" aria-checked="false" aria-label="Compra a meses sin intereses">
       <span class="toggle-label">📅 Compra a meses sin intereses</span>
       <div class="toggle-sw" id="msi-toggle-sw"><div class="toggle-knob"></div></div>
     </div>
     <div class="field"><label>Descripción</label><input type="text" id="inp-name" placeholder="¿En qué gastaste?" autocomplete="off"></div>
     <div class="field"><label id="inp-amount-lbl">Monto ($)</label><div class="pfx-wrap"><input type="number" id="inp-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
-    <div id="msi-fields-box" class="msi-fields-box" style="display:none;">
+    <div id="msi-fields-box" class="msi-fields-box">
+      <div class="msi-fields-box-inner">
       <div class="field">
         <label>Meses sin intereses</label>
         <select id="inp-msi-months"><option value="3">3 meses</option><option value="6">6 meses</option><option value="9">9 meses</option><option value="12" selected>12 meses</option><option value="18">18 meses</option><option value="24">24 meses</option></select>
       </div>
       <div class="field" style="margin-bottom:0;"><label>Meses ya pagados <span style="font-weight:400;color:var(--muted);font-size:11px;">(se cuenta solo; ajústalo solo si no coincide)</span></label><input type="number" id="inp-msi-paid" placeholder="0" min="0" inputmode="numeric"></div>
+      </div>
     </div>
-    <div id="msi-preview-box" class="msi-preview-box" style="display:none;">
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Vista previa</div>
-      <div id="msi-preview-text"></div>
+    <div id="msi-preview-box" class="msi-preview-box">
+      <div class="msi-preview-box-inner">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Vista previa</div>
+        <div id="msi-preview-text"></div>
+      </div>
     </div>
     <div class="field"><label>Categoría</label><div class="cat-pills" id="cat-pills"></div></div>
     <div class="field"><label>Fecha</label><input type="date" id="inp-date"></div>
@@ -538,7 +648,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
     <!-- MOVER A CICLO ANTERIOR -->
     <div id="move-to-prev-row" style="display:none;margin-bottom:12px;">
       <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;">Asignar a ciclo</div>
-      <select id="inp-cycle-assign" style="width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;appearance:none;"></select>
+      <select id="inp-cycle-assign"></select>
     </div>
     <div class="btn-row">
       <button class="sec-btn" id="modal-cancel">Cancelar</button>
@@ -552,7 +662,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 <!-- ══ MODAL: CATEGORÍA ══ -->
 <div class="overlay" id="modal-cat">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-cat-title">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-cat-title">Nueva categoría</div>
     <div class="field"><label>Ícono (emoji)</label><input type="text" id="cat-inp-icon" placeholder="ej. 🛒" maxlength="4"></div>
@@ -569,7 +679,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 <!-- ══ MODAL: TRANSPORTE ══ -->
 <div class="overlay" id="modal-transport">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-transport-title">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-transport-title">Nuevo atajo de transporte</div>
     <div class="field"><label>Ícono (emoji)</label><input type="text" id="tr-inp-icon" placeholder="🚇" maxlength="4"></div>
@@ -944,13 +1054,16 @@ function renderMSI(){
         <div class="msi-amt-item"><div class="msi-amt-label">Por mes</div><div class="msi-amt-value" style="color:var(--accent)">${fmt(mon)}</div></div>
         <div class="msi-amt-item"><div class="msi-amt-label">Pendiente</div><div class="msi-amt-value">${fmt(rem*mon)}</div></div>
       </div>
-      <div class="msi-prog-wrap"><div class="msi-prog-bar" style="width:${pct}%"></div></div>
+      <div class="msi-prog-wrap"><div class="msi-prog-bar" style="width:0%" data-pct="${pct}"></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;">
         <span style="font-size:12px;color:var(--muted);">${paid} de ${m.months} pagados${done?'':' · 🔄 auto'}${liqDate?'<br><span style="font-size:11px;">'+liqDate+'</span>':''}</span>
         <button class="exp-act-btn" onclick="openEditMSI('${m.id}')" style="flex-shrink:0;">✏️ Editar</button>
       </div>
     </div>`;
   }).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.querySelectorAll('#msi-list .msi-prog-bar[data-pct]').forEach(b=>{b.style.width=b.dataset.pct+'%';});
+  }));
 }
 
 function openEditMSI(id){
@@ -980,9 +1093,10 @@ function setMsiMode(on, lock=false){
   isMsiMode=on;
   const sw=document.getElementById('msi-toggle-sw');
   sw.classList.toggle('on',on);
-  document.getElementById('msi-fields-box').style.display=on?'':'none';
+  document.getElementById('msi-toggle-row').setAttribute('aria-checked',on?'true':'false');
+  document.getElementById('msi-fields-box').classList.toggle('open',on);
   document.getElementById('inp-amount-lbl').textContent=on?'Monto total ($)':'Monto ($)';
-  if(!on)document.getElementById('msi-preview-box').style.display='none';
+  if(!on)document.getElementById('msi-preview-box').classList.remove('open');
   else updateMsiPreview();
 }
 
@@ -990,10 +1104,10 @@ function updateMsiPreview(){
   const total=parseFloat(document.getElementById('inp-amount').value)||0;
   const months=parseInt(document.getElementById('inp-msi-months').value)||12;
   const box=document.getElementById('msi-preview-box');
-  if(!total||!isMsiMode){box.style.display='none';return;}
+  if(!total||!isMsiMode){box.classList.remove('open');return;}
   document.getElementById('msi-preview-text').innerHTML=
     `Mensualidad: <b style="color:var(--accent)">${fmt(total/months)}</b> &nbsp;·&nbsp; ${months} pagos = ${fmt(total)} total`;
-  box.style.display='';
+  box.classList.add('open');
 }
 
 document.getElementById('msi-toggle-row').addEventListener('click',()=>{
@@ -1148,23 +1262,23 @@ document.getElementById('modal-save').addEventListener('click',()=>{
   showToast(editingExpId?'✏️ Gasto actualizado':'💾 Gasto guardado');
 });
 
-document.getElementById('modal-delete').addEventListener('click',()=>{
+document.getElementById('modal-delete').addEventListener('click',function(){
   if(!editingExpId)return;
-  if(!confirm('¿Eliminar este gasto?'))return;
-
-  if(editingExpId.startsWith('msi:')){
-    const msiId=editingExpId.slice(4);
-    saveMSI(getMSI().filter(x=>x.id!==msiId));
-    closeModal('modal-add');renderMSI();renderAll();showToast('🗑 Compra eliminada');return;
-  }
-  if(editingExpId.includes('|')){
-    const [eid,cid]=editingExpId.split('|');
-    const exps=getExpenses(cid);
-    const exp=exps.find(x=>x.id===eid);
-    if(exp?.isMsi)saveMSI(getMSI().filter(x=>x.linkedExpId!==eid));
-    saveExpenses(cid,exps.filter(x=>x.id!==eid));
-    closeModal('modal-add');renderAll();showToast('🗑 Gasto eliminado');
-  }
+  armDestructive(this,()=>{
+    if(editingExpId.startsWith('msi:')){
+      const msiId=editingExpId.slice(4);
+      saveMSI(getMSI().filter(x=>x.id!==msiId));
+      closeModal('modal-add');renderMSI();renderAll();showToast('Compra eliminada');return;
+    }
+    if(editingExpId.includes('|')){
+      const [eid,cid]=editingExpId.split('|');
+      const exps=getExpenses(cid);
+      const exp=exps.find(x=>x.id===eid);
+      if(exp?.isMsi)saveMSI(getMSI().filter(x=>x.linkedExpId!==eid));
+      saveExpenses(cid,exps.filter(x=>x.id!==eid));
+      closeModal('modal-add');renderAll();showToast('Gasto eliminado');
+    }
+  });
 });
 
 document.getElementById('modal-cancel').addEventListener('click',()=>closeModal('modal-add'));
@@ -1231,9 +1345,9 @@ function renderCatManager(){
       <div class="cat-manage-icon">${c.icon}</div>
       <div class="cat-manage-name">${c.name}</div>
       <div class="cat-manage-actions">
-        ${i>0?`<span class="cat-icon-edit" onclick="moveCat('${c.id}',-1)">⬆️</span>`:''}
-        ${i<cats.length-1?`<span class="cat-icon-edit" onclick="moveCat('${c.id}',1)">⬇️</span>`:''}
-        <span class="cat-icon-edit" onclick="openEditCat('${c.id}')">✏️</span>
+        ${i>0?`<button class="cat-icon-edit" onclick="moveCat('${c.id}',-1)" aria-label="Subir ${c.name}">⬆️</button>`:''}
+        ${i<cats.length-1?`<button class="cat-icon-edit" onclick="moveCat('${c.id}',1)" aria-label="Bajar ${c.name}">⬇️</button>`:''}
+        <button class="cat-icon-edit" onclick="openEditCat('${c.id}')" aria-label="Editar ${c.name}">✏️</button>
       </div>
     </div>`).join('');
 }
@@ -1286,11 +1400,12 @@ document.getElementById('modal-cat-save').addEventListener('click',()=>{
   showToast(editingCatId?'✏️ Categoría actualizada':'✅ Categoría agregada');
 });
 
-document.getElementById('modal-cat-delete').addEventListener('click',()=>{
+document.getElementById('modal-cat-delete').addEventListener('click',function(){
   if(!editingCatId)return;
-  if(!confirm('¿Eliminar esta categoría?'))return;
-  saveCats(getCats().filter(c=>c.id!==editingCatId));
-  closeModal('modal-cat');renderCatManager();showToast('🗑 Categoría eliminada');
+  armDestructive(this,()=>{
+    saveCats(getCats().filter(c=>c.id!==editingCatId));
+    closeModal('modal-cat');renderCatManager();showToast('Categoría eliminada');
+  });
 });
 document.getElementById('modal-cat-cancel').addEventListener('click',()=>closeModal('modal-cat'));
 document.getElementById('modal-cat').addEventListener('click',function(e){if(e.target===this)closeModal('modal-cat');});
@@ -1360,11 +1475,12 @@ document.getElementById('modal-tr-save').addEventListener('click',()=>{
   showToast(editingTrId?'✏️ Atajo actualizado':'✅ Atajo agregado');
 });
 
-document.getElementById('modal-tr-delete').addEventListener('click',()=>{
+document.getElementById('modal-tr-delete').addEventListener('click',function(){
   if(!editingTrId)return;
-  if(!confirm('¿Eliminar este atajo?'))return;
-  saveTransport(getTransport().filter(x=>x.id!==editingTrId));
-  closeModal('modal-transport');renderTransportConfig();renderTransportFab();showToast('🗑 Atajo eliminado');
+  armDestructive(this,()=>{
+    saveTransport(getTransport().filter(x=>x.id!==editingTrId));
+    closeModal('modal-transport');renderTransportConfig();renderTransportFab();showToast('Atajo eliminado');
+  });
 });
 document.getElementById('modal-tr-cancel').addEventListener('click',()=>closeModal('modal-transport'));
 document.getElementById('modal-transport').addEventListener('click',function(e){if(e.target===this)closeModal('modal-transport');});
@@ -1390,13 +1506,14 @@ document.getElementById('modal-cycle-save').addEventListener('click',()=>{
 });
 document.getElementById('modal-cycle-cancel').addEventListener('click',()=>closeModal('modal-cycle'));
 
-document.getElementById('cfg-close-cycle-btn').addEventListener('click',()=>{
+document.getElementById('cfg-close-cycle-btn').addEventListener('click',function(){
   const cutDate=document.getElementById('cfg-cut-date-input').value;
   const payDate=document.getElementById('cfg-pay-date-input').value;
   if(!cutDate||!payDate){showToast('⚠️ Ingresa ambas fechas');return;}
-  if(!confirm(`¿Cerrar el ciclo actual con fecha de corte ${fmtDate(cutDate)} y pago límite ${fmtDate(payDate)}?\n\nSe abrirá un nuevo ciclo automáticamente.`))return;
-  closeCycleAndOpenNew(cutDate,payDate);
-  renderConfigCycleStatus();
+  armDestructive(this,()=>{
+    closeCycleAndOpenNew(cutDate,payDate);
+    renderConfigCycleStatus();
+  });
 });
 
 // ══════════════════════════════════════════════════════
@@ -1486,7 +1603,9 @@ document.getElementById('cfg-export-json').addEventListener('click',()=>{
   showToast('📦 Respaldo descargado');
 });
 
-document.getElementById('cfg-import-json-btn').addEventListener('click',()=>document.getElementById('cfg-import-file').click());
+document.getElementById('cfg-import-json-btn').addEventListener('click',function(){
+  armDestructive(this,()=>document.getElementById('cfg-import-file').click());
+});
 document.getElementById('cfg-import-file').addEventListener('change',function(){
   const file=this.files[0];if(!file)return;
   const reader=new FileReader();
@@ -1494,7 +1613,6 @@ document.getElementById('cfg-import-file').addEventListener('change',function(){
     try{
       const b=JSON.parse(ev.target.result);
       if(!b.version){showToast('⚠️ Archivo no válido');return;}
-      if(!confirm(`¿Importar respaldo del ${(b.exportedAt||'').split('T')[0]}?\nEsto reemplazará TODOS tus datos.`))return;
       const toDel=[];
       for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
       toDel.forEach(k=>localStorage.removeItem(k));
@@ -1513,23 +1631,59 @@ document.getElementById('cfg-import-file').addEventListener('change',function(){
   reader.readAsText(file);this.value='';
 });
 
-document.getElementById('cfg-clear').addEventListener('click',()=>{
-  if(!confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer.'))return;
-  const toDel=[];
-  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
-  toDel.forEach(k=>localStorage.removeItem(k));
-  currentCycleIdx=0;renderAll();renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
-  showToast('🗑 Datos borrados');
+document.getElementById('cfg-clear').addEventListener('click',function(){
+  armDestructive(this,()=>{
+    const toDel=[];
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
+    toDel.forEach(k=>localStorage.removeItem(k));
+    currentCycleIdx=0;renderAll();renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
+    showToast('Datos borrados');
+  });
 });
 
 // ══════════════════════════════════════════════════════
 //  COLOR
 // ══════════════════════════════════════════════════════
+function getLuminance(hex){
+  if(!hex||hex.length<7)return 0;
+  const r=parseInt(hex.slice(1,3),16)/255;
+  const g=parseInt(hex.slice(3,5),16)/255;
+  const b=parseInt(hex.slice(5,7),16)/255;
+  const lin=c=>c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);
+  return 0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b);
+}
+
 function applyAccent(color){
   document.documentElement.style.setProperty('--accent',color);
+  const lum=getLuminance(color);
+  const txt=lum>0.3?'#111111':'#ffffff';
+  const txtMuted=lum>0.3?'rgba(17,17,17,0.70)':'rgba(255,255,255,0.80)';
+  document.documentElement.style.setProperty('--accent-text',txt);
+  document.documentElement.style.setProperty('--accent-text-muted',txtMuted);
   document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('active-swatch',s.dataset.color===color));
   document.getElementById('cfg-color-custom').value=color;
   document.getElementById('cfg-color-hex').textContent=color;
+}
+
+// Two-step destructive confirmation — avoids native confirm() dialogs
+function armDestructive(btn, onConfirm){
+  if(btn._armed){
+    clearTimeout(btn._armTimer);
+    btn._armed=false;
+    btn.textContent=btn._origText;
+    btn.classList.remove('btn-armed');
+    onConfirm();
+  } else {
+    btn._armed=true;
+    btn._origText=btn.textContent;
+    btn.textContent='Toca de nuevo para confirmar';
+    btn.classList.add('btn-armed');
+    btn._armTimer=setTimeout(()=>{
+      btn._armed=false;
+      btn.textContent=btn._origText;
+      btn.classList.remove('btn-armed');
+    },3000);
+  }
 }
 document.querySelectorAll('.color-swatch').forEach(s=>s.addEventListener('click',()=>{
   applyAccent(s.dataset.color);
@@ -1751,9 +1905,63 @@ document.querySelectorAll('.tab').forEach(btn=>{
 });
 
 // ══════════════════════════════════════════════════════
+//  FOCUS TRAP + MODAL KEYBOARD
+// ══════════════════════════════════════════════════════
+function trapFocus(modalEl){
+  const sel='button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';
+  const nodes=[...modalEl.querySelectorAll(sel)].filter(n=>!n.disabled);
+  if(!nodes.length)return;
+  const first=nodes[0],last=nodes[nodes.length-1];
+  function handler(e){
+    if(e.key!=='Tab')return;
+    if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}
+    else{if(document.activeElement===last){e.preventDefault();first.focus();}}
+  }
+  modalEl._trapHandler=handler;
+  modalEl.addEventListener('keydown',handler);
+  setTimeout(()=>first.focus(),60);
+}
+function releaseFocus(modalEl){
+  if(modalEl&&modalEl._trapHandler){modalEl.removeEventListener('keydown',modalEl._trapHandler);delete modalEl._trapHandler;}
+}
+
+// ══════════════════════════════════════════════════════
 //  CLOSE MODAL HELPER
 // ══════════════════════════════════════════════════════
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModal(id){
+  const overlay=document.getElementById(id);
+  const modal=overlay.querySelector('.modal');
+  overlay.classList.remove('open');
+  releaseFocus(modal);
+}
+
+// Trap focus when a modal opens (via transitionend)
+document.querySelectorAll('.overlay').forEach(overlay=>{
+  overlay.addEventListener('transitionend',()=>{
+    if(overlay.classList.contains('open')){
+      const modal=overlay.querySelector('.modal');
+      if(!modal._trapHandler)trapFocus(modal);
+    }
+  });
+});
+
+// Escape closes open modal
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const open=document.querySelector('.overlay.open');
+    if(open)closeModal(open.id);
+  }
+});
+
+// Keyboard for cycle-bar (Enter/Space)
+document.getElementById('cycle-bar').addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('cycle-bar').classList.toggle('expanded');}
+});
+
+// Keyboard for msi-toggle-row (Enter/Space)
+document.getElementById('msi-toggle-row').addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('msi-toggle-row').click();}
+});
 
 // ══════════════════════════════════════════════════════
 //  RENDER ALL
@@ -1769,8 +1977,8 @@ function renderAll(){
 document.getElementById('tutorial-toggle-btn').addEventListener('click',()=>{
   const body = document.getElementById('tutorial-body');
   const arrow = document.getElementById('tutorial-arrow');
-  const open = body.style.display === 'none';
-  body.style.display = open ? '' : 'none';
+  const open = !body.classList.contains('open');
+  body.classList.toggle('open', open);
   arrow.style.transform = open ? 'rotate(180deg)' : '';
 });
 
