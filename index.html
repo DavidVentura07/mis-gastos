@@ -37,7 +37,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .hdr-logo{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;}
 .hdr-logo span{color:var(--accent);}
 .icon-btn{background:var(--bg2);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative;flex-shrink:0;}
-.notif-dot{position:absolute;top:1px;right:1px;width:8px;height:8px;background:var(--danger);border-radius:50%;border:2px solid var(--bg);}
 
 /* COLLAPSIBLE TOP */
 .sticky-top{flex-shrink:0;}
@@ -248,7 +247,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 <div class="screen active" id="scr-main">
   <div class="hdr">
     <div class="hdr-logo">mis<span>gastos</span></div>
-    <div class="icon-btn" id="btn-notif">🔔<div class="notif-dot" id="notif-dot" style="display:none"></div></div>
   </div>
   <div class="sticky-top" id="sticky-top">
     <div class="summary">
@@ -405,23 +403,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
         <input type="color" id="cfg-color-custom" value="#c8f55a" style="width:52px;height:44px;padding:4px;background:var(--bg3);border:1px solid var(--border);border-radius:11px;cursor:pointer;">
         <span style="font-size:13px;color:var(--muted2);" id="cfg-color-hex">#c8f55a</span>
       </div>
-    </div>
-
-    <!-- NOTIFICACIONES -->
-    <div class="cfg-section">
-      <div class="cfg-section-title">🔔 Notificaciones</div>
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:14px;font-weight:500;">Estado</span>
-          <button id="cfg-notif-toggle" style="padding:8px 16px;border-radius:100px;border:1px solid var(--border);background:var(--bg4);color:var(--muted2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Activar</button>
-        </div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.5;" id="cfg-notif-status">No activadas aún</div>
-      </div>
-      <div class="field">
-        <label>Avisar con cuántos días de anticipación</label>
-        <select id="cfg-notif-days"><option value="1">1 día antes</option><option value="2">2 días antes</option><option value="3" selected>3 días antes</option><option value="5">5 días antes</option><option value="7">7 días antes</option></select>
-      </div>
-      <button class="sec-btn" id="cfg-test-notif" style="width:100%;">🔔 Notificación de prueba</button>
     </div>
 
     <!-- DATOS -->
@@ -963,11 +944,10 @@ function renderMSI(){
         <div class="msi-amt-item"><div class="msi-amt-label">Por mes</div><div class="msi-amt-value" style="color:var(--accent)">${fmt(mon)}</div></div>
         <div class="msi-amt-item"><div class="msi-amt-label">Pendiente</div><div class="msi-amt-value">${fmt(rem*mon)}</div></div>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${paid} de ${m.months} meses pagados${liqDate?' · '+liqDate:''}</div>
       <div class="msi-prog-wrap"><div class="msi-prog-bar" style="width:${pct}%"></div></div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px;">${done?'':'<span>🔄 Se actualiza solo en cada corte</span>'}</div>
-      <div class="msi-actions">
-        <button class="exp-act-btn" onclick="openEditMSI('${m.id}')">✏️ Editar</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;">
+        <span style="font-size:12px;color:var(--muted);">${paid} de ${m.months} pagados${done?'':' · 🔄 auto'}${liqDate?'<br><span style="font-size:11px;">'+liqDate+'</span>':''}</span>
+        <button class="exp-act-btn" onclick="openEditMSI('${m.id}')" style="flex-shrink:0;">✏️ Editar</button>
       </div>
     </div>`;
   }).join('');
@@ -1570,53 +1550,6 @@ document.getElementById('cfg-save-card').addEventListener('click',()=>{
 });
 
 // ══════════════════════════════════════════════════════
-//  NOTIFICATIONS
-// ══════════════════════════════════════════════════════
-function checkNotifDot(){
-  const cfg=getConfig();
-  const cycles=getCycles();
-  const open=cycles.find(c=>c.open);
-  // Check if there's a recently closed cycle with upcoming pay date
-  const closed=cycles.filter(c=>!c.open&&c.payDate).sort((a,b)=>b.endDate?.localeCompare(a.endDate||'')).slice(0,1);
-  if(!closed.length){document.getElementById('notif-dot').style.display='none';return;}
-  const payDate=new Date(closed[0].payDate+'T12:00:00');
-  const days=parseInt(cfg.notifDays||3);
-  const diff=Math.ceil((payDate-new Date())/(1000*60*60*24));
-  document.getElementById('notif-dot').style.display=(diff>=0&&diff<=days)?'':'none';
-}
-function updateNotifStatus(){
-  const st=document.getElementById('cfg-notif-status'),btn=document.getElementById('cfg-notif-toggle');
-  if(!('Notification' in window)){st.textContent='Tu navegador no soporta notificaciones';btn.textContent='No disponible';btn.disabled=true;return;}
-  const p=Notification.permission;
-  if(p==='granted'){st.textContent='✅ Activadas';btn.textContent='Reactivar';btn.style.color='';}
-  else if(p==='denied'){st.textContent='🚫 Bloqueadas. Ve a Ajustes > Safari.';btn.textContent='Bloqueadas';btn.disabled=true;}
-  else{st.textContent='No activadas aún.';btn.textContent='Activar';btn.style.color='';}
-}
-document.getElementById('cfg-notif-toggle').addEventListener('click',async()=>{
-  if(!('Notification' in window)){showToast('No soportado');return;}
-  const p=await Notification.requestPermission();
-  updateNotifStatus();
-  if(p==='granted'){showToast('✅ Notificaciones activadas');}
-  else showToast('⚠️ Permiso denegado');
-});
-document.getElementById('cfg-notif-days').addEventListener('change',function(){
-  const cfg=getConfig();saveConfig({...cfg,notifDays:this.value});showToast(`✅ Aviso ${this.value} día(s) antes`);
-});
-document.getElementById('cfg-test-notif').addEventListener('click',async()=>{
-  if(Notification.permission!=='granted'){const p=await Notification.requestPermission();if(p!=='granted'){showToast('⚠️ Permiso denegado');return;}}
-  new Notification('🔔 MisGastos',{body:'Las notificaciones funcionan correctamente.'});
-  showToast('✅ Notificación enviada');
-});
-document.getElementById('btn-notif').addEventListener('click',()=>{
-  const cycles=getCycles();
-  const closed=cycles.filter(c=>!c.open&&c.payDate).sort((a,b)=>b.endDate?.localeCompare(a.endDate||'')).slice(0,1);
-  if(!closed.length){showToast('Sin fechas de pago pendientes');return;}
-  const payDate=new Date(closed[0].payDate+'T12:00:00');
-  const diff=Math.ceil((payDate-new Date())/(1000*60*60*24));
-  showToast(diff>=0?`💳 Pago límite en ${diff} día${diff!==1?'s':''} — ${fmtDate(closed[0].payDate)}`:'💳 Fecha de pago ya pasó');
-});
-
-// ══════════════════════════════════════════════════════
 //  SEARCH
 // ══════════════════════════════════════════════════════
 document.getElementById('search-input').addEventListener('input',function(){
@@ -1788,8 +1721,8 @@ function showScreen(name){
   document.getElementById('scr-'+name).classList.add('active');
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===name));
   if(name==='msi')renderMSI();
-  if(name==='config'){renderConfigCycleStatus();renderCatManager();renderTransportConfig();updateNotifStatus();
-    const cfg=getConfig();if(cfg.notifDays)document.getElementById('cfg-notif-days').value=cfg.notifDays;
+  if(name==='config'){renderConfigCycleStatus();renderCatManager();renderTransportConfig();
+    const cfg=getConfig();
     if(cfg.cardName)document.getElementById('cfg-cardname').value=cfg.cardName;
   }
   // Hide/show transport FAB
@@ -1828,7 +1761,6 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 function renderAll(){
   renderCycleBar();
   renderTabs();
-  checkNotifDot();
 }
 
 // ══════════════════════════════════════════════════════
@@ -1857,7 +1789,6 @@ function showToast(msg){
 (function init(){
   const cfg=getConfig();
   applyAccent(cfg.accentColor||'#c8f55a');
-  if(cfg.notifDays)document.getElementById('cfg-notif-days').value=cfg.notifDays;
 
   // ── Migración: MSI antiguas usaban paidMonths manual.
   // Lo convertimos a paidBaseline congelado para que el conteo automático continúe.
