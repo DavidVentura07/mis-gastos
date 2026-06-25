@@ -1,6 +1,6 @@
 // MisGastos Service Worker
 // Estrategia: Cache First para recursos estáticos, Network First para fuentes
-const CACHE_NAME = 'misgastos-v9';
+const CACHE_NAME = 'misgastos-v10';
 
 // Recursos que se cachean al instalar
 const PRECACHE = [
