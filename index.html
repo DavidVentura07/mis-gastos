@@ -54,11 +54,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .sum-row{display:flex;margin-top:10px;transition:opacity .2s,max-height .2s,margin .2s;max-height:50px;overflow:hidden;}
 .sum-item{flex:1;font-size:12px;color:var(--accent-text-muted);}
 .sum-item strong{display:block;font-size:14px;font-weight:600;color:var(--accent-text);font-variant-numeric:tabular-nums;}
+/* Presupuesto por ciclo (opcional, se configura en Config) */
+.sum-budget{margin-top:10px;transition:opacity .2s,max-height .2s,margin .2s;max-height:40px;overflow:hidden;}
+.sum-budget-bar{height:4px;background:rgba(0,0,0,.15);border-radius:2px;overflow:hidden;}
+.sum-budget-fill{height:100%;background:var(--accent-text);border-radius:2px;transition:width .4s,background .3s;}
+.sum-budget-lbl{font-size:11px;color:var(--accent-text-muted);margin-top:5px;font-variant-numeric:tabular-nums;}
 .sticky-top.collapsed .summary{padding:10px 20px;margin-bottom:8px;}
 .sticky-top.collapsed .sum-label{opacity:0;height:0;margin:0;overflow:hidden;}
 .sticky-top.collapsed .sum-total{font-size:20px;}
 .sticky-top.collapsed .sum-msi-row{opacity:0;max-height:0;margin:0;}
 .sticky-top.collapsed .sum-row{opacity:0;max-height:0;margin:0;}
+.sticky-top.collapsed .sum-budget{opacity:0;max-height:0;margin:0;}
 .sticky-top.collapsed .cycle-bar{margin-bottom:6px;}
 .sticky-top.collapsed .cycle-detail{max-height:0!important;padding:0 12px!important;}
 
@@ -110,7 +116,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .tab.active{background:var(--bg3);border-color:var(--border2);color:var(--text);}
 
 /* SCROLL */
-.scroll{flex:1;overflow-y:auto;padding:0 16px;-webkit-overflow-scrolling:touch;}
+.scroll{flex:1;overflow-y:auto;padding:0 16px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 .scroll::-webkit-scrollbar{display:none;}
 .day-lbl{font-size:12px;font-weight:500;color:var(--muted);padding:0 2px;margin:12px 0 7px;}
 
@@ -223,7 +229,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);z-index:200;display:flex;align-items:flex-end;padding:0 12px 14px;opacity:0;pointer-events:none;transition:opacity .2s;}
 .overlay.open{opacity:1;pointer-events:all;}
 /* Hoja flotante: separada de los bordes, 4 esquinas redondeadas y sombra (Propuesta 1) */
-.modal{width:100%;max-width:430px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:26px;padding:10px 20px 26px;transform:translateY(110%);transition:transform .28s cubic-bezier(0.2,0,0,1);max-height:86vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4);}
+.modal{width:100%;max-width:430px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:26px;padding:10px 20px 26px;transform:translateY(110%);transition:transform .28s cubic-bezier(0.2,0,0,1);max-height:86vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4);overscroll-behavior:contain;}
 .overlay.open .modal{transform:translateY(0);}
 .modal-handle{width:34px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px;}
 .modal-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:18px;}
@@ -285,6 +291,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   .bnav-btn:hover{color:var(--accent);}
   .msi-card:hover{border-color:var(--border2);}
 }
+
+/* TAP LATENCY — evita el retardo/zoom de doble toque en controles */
+button,[role="button"]{touch-action:manipulation;}
 
 /* FOCUS VISIBLE */
 button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
@@ -366,6 +375,10 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
         <div class="sum-item"><strong id="sum-count">0</strong> gastos</div>
         <div class="sum-item"><strong id="sum-msi-count">0</strong> a meses</div>
         <div class="sum-item"><strong id="sum-recurrent-count">0</strong> recurrentes</div>
+      </div>
+      <div class="sum-budget" id="sum-budget" style="display:none">
+        <div class="sum-budget-bar"><div class="sum-budget-fill" id="sum-budget-fill" style="width:0%"></div></div>
+        <div class="sum-budget-lbl" id="sum-budget-lbl"></div>
       </div>
     </div>
     <div class="cycle-bar" id="cycle-bar" tabindex="0" role="button" aria-label="Ver detalle del ciclo">
@@ -477,6 +490,14 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
       <button class="sec-btn" id="cfg-save-card" style="width:100%;">Guardar nombre</button>
     </div>
 
+    <!-- PRESUPUESTO -->
+    <div class="cfg-section">
+      <div class="cfg-section-title">Presupuesto por ciclo</div>
+      <p class="cfg-desc">Opcional: define un tope de gasto por ciclo y verás tu avance en la tarjeta de Inicio. Guárdalo vacío para quitarlo.</p>
+      <div class="field"><label>Monto ($)</label><div class="pfx-wrap"><input type="number" id="cfg-budget" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
+      <button class="sec-btn" id="cfg-save-budget" style="width:100%;">Guardar presupuesto</button>
+    </div>
+
     <!-- TRANSPORTE RÁPIDO -->
     <div class="cfg-section">
       <div class="cfg-section-title">🚇 Transporte rápido</div>
@@ -561,7 +582,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
           </div>
 
         </div>
-        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;">MisGastos · Versión 7</div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;" id="app-version-lbl">MisGastos</div>
         </div>
       </div>
     </div>
@@ -697,9 +718,14 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 // ══════════════════════════════════════════════════════
 //  STORAGE HELPERS
 // ══════════════════════════════════════════════════════
+// Versión visible de la app = número de la última entrada en CAMBIOS.md (esquema unificado).
+const APP_VERSION = 15;
+
 const S = {
   get:(k,fb={})=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}},
-  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),
+  // Si el almacenamiento está lleno (o en modo privado) el guardado truena en
+  // silencio y el usuario cree que registró; avisamos en vez de tragarnos el error.
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){showToast('⚠️ No se pudo guardar — almacenamiento lleno o bloqueado');}},
   del:(k)=>localStorage.removeItem(k),
 };
 
@@ -748,6 +774,15 @@ const localDate = (dt=new Date())=>`${dt.getFullYear()}-${_pad(dt.getMonth()+1)}
 const today = ()=>localDate();
 const addDays = (dateStr,n)=>{const d=new Date(dateStr+'T12:00:00');d.setDate(d.getDate()+n);return localDate(d);};
 const uid = ()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const FM = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+// Etiqueta de ciclo "mes año"; si ya existe otro ciclo con esa etiqueta (dos ciclos
+// que empiezan el mismo mes), se agrega el día de inicio para poder distinguirlos.
+function cycleLabel(startDate, existingCycles){
+  const dt = new Date(startDate+'T12:00:00');
+  let label = `${FM[dt.getMonth()]} ${dt.getFullYear()}`;
+  if(existingCycles.some(c=>c.label===label)) label += ` (desde el ${dt.getDate()})`;
+  return label;
+}
 
 let currentCycleIdx = 0; // 0 = most recent, 1 = one before, etc.
 let transportOpen = false;
@@ -775,9 +810,7 @@ function getCurrentCycle(){
 function openFirstCycle(startDate){
   const cycles = getCycles();
   const id = uid();
-  const dt = new Date(startDate+'T12:00:00');
-  const FM = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  cycles.push({id, label:`${FM[dt.getMonth()]} ${dt.getFullYear()}`, startDate, open:true});
+  cycles.push({id, label:cycleLabel(startDate,cycles), startDate, open:true});
   saveCycles(cycles);
   currentCycleIdx = 0;
   // Copy recurrents from any previous cycles (shouldn't be any on first, but just in case)
@@ -806,10 +839,7 @@ function closeCycleAndOpenNew(cutDate, payDate){
   // Open new — empieza el día después del corte (en hora local)
   const newId = uid();
   const nextStart = addDays(cutDate,1);
-  const FM = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  // Label based on next month if cut is end of month
-  const labelDt = new Date(nextStart+'T12:00:00');
-  cycles.push({id:newId, label:`${FM[labelDt.getMonth()]} ${labelDt.getFullYear()}`, startDate:nextStart, open:true});
+  cycles.push({id:newId, label:cycleLabel(nextStart,cycles), startDate:nextStart, open:true});
   saveCycles(cycles);
   currentCycleIdx = 0;
   copyRecurrentsToCurrentCycle(newId);
@@ -915,7 +945,9 @@ function renderSummary(expenses, cycle){
 
   document.getElementById('sum-total').textContent = fmt(grandTotal);
   document.getElementById('sum-count').textContent = normal.length;
-  document.getElementById('sum-msi-count').textContent = activeMsi.length; // ← global, no del ciclo
+  // Cuenta las MSI que componen el total mostrado (compromiso vigente en ciclo
+  // abierto; pagos que cayeron en el ciclo si es uno cerrado) — coherente con la suma.
+  document.getElementById('sum-msi-count').textContent = activeMsi.length;
   document.getElementById('sum-recurrent-count').textContent = recurrents.length;
 
   const msiRow = document.getElementById('sum-msi-row');
@@ -926,6 +958,23 @@ function renderSummary(expenses, cycle){
   } else {
     msiRow.style.display='none';
   }
+
+  // Presupuesto por ciclo (opcional, Config → Presupuesto)
+  const budget = parseFloat(getConfig().cycleBudget)||0;
+  const budgetEl = document.getElementById('sum-budget');
+  if(budget>0){
+    budgetEl.style.display='';
+    const pct = Math.max(0,Math.min(100,(grandTotal/budget)*100));
+    const over = grandTotal>budget;
+    const fill = document.getElementById('sum-budget-fill');
+    fill.style.width = pct.toFixed(0)+'%';
+    fill.style.background = over?'var(--danger)':'var(--accent-text)';
+    document.getElementById('sum-budget-lbl').textContent = over
+      ? `Presupuesto ${fmt(budget)} · excedido por ${fmt(grandTotal-budget)}`
+      : `${pct.toFixed(0)}% del presupuesto (${fmt(budget)})`;
+  } else {
+    budgetEl.style.display='none';
+  }
 }
 
 // ══════════════════════════════════════════════════════
@@ -933,13 +982,15 @@ function renderSummary(expenses, cycle){
 // ══════════════════════════════════════════════════════
 function expenseHTML(e, cycleKey){
   const cats = getCats();
-  const cat = cats.find(c=>c.id===e.cat)||{icon:'📦',name:'Otro'};
+  const cat = cats.find(c=>c.id===e.cat)||{icon:'📦',name:'Sin categoría'};
   const displayAmt = e.isMsi ? e.amount/(e.msiMonths||12) : e.amount;
   const sub = e.isMsi ? `<div class="exp-amount-sub">${fmt(e.amount)} total · ${e.msiMonths}MSI</div>`:
               e.isRecurrent ? `<div class="exp-amount-sub">Fijo mensual</div>`:'';
   let cls = e.isMsi?'is-msi':e.isRecurrent?'is-recurrent':'';
 
-  const editCk = cycleKey ? `openEdit('${e.id}','${cycleKey}')` : '';
+  // Sin onclick inline con ids interpolados: se enlaza por data-* + delegación
+  // (los ids de un respaldo importado podrían contener comillas/código).
+  const editBtn = cycleKey ? `<div class="exp-actions"><button class="exp-act-btn" data-eid="${esc(e.id)}" data-cid="${esc(cycleKey)}">✏️ Editar</button></div>` : '';
 
   return`<div class="expense-item ${cls}">
     <div class="exp-icon">${e.isMsi?'📅':esc(cat.icon)}</div>
@@ -951,7 +1002,7 @@ function expenseHTML(e, cycleKey){
         <span>· ${fmtDate(e.date)}</span>
       </div>
       ${e.note?`<div class="exp-note">${esc(e.note)}</div>`:''}
-      ${editCk?`<div class="exp-actions"><button class="exp-act-btn" onclick="${editCk}">✏️ Editar</button></div>`:''}
+      ${editBtn}
     </div>
     <div class="exp-right">
       <div class="exp-amount">${fmt(displayAmt)}${e.isMsi?'<span style="font-size:10px;font-weight:400;opacity:.7">/mes</span>':''}</div>
@@ -959,6 +1010,12 @@ function expenseHTML(e, cycleKey){
     </div>
   </div>`;
 }
+
+// Delegación: un solo listener para todos los botones "Editar" de la lista.
+document.getElementById('main-scroll').addEventListener('click',e=>{
+  const btn = e.target.closest('.exp-act-btn[data-eid]');
+  if(btn) openEdit(btn.dataset.eid, btn.dataset.cid);
+});
 
 // ══════════════════════════════════════════════════════
 //  RENDER TABS
@@ -991,10 +1048,15 @@ function renderTabs(){
   const cats = getCats();
   const totals={};
   expenses.filter(e=>!e.isMsi).forEach(e=>{totals[e.cat]=(totals[e.cat]||0)+e.amount;});
-  const maxAmt=Math.max(...Object.values(totals),1);
-  const activeCats=cats.filter(c=>totals[c.id]);
-  catEl.innerHTML=!activeCats.length?`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos en este ciclo.</p></div>`:
-    `<div class="cat-grid">${activeCats.sort((a,b)=>(totals[b.id]||0)-(totals[a.id]||0)).map(c=>`<div class="cat-card"><div class="cat-icon">${esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(totals[c.id]||0)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round(((totals[c.id]||0)/maxAmt)*100)}%"></div></div></div>`).join('')}</div>`;
+  // Los gastos cuya categoría fue eliminada no deben "desaparecer" de los totales:
+  // se agrupan en una tarjeta "Sin categoría" para que las vistas sigan cuadrando.
+  const catIds=new Set(cats.map(c=>c.id));
+  const cards=cats.filter(c=>totals[c.id]).map(c=>({icon:c.icon,name:c.name,amt:totals[c.id]}));
+  const orphanTotal=Object.keys(totals).filter(k=>!catIds.has(k)).reduce((s,k)=>s+totals[k],0);
+  if(orphanTotal>0)cards.push({icon:'📦',name:'Sin categoría',amt:orphanTotal});
+  const maxAmt=Math.max(...cards.map(c=>c.amt),1);
+  catEl.innerHTML=!cards.length?`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos en este ciclo.</p></div>`:
+    `<div class="cat-grid">${cards.sort((a,b)=>b.amt-a.amt).map(c=>`<div class="cat-card"><div class="cat-icon">${esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(c.amt)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((c.amt/maxAmt)*100)}%"></div></div></div>`).join('')}</div>`;
 
   // RECURRENTES (respeta la búsqueda)
   const recEl = document.getElementById('tab-recurrentes');
@@ -1068,7 +1130,7 @@ function renderMSI(){
       <div class="msi-prog-wrap"><div class="msi-prog-bar" style="width:0%" data-pct="${pct}"></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;">
         <span style="font-size:12px;color:var(--muted);">${paid} de ${m.months} pagados${done?'':' · 🔄 auto'}${liqDate?'<br><span style="font-size:11px;">'+liqDate+'</span>':''}</span>
-        <button class="exp-act-btn" onclick="openEditMSI('${m.id}')" style="flex-shrink:0;">✏️ Editar</button>
+        <button class="exp-act-btn" data-msi-edit="${esc(m.id)}" style="flex-shrink:0;">✏️ Editar</button>
       </div>
     </div>`;
   }).join('');
@@ -1076,6 +1138,12 @@ function renderMSI(){
     document.querySelectorAll('#msi-list .msi-prog-bar[data-pct]').forEach(b=>{b.style.width=b.dataset.pct+'%';});
   }));
 }
+
+// Delegación para los botones "Editar" de la pantalla A meses (sin onclick inline).
+document.getElementById('msi-list').addEventListener('click',e=>{
+  const btn = e.target.closest('[data-msi-edit]');
+  if(btn) openEditMSI(btn.dataset.msiEdit);
+});
 
 function openEditMSI(id){
   const m=getMSI().find(x=>x.id===id);if(!m)return;
@@ -1105,6 +1173,10 @@ function setMsiMode(on, lock=false){
   sw.classList.toggle('on',on);
   document.getElementById('msi-toggle-row').setAttribute('aria-checked',on?'true':'false');
   document.getElementById('msi-fields-box').classList.toggle('open',on);
+  // La caja se oculta con max-height:0, no con display:none — se deshabilitan los
+  // campos para que Tab no meta el foco a controles invisibles.
+  document.getElementById('inp-msi-months').disabled=!on;
+  document.getElementById('inp-msi-paid').disabled=!on;
   document.getElementById('inp-amount-lbl').textContent=on?'Monto total ($)':'Monto ($)';
   if(!on)document.getElementById('msi-preview-box').classList.remove('open');
   else updateMsiPreview();
@@ -1131,7 +1203,7 @@ function buildCatPills(){
   const cats=getCats();
   const el=document.getElementById('cat-pills');
   if(!selectedCat&&cats.length)selectedCat=cats[0].id;
-  el.innerHTML=cats.map(c=>`<button class="cpill${c.id===selectedCat?' sel':''}" data-cat="${c.id}">${esc(c.icon)} ${esc(c.name)}</button>`).join('');
+  el.innerHTML=cats.map(c=>`<button class="cpill${c.id===selectedCat?' sel':''}" data-cat="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)}</button>`).join('');
   el.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{selectedCat=p.dataset.cat;el.querySelectorAll('.cpill').forEach(x=>x.classList.remove('sel'));p.classList.add('sel');}));
 }
 
@@ -1257,8 +1329,12 @@ document.getElementById('modal-save').addEventListener('click',()=>{
   }
 
   closeModal('modal-add');
+  // Un gasto nuevo siempre va al ciclo más reciente; si se estaba viendo un ciclo
+  // pasado, saltamos a él para que el gasto no "desaparezca" de la vista.
+  const jumped = !editingExpId && currentCycleIdx>0;
+  if(jumped) currentCycleIdx=0;
   renderAll();
-  showToast(editingExpId?'✏️ Gasto actualizado':'💾 Gasto guardado');
+  showToast(editingExpId?'✏️ Gasto actualizado':(jumped?'💾 Guardado en el ciclo actual':'💾 Gasto guardado'));
 });
 
 // Actualiza/elimina el gasto MSI guardado dentro de su ciclo (vinculado por linkedExpId).
@@ -1366,16 +1442,24 @@ function registerTransport(t){
 function renderCatManager(){
   const cats=getCats();
   const el=document.getElementById('cat-manage-list');
+  // data-* + listeners en vez de onclick inline con ids interpolados (los ids de
+  // un respaldo importado podrían contener comillas/código).
   el.innerHTML=cats.map((c,i)=>`
     <div class="cat-manage-item" draggable="false">
       <div class="cat-manage-icon">${esc(c.icon)}</div>
       <div class="cat-manage-name">${esc(c.name)}</div>
       <div class="cat-manage-actions">
-        ${i>0?`<button class="cat-icon-edit" onclick="moveCat('${c.id}',-1)" aria-label="Subir ${esc(c.name)}">⬆️</button>`:''}
-        ${i<cats.length-1?`<button class="cat-icon-edit" onclick="moveCat('${c.id}',1)" aria-label="Bajar ${esc(c.name)}">⬇️</button>`:''}
-        <button class="cat-icon-edit" onclick="openEditCat('${c.id}')" aria-label="Editar ${esc(c.name)}">✏️</button>
+        ${i>0?`<button class="cat-icon-edit" data-act="up" data-id="${esc(c.id)}" aria-label="Subir ${esc(c.name)}">⬆️</button>`:''}
+        ${i<cats.length-1?`<button class="cat-icon-edit" data-act="down" data-id="${esc(c.id)}" aria-label="Bajar ${esc(c.name)}">⬇️</button>`:''}
+        <button class="cat-icon-edit" data-act="edit" data-id="${esc(c.id)}" aria-label="Editar ${esc(c.name)}">✏️</button>
       </div>
     </div>`).join('');
+  el.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.id;
+    if(b.dataset.act==='up')moveCat(id,-1);
+    else if(b.dataset.act==='down')moveCat(id,1);
+    else openEditCat(id);
+  }));
 }
 
 function moveCat(id,dir){
@@ -1447,13 +1531,14 @@ function renderTransportConfig(){
     <div class="cat-manage-item">
       <div class="cat-manage-icon">${esc(t.icon||'🚇')}</div>
       <div class="cat-manage-name" style="flex:1;">${esc(t.name)} <span style="color:var(--accent);font-weight:600;">${fmt(t.cost)}</span></div>
-      <button class="cat-icon-edit" onclick="openEditTransport('${t.id}')" aria-label="Editar ${esc(t.name)}">✏️</button>
+      <button class="cat-icon-edit" data-tr-edit="${esc(t.id)}" aria-label="Editar ${esc(t.name)}">✏️</button>
     </div>`).join('');
+  el.querySelectorAll('[data-tr-edit]').forEach(b=>b.addEventListener('click',()=>openEditTransport(b.dataset.trEdit)));
 }
 
 function buildTransportCatSelect(){
   const cats=getCats();
-  document.getElementById('tr-inp-cat').innerHTML=cats.map(c=>`<option value="${c.id}">${esc(c.icon)} ${esc(c.name)}</option>`).join('');
+  document.getElementById('tr-inp-cat').innerHTML=cats.map(c=>`<option value="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)}</option>`).join('');
 }
 
 document.getElementById('cfg-add-transport').addEventListener('click',()=>{
@@ -1602,7 +1687,10 @@ document.getElementById('export-confirm').addEventListener('click',()=>{
         e.isRecurrent?'Sí':'No',e.note||'']);
     });
   });
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  // Anti-inyección de fórmulas: un texto que empiece con =, +, - o @ se interpreta
+  // como fórmula al abrir el CSV en Excel; se antepone ' (los montos empiezan con
+  // dígito, así que no se ven afectados).
+  const csv=rows.map(r=>r.map(v=>{let s=String(v);if(/^[=+\-@]/.test(s))s="'"+s;return `"${s.replace(/"/g,'""')}"`;}).join(',')).join('\n');
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`misgastos_${today()}.csv`;
@@ -1626,6 +1714,7 @@ document.getElementById('cfg-export-json').addEventListener('click',()=>{
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`misgastos_respaldo_${today()}.json`;
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  saveConfig({...getConfig(),lastBackupAt:today()}); // para el recordatorio de respaldo
   showToast('📦 Respaldo descargado');
 });
 
@@ -1638,7 +1727,15 @@ document.getElementById('cfg-import-file').addEventListener('change',function(){
   reader.onload=ev=>{
     try{
       const b=JSON.parse(ev.target.result);
-      if(!b.version){showToast('⚠️ Archivo no válido');return;}
+      // Validar la estructura ANTES de borrar los datos actuales: un archivo con
+      // formas incorrectas (cats como objeto, gastos como string…) rompería la
+      // app en silencio después de haber destruido lo que había.
+      const isArr=Array.isArray;
+      const valid = b && typeof b==='object' && b.version
+        && (!b.cats||isArr(b.cats)) && (!b.msi||isArr(b.msi))
+        && (!b.transport||isArr(b.transport)) && (!b.cycles||isArr(b.cycles))
+        && (!b.expenses||(typeof b.expenses==='object'&&!isArr(b.expenses)&&Object.values(b.expenses).every(isArr)));
+      if(!valid){showToast('⚠️ Archivo no válido');return;}
       const toDel=[];
       for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
       toDel.forEach(k=>localStorage.removeItem(k));
@@ -1680,6 +1777,14 @@ function applyAccent(color){
 }
 
 // Two-step destructive confirmation — avoids native confirm() dialogs
+function disarmDestructive(btn){
+  if(btn&&btn._armed){
+    clearTimeout(btn._armTimer);
+    btn._armed=false;
+    btn.textContent=btn._origText;
+    btn.classList.remove('btn-armed');
+  }
+}
 function armDestructive(btn, onConfirm){
   if(btn._armed){
     clearTimeout(btn._armTimer);
@@ -1713,6 +1818,24 @@ document.getElementById('cfg-save-card').addEventListener('click',()=>{
 });
 
 // ══════════════════════════════════════════════════════
+//  PRESUPUESTO POR CICLO
+// ══════════════════════════════════════════════════════
+document.getElementById('cfg-save-budget').addEventListener('click',()=>{
+  const v=parseFloat(document.getElementById('cfg-budget').value);
+  const cfg=getConfig();
+  if(v>0){
+    saveConfig({...cfg,cycleBudget:v});
+    showToast('✅ Presupuesto guardado');
+  } else {
+    delete cfg.cycleBudget;
+    saveConfig(cfg);
+    document.getElementById('cfg-budget').value='';
+    showToast('Presupuesto desactivado');
+  }
+  renderAll();
+});
+
+// ══════════════════════════════════════════════════════
 //  SEARCH
 // ══════════════════════════════════════════════════════
 document.getElementById('search-input').addEventListener('input',function(){
@@ -1740,21 +1863,52 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
 //  SCROLL COLLAPSE
 // ══════════════════════════════════════════════════════
 // La tarjeta del total (#sticky-top) está en el flujo, no es position:fixed/sticky.
-// Al colapsar encoge ~80px y, como la lista es flex:1, ese alto se lo queda la lista
-// (clientHeight crece → maxScroll baja). Si estás hasta abajo, el navegador recorta
-// el scrollTop y dispara un 'scroll' con delta negativo que antes se leía como "subir"
-// → expandía → re-colapsaba = parpadeo infinito. La solución: en el fondo forzamos
-// colapsado y NO alternamos, así el evento del reajuste se ignora.
+// Al colapsar encoge ~100-130px y, como la lista es flex:1, ese alto se lo queda la
+// lista (clientHeight crece → maxScroll baja). Dos trampas derivadas de eso:
+//  1) En el fondo, el navegador recorta scrollTop y dispara un 'scroll' con delta
+//     negativo que se leía como "subir" → expandía → re-colapsaba = parpadeo.
+//     Solución: en el fondo, colapsado fijo sin alternar.
+//  2) Con contenido corto (p. ej. pestaña Categorías), colapsar elimina TODO el
+//     área de scroll: scrollTop se recorta a 0 y la regla "sin scroll → expandir"
+//     regresaba al usuario forzado al tope en bucle. Solución: medir cuánto alto
+//     libera el colapso y NO colapsar si después no quedaría scroll.
 (function setupScrollCollapse(){
   const scroller = document.getElementById('main-scroll');
   const stickyTop = document.getElementById('sticky-top');
   let collapsed = false;
   let lastY = 0;
+  let cachedGain = 0, gainMeasuredAt = -1;
 
   function setCollapsed(v){
     if(v===collapsed)return;
     collapsed = v;
     stickyTop.classList.toggle('collapsed', v);
+  }
+
+  // Mide cuántos px de alto gana la lista al colapsar la tarjeta. Se hace con las
+  // transiciones desactivadas y se revierte en el mismo frame: no llega a pintarse
+  // ni dispara animaciones. Se cachea para no forzar reflow en cada evento de scroll.
+  function collapseGain(){
+    if(collapsed) return cachedGain; // solo puede medirse desde el estado expandido
+    const now = performance.now();
+    if(gainMeasuredAt >= 0 && now - gainMeasuredAt < 800) return cachedGain;
+    const st = document.createElement('style');
+    st.textContent = '#sticky-top,#sticky-top *{transition:none!important;}';
+    document.head.appendChild(st);
+    const before = scroller.clientHeight;
+    stickyTop.classList.add('collapsed');
+    const after = scroller.clientHeight;   // fuerza reflow en estado colapsado
+    stickyTop.classList.remove('collapsed');
+    void scroller.clientHeight;            // reflow de vuelta antes de reactivar transiciones
+    document.head.removeChild(st);
+    cachedGain = after - before;
+    gainMeasuredAt = now;
+    return cachedGain;
+  }
+
+  // ¿Seguirá habiendo scroll de sobra después de colapsar?
+  function canCollapse(maxScroll){
+    return collapsed || (maxScroll - collapseGain() > 24);
   }
 
   scroller.addEventListener('scroll', function(){
@@ -1768,7 +1922,7 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
       return;
     }
     if(maxScroll - y <= 2){          // EN EL FONDO → colapsado fijo, sin alternar
-      setCollapsed(true);            // (ignora el delta negativo del reajuste = sin parpadeo)
+      if(canCollapse(maxScroll)) setCollapsed(true); // (salvo que colapsar dejara sin scroll)
       return;
     }
     if(y <= 4){                      // en el tope → expandido
@@ -1776,7 +1930,7 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
       return;
     }
     // Zona intermedia: alternar por intención de scroll
-    if(!collapsed && delta > 4)      setCollapsed(true);
+    if(!collapsed && delta > 4 && canCollapse(maxScroll)) setCollapsed(true);
     else if(collapsed && delta < -4) setCollapsed(false);
   }, {passive:true});
 })();
@@ -1853,21 +2007,20 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     finalizeTimer = setTimeout(finalizeToAnchor, 480); // respaldo si no dispara transitionend
   }
 
-  function onTouchStart(e){
-    if(e.touches.length !== 1) return;
-    const t = e.touches[0];
+  // Lógica compartida touch + mouse (la física de la burbuja es la misma).
+  function startDrag(x, y){
     // Si venía deslizándose, lo "atrapamos" donde esté en ese instante
     if(finalizeTimer){clearTimeout(finalizeTimer);finalizeTimer=null;}
     fab.removeEventListener('transitionend', finalizeToAnchor);
     fab.classList.remove('snapping');
     const rect = fab.getBoundingClientRect();
-    dragStartX = t.clientX;
-    dragStartY = t.clientY;
+    dragStartX = x;
+    dragStartY = y;
     fabStartX = rect.left;
     fabStartY = rect.top;
     isDragging = true;
     moved = false;
-    vx = vy = 0; lastT = performance.now(); lastX = t.clientX; lastY = t.clientY;
+    vx = vy = 0; lastT = performance.now(); lastX = x; lastY = y;
     btn.classList.add('dragging');
     // Posicionamiento por left/top mientras se arrastra
     fab.style.left = rect.left + 'px';
@@ -1876,30 +2029,30 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     fab.style.bottom = 'auto';
   }
 
-  function onTouchMove(e){
-    if(!isDragging || e.touches.length !== 1) return;
-    const t = e.touches[0];
-    const dx = t.clientX - dragStartX;
-    const dy = t.clientY - dragStartY;
+  // Devuelve true cuando el gesto ya se considera arrastre (para preventDefault)
+  function moveDrag(x, y){
+    const dx = x - dragStartX;
+    const dy = y - dragStartY;
     if(Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
-    if(!moved) return;
-    e.preventDefault();
+    if(!moved) return false;
     // Velocidad instantánea (px/ms) con suavizado, para la inercia al soltar
     const now = performance.now();
     const dt = now - lastT;
     if(dt > 0){
-      vx = 0.6*((t.clientX - lastX)/dt) + 0.4*vx;
-      vy = 0.6*((t.clientY - lastY)/dt) + 0.4*vy;
-      lastT = now; lastX = t.clientX; lastY = t.clientY;
+      vx = 0.6*((x - lastX)/dt) + 0.4*vx;
+      vy = 0.6*((y - lastY)/dt) + 0.4*vy;
+      lastT = now; lastX = x; lastY = y;
     }
     const vw = window.innerWidth, vh = window.innerHeight;
     const newLeft = Math.max(4, Math.min(vw - fab.offsetWidth - 4, fabStartX + dx));
     const newTop  = Math.max(4, Math.min(vh - fab.offsetHeight - 4, fabStartY + dy));
     fab.style.left = newLeft + 'px';
     fab.style.top  = newTop  + 'px';
+    return true;
   }
 
-  function onTouchEnd(){
+  let suppressClick = false;
+  function endDrag(){
     if(!isDragging) return;
     isDragging = false;
     btn.classList.remove('dragging');
@@ -1908,14 +2061,38 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
       transportOpen = false;
       const sub = document.getElementById('transport-sub-btns');
       sub.classList.add('hidden'); sub.classList.remove('visible');
+      // Con mouse, el click llega justo después del mouseup: se suprime ese
+      // click fantasma para que arrastrar no abra el menú. (En touch el
+      // preventDefault del touchmove ya lo evita; el flag se limpia al instante.)
+      suppressClick = true;
+      setTimeout(()=>{suppressClick=false;},0);
     }
     // Si no se movió → lo maneja el click handler como un toque normal
     moved = false;
   }
 
-  btn.addEventListener('touchstart', onTouchStart, {passive:true});
-  document.addEventListener('touchmove', onTouchMove, {passive:false});
-  document.addEventListener('touchend', onTouchEnd, {passive:true});
+  // — touch —
+  btn.addEventListener('touchstart', e=>{
+    if(e.touches.length !== 1) return;
+    startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(!isDragging || e.touches.length !== 1) return;
+    if(moveDrag(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault();
+  }, {passive:false});
+  document.addEventListener('touchend', endDrag, {passive:true});
+
+  // — mouse (escritorio) —
+  btn.addEventListener('mousedown', e=>{
+    if(e.button !== 0) return;
+    e.preventDefault(); // evita selección de texto al arrastrar
+    startDrag(e.clientX, e.clientY);
+  });
+  document.addEventListener('mousemove', e=>{ if(isDragging) moveDrag(e.clientX, e.clientY); });
+  document.addEventListener('mouseup', endDrag);
+  btn.addEventListener('click', e=>{
+    if(suppressClick){ e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true);
 })();
 
 // ══════════════════════════════════════════════════════
@@ -1929,6 +2106,7 @@ function showScreen(name){
   if(name==='config'){renderConfigCycleStatus();renderCatManager();renderTransportConfig();
     const cfg=getConfig();
     if(cfg.cardName)document.getElementById('cfg-cardname').value=cfg.cardName;
+    document.getElementById('cfg-budget').value=cfg.cycleBudget||'';
   }
   // Hide/show transport FAB
   document.getElementById('transport-fab').style.display=(name==='main'&&getTransport().length)?'flex':'none';
@@ -1984,6 +2162,9 @@ function closeModal(id){
   const modal=overlay.querySelector('.modal');
   overlay.classList.remove('open');
   releaseFocus(modal);
+  // Desarmar cualquier botón destructivo que quedó "armado": si no, al reabrir el
+  // modal con otro elemento en <3s, un solo toque ejecutaría la acción sin confirmar.
+  overlay.querySelectorAll('.btn-armed').forEach(disarmDestructive);
 }
 
 // Trap focus when a modal opens (via transitionend)
@@ -2052,6 +2233,8 @@ function showToast(msg){
   if(accent==='#ffffff'||accent==='#ffdb5a'){accent='#c8f55a';saveConfig({...cfg,accentColor:accent});}
   applyAccent(accent);
 
+  document.getElementById('app-version-lbl').textContent=`MisGastos · Versión ${APP_VERSION}`;
+
   // ── Migración: MSI antiguas usaban paidMonths manual.
   // Lo convertimos a paidBaseline congelado para que el conteo automático continúe.
   (function migrateMSI(){
@@ -2076,6 +2259,27 @@ function showToast(msg){
 
   renderAll();
   renderTransportFab();
+
+  // ── Recordatorio de respaldo ──
+  // Los datos viven solo en localStorage; si el último respaldo tiene más de 30
+  // días (o nunca se hizo) se avisa, máximo una vez al día, y solo si ya hay datos.
+  (function backupReminder(){
+    if(!cycles.length) return; // sin ciclo aún: el aviso de primer ciclo tiene prioridad
+    const hasExpenses = cycles.some(c=>getExpenses(c.id).length);
+    if(!hasExpenses) return;
+    const c=getConfig();
+    const t=today();
+    if(c.lastBackupNudgeAt===t) return;
+    const days = c.lastBackupAt
+      ? Math.floor((new Date(t+'T12:00:00')-new Date(c.lastBackupAt+'T12:00:00'))/86400000)
+      : Infinity;
+    if(days>=30){
+      setTimeout(()=>showToast(c.lastBackupAt
+        ?'💾 Hace más de un mes de tu último respaldo — expórtalo en Config'
+        :'💾 Tip: exporta un respaldo de tus datos en Config'),1500);
+      saveConfig({...c,lastBackupNudgeAt:t});
+    }
+  })();
 
   // Registrar Service Worker para modo offline
   if('serviceWorker' in navigator){
