@@ -7,7 +7,7 @@
 //  - Resto de recursos locales (íconos, manifest): Cache First.
 // CACHE_NAME solo necesita subirse cuando cambia este archivo (sw.js) o la lista
 // de precache; el navegador detecta el sw.js nuevo automáticamente en cada visita.
-const CACHE_NAME = 'misgastos-v11';
+const CACHE_NAME = 'misgastos-v12';
 
 // Recursos que se cachean al instalar
 const PRECACHE = [

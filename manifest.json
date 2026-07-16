@@ -1,7 +1,7 @@
 {
   "name": "MisGastos",
   "short_name": "MisGastos",
-  "description": "Control personal de gastos de tarjeta de crédito",
+  "description": "Control personal de gastos: tarjeta, efectivo, débito y transferencias",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",

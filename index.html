@@ -320,6 +320,18 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 .cat-icon-edit{border:none;line-height:1;-webkit-appearance:none;}
 .color-swatch{border:none;padding:0;-webkit-appearance:none;}
 
+/* MUNDO MES (v16) */
+.world-switch{display:flex;margin:0 16px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;padding:3px;flex-shrink:0;}
+.world-btn{flex:1;padding:8px 0;border:none;background:transparent;border-radius:100px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:background .18s,color .18s;}
+.world-btn.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.10);}
+.world-btn:active{transform:scale(.97);}
+.method-chip{font-size:10px;padding:2px 8px;border-radius:100px;font-weight:500;}
+.m-efectivo{background:rgba(59,109,17,.14);color:var(--success);}
+.m-debito{background:rgba(24,95,165,.14);color:var(--info);}
+.m-transferencia{background:rgba(186,117,23,.16);color:var(--warn);}
+.est-badge{font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(24,95,165,.14);color:var(--info);font-weight:500;}
+.swatch-row-lbl{font-size:12px;color:var(--muted2);font-weight:600;margin-bottom:8px;}
+
 /* DARK MODE */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -330,6 +342,10 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   }
   .expense-item.is-msi{background:rgba(200,245,90,0.09);}
   .expense-item.is-recurrent{background:rgba(24,95,165,0.10);}
+  .m-efectivo{background:rgba(90,255,160,.14);color:#8fe6b0;}
+  .m-debito{background:rgba(90,180,255,.14);color:#8ec8ff;}
+  .m-transferencia{background:rgba(255,200,90,.16);color:#f0c780;}
+  .est-badge{background:rgba(90,180,255,.14);color:#8ec8ff;}
 }
 
 /* REDUCED MOTION */
@@ -364,6 +380,11 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   <div class="hdr">
     <div class="hdr-logo">mis<span>gastos</span></div>
   </div>
+  <!-- v16: selector de mundos TDC / Mes -->
+  <div class="world-switch">
+    <button class="world-btn active" id="wb-tdc">💳 Tarjeta</button>
+    <button class="world-btn" id="wb-mes">📅 Mes</button>
+  </div>
   <div class="sticky-top" id="sticky-top">
     <div class="summary">
       <div class="sum-label">Total estimado del ciclo</div>
@@ -395,28 +416,62 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
       </div>
     </div>
   </div>
+  <!-- v16: resumen del mundo Mes (oculto en mundo Tarjeta) -->
+  <div id="mes-top" style="display:none">
+    <div class="summary" style="margin:0 16px 10px;">
+      <div class="sum-label">Gastado en el mes (sin TDC)</div>
+      <div class="sum-total" id="msum-total">$0.00</div>
+      <div class="sum-row">
+        <div class="sum-item"><strong id="msum-fijos">$0.00</strong> fijos</div>
+        <div class="sum-item"><strong id="msum-vars">$0.00</strong> variables</div>
+        <div class="sum-item"><strong id="msum-count">0</strong> gastos</div>
+      </div>
+      <div class="sum-budget" id="msum-budget" style="display:none">
+        <div class="sum-budget-bar"><div class="sum-budget-fill" id="msum-budget-fill" style="width:0%"></div></div>
+        <div class="sum-budget-lbl" id="msum-budget-lbl"></div>
+      </div>
+    </div>
+    <div class="cycle-bar" style="cursor:default;">
+      <div class="cycle-compact">
+        <span class="cycle-name" id="mes-name">—</span>
+        <div class="cycle-arrows">
+          <button class="arr-btn" id="mbtn-prev" aria-label="Mes anterior">‹</button>
+          <button class="arr-btn" id="mbtn-next" aria-label="Mes siguiente">›</button>
+        </div>
+      </div>
+      <div class="cycle-progress-thin"><div class="cycle-progress-bar" id="mes-prog-bar" style="width:0%"></div></div>
+    </div>
+  </div>
   <div class="search-bar" id="search-bar-wrap">
     <span class="search-icon">🔍</span>
     <input type="text" id="search-input" placeholder="Buscar gasto...">
     <button class="search-clear" id="search-clear" style="display:none">✕</button>
   </div>
-  <div class="tabs">
+  <div class="tabs" id="tdc-tabs">
     <button class="tab active" data-tab="todos">Todos</button>
     <button class="tab" data-tab="categorias">Categorías</button>
     <button class="tab" data-tab="recurrentes">Fijos</button>
     <button class="tab" data-tab="msi-tab">A meses</button>
+  </div>
+  <div class="tabs" id="mes-tabs" style="display:none">
+    <button class="tab active" data-mtab="mgastos">Gastos</button>
+    <button class="tab" data-mtab="mcats">Categorías</button>
+    <button class="tab" data-mtab="mfijos">Fijos</button>
   </div>
   <div class="scroll" id="main-scroll">
     <div id="tab-todos"></div>
     <div id="tab-categorias" style="display:none"></div>
     <div id="tab-recurrentes" style="display:none"></div>
     <div id="tab-msi-tab" style="display:none"></div>
+    <div id="tab-mgastos" style="display:none"></div>
+    <div id="tab-mcats" style="display:none"></div>
+    <div id="tab-mfijos" style="display:none"></div>
     <div style="height:14px"></div>
   </div>
   <div class="fab-wrap">
     <button class="fab" id="fab-add">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-      Agregar gasto
+      <span id="fab-add-lbl">Agregar gasto</span>
     </button>
   </div>
   <div class="bnav">
@@ -492,16 +547,24 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 
     <!-- PRESUPUESTO -->
     <div class="cfg-section">
-      <div class="cfg-section-title">Presupuesto por ciclo</div>
-      <p class="cfg-desc">Opcional: define un tope de gasto por ciclo y verás tu avance en la tarjeta de Inicio. Guárdalo vacío para quitarlo.</p>
+      <div class="cfg-section-title">Presupuesto por ciclo (Tarjeta)</div>
+      <p class="cfg-desc">Opcional: define un tope de gasto por ciclo de tarjeta y verás tu avance en la tarjeta de Inicio. Guárdalo vacío para quitarlo.</p>
       <div class="field"><label>Monto ($)</label><div class="pfx-wrap"><input type="number" id="cfg-budget" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
       <button class="sec-btn" id="cfg-save-budget" style="width:100%;">Guardar presupuesto</button>
+    </div>
+
+    <!-- TOPE DEL MES (v16) -->
+    <div class="cfg-section">
+      <div class="cfg-section-title">Tope del mes (sin TDC)</div>
+      <p class="cfg-desc">Opcional: tope mensual para efectivo, débito y transferencias. Verás tu avance en el mundo Mes. Guárdalo vacío para quitarlo.</p>
+      <div class="field"><label>Monto ($)</label><div class="pfx-wrap"><input type="number" id="cfg-mbudget" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
+      <button class="sec-btn" id="cfg-save-mbudget" style="width:100%;">Guardar tope mensual</button>
     </div>
 
     <!-- TRANSPORTE RÁPIDO -->
     <div class="cfg-section">
       <div class="cfg-section-title">🚇 Transporte rápido</div>
-      <p class="cfg-desc">Configura hasta 5 atajos de transporte. Aparecen como botón flotante en Inicio para registrar con un toque.</p>
+      <p class="cfg-desc">Configura hasta 5 atajos de transporte. Aparecen como botón flotante en el mundo Mes y se registran en efectivo con un toque.</p>
       <div id="transport-config-list"></div>
       <button class="sec-btn" id="cfg-add-transport" style="width:100%;margin-top:4px;">+ Agregar atajo</button>
     </div>
@@ -517,13 +580,24 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
     <!-- COLOR -->
     <div class="cfg-section">
       <div class="cfg-section-title">Color de acento</div>
+      <p class="cfg-desc">Un color por mundo, para distinguir de un vistazo dónde estás.</p>
+      <div class="swatch-row-lbl">💳 Mundo Tarjeta</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <button class="color-swatch" data-world="tdc" data-color="#c8f55a" style="background:#c8f55a;" aria-label="Verde lima"></button>
+        <button class="color-swatch" data-world="tdc" data-color="#5ab4ff" style="background:#5ab4ff;" aria-label="Azul cielo"></button>
+        <button class="color-swatch" data-world="tdc" data-color="#ff7b5a" style="background:#ff7b5a;" aria-label="Coral"></button>
+        <button class="color-swatch" data-world="tdc" data-color="#b47bff" style="background:#b47bff;" aria-label="Violeta"></button>
+        <button class="color-swatch" data-world="tdc" data-color="#5affa0" style="background:#5affa0;" aria-label="Verde menta"></button>
+        <button class="color-swatch" data-world="tdc" data-color="#ff5ab4" style="background:#ff5ab4;" aria-label="Rosa"></button>
+      </div>
+      <div class="swatch-row-lbl">📅 Mundo Mes</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-        <button class="color-swatch" data-color="#c8f55a" style="background:#c8f55a;" aria-label="Verde lima"></button>
-        <button class="color-swatch" data-color="#5ab4ff" style="background:#5ab4ff;" aria-label="Azul cielo"></button>
-        <button class="color-swatch" data-color="#ff7b5a" style="background:#ff7b5a;" aria-label="Coral"></button>
-        <button class="color-swatch" data-color="#b47bff" style="background:#b47bff;" aria-label="Violeta"></button>
-        <button class="color-swatch" data-color="#5affa0" style="background:#5affa0;" aria-label="Verde menta"></button>
-        <button class="color-swatch" data-color="#ff5ab4" style="background:#ff5ab4;" aria-label="Rosa"></button>
+        <button class="color-swatch" data-world="mes" data-color="#c8f55a" style="background:#c8f55a;" aria-label="Verde lima"></button>
+        <button class="color-swatch" data-world="mes" data-color="#5ab4ff" style="background:#5ab4ff;" aria-label="Azul cielo"></button>
+        <button class="color-swatch" data-world="mes" data-color="#ff7b5a" style="background:#ff7b5a;" aria-label="Coral"></button>
+        <button class="color-swatch" data-world="mes" data-color="#b47bff" style="background:#b47bff;" aria-label="Violeta"></button>
+        <button class="color-swatch" data-world="mes" data-color="#5affa0" style="background:#5affa0;" aria-label="Verde menta"></button>
+        <button class="color-swatch" data-world="mes" data-color="#ff5ab4" style="background:#ff5ab4;" aria-label="Rosa"></button>
       </div>
     </div>
 
@@ -534,6 +608,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
       <button class="sec-btn" id="cfg-import-json-btn" style="width:100%;margin-bottom:8px;">📥 Importar respaldo (JSON)</button>
       <input type="file" id="cfg-import-file" accept=".json" style="display:none;">
       <button class="sec-btn" id="cfg-export-csv-btn" style="width:100%;margin-bottom:8px;">📊 Exportar a Excel (CSV)</button>
+      <button class="sec-btn" id="cfg-export-claude" style="width:100%;margin-bottom:8px;">🤖 Exportar resumen para Claude (MD)</button>
       <button class="sec-btn danger-btn" id="cfg-clear" style="width:100%;">🗑 Borrar todos los datos</button>
     </div>
 
@@ -573,7 +648,12 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;">
             <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">🚇 Transporte rápido</div>
-            <div style="font-size:13px;color:var(--muted2);line-height:1.6;">Configura atajos de transporte aquí en Config. Aparecen como un botón flotante 🚇 en Inicio. Un toque registra el gasto sin abrir ningún formulario. Puedes arrastrarlo a donde más te convenga en pantalla.</div>
+            <div style="font-size:13px;color:var(--muted2);line-height:1.6;">Configura atajos de transporte aquí en Config. Aparecen como un botón flotante 🚇 en el <b style="color:var(--text)">mundo Mes</b> y registran el gasto en efectivo con un toque, sin abrir formularios. Puedes arrastrarlo a donde más te convenga.</div>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">📅 Mundo Mes (sin TDC)</div>
+            <div style="font-size:13px;color:var(--muted2);line-height:1.6;">Arriba puedes cambiar entre <b style="color:var(--text)">💳 Tarjeta</b> (ciclos, corte, MSI) y <b style="color:var(--text)">📅 Mes</b>: tus gastos en efectivo, débito y transferencias, agrupados por mes calendario que <b style="color:var(--text)">rota solo</b>. Los fijos mensuales se precargan el día 1 con monto estimado editable, puedes ponerte un tope mensual en Config, y cada gasto puede moverse de mes (o de ciclo en TDC) con el botón 📆 Mover. Regla de oro: el pago de tu tarjeta y los retiros de cajero <b style="color:var(--text)">no se registran</b> — serían doble conteo.</div>
           </div>
 
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;">
@@ -712,6 +792,66 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   </div>
 </div>
 
+<!-- ══ MODAL: GASTO DEL MES (v16) ══ -->
+<div class="overlay" id="modal-madd">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-madd-title">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-madd-title">Gasto del mes</div>
+    <div class="field"><label>Descripción</label><input type="text" id="minp-name" placeholder="¿En qué gastaste?" autocomplete="off"></div>
+    <div class="field"><label>Monto ($)</label><div class="pfx-wrap"><input type="number" id="minp-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
+    <div class="field"><label>Método de pago</label><div class="cat-pills" id="mmethod-pills"></div></div>
+    <div class="field"><label>Categoría</label><div class="cat-pills" id="mcat-pills"></div></div>
+    <div class="field"><label>Fecha <span style="font-weight:400;color:var(--muted);font-size:11px;">(el gasto se guarda en el mes de esta fecha)</span></label><input type="date" id="minp-date"></div>
+    <div class="field" id="minp-fijo-row">
+      <label>¿Es un fijo mensual?</label>
+      <select id="minp-fijo"><option value="no">No, es un gasto único</option><option value="yes">Sí, se repite cada mes (crear plantilla)</option></select>
+    </div>
+    <div class="field">
+      <label>Nota (opcional)</label>
+      <textarea id="minp-note" rows="2" placeholder="Agrega un detalle o recordatorio..." style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif;padding:11px 13px;width:100%;resize:none;outline:none;"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="sec-btn" id="modal-madd-cancel">Cancelar</button>
+      <button class="save-btn" id="modal-madd-save" style="flex:2;margin-top:0;">Guardar</button>
+    </div>
+    <div id="madd-delete-row" style="display:none;margin-top:10px;">
+      <button class="sec-btn danger-btn" id="modal-madd-delete" style="width:100%;">Eliminar gasto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: FIJO MENSUAL (v16) ══ -->
+<div class="overlay" id="modal-mfijo">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-mfijo-title">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-mfijo-title">Nuevo fijo mensual</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Se precarga solo el día 1 de cada mes con este monto estimado. Si un mes varía, edita el gasto ya cargado.</p>
+    <div class="field"><label>Nombre</label><input type="text" id="finp-name" placeholder="ej. Diezmo" autocomplete="off"></div>
+    <div class="field"><label>Monto estimado ($)</label><div class="pfx-wrap"><input type="number" id="finp-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
+    <div class="field"><label>Método de pago</label><div class="cat-pills" id="fmethod-pills"></div></div>
+    <div class="field"><label>Categoría</label><div class="cat-pills" id="fcat-pills"></div></div>
+    <div class="btn-row">
+      <button class="sec-btn" id="modal-mfijo-cancel">Cancelar</button>
+      <button class="save-btn" id="modal-mfijo-save" style="flex:2;margin-top:0;">Guardar</button>
+    </div>
+    <div id="mfijo-delete-row" style="display:none;margin-top:10px;">
+      <button class="sec-btn danger-btn" id="modal-mfijo-delete" style="width:100%;">Eliminar fijo (los meses cargados no cambian)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: MOVER GASTO (v16) ══ -->
+<div class="overlay" id="modal-mover">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-mover-title">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-mover-title">📆 Mover gasto</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;" id="mover-sub"></p>
+    <div class="field"><label>Mover a</label><div class="cat-pills" id="mover-pills"></div></div>
+    <button class="save-btn" id="mover-confirm">Mover</button>
+    <button class="sec-btn" id="mover-cancel" style="width:100%;margin-top:8px;">Cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -719,7 +859,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 //  STORAGE HELPERS
 // ══════════════════════════════════════════════════════
 // Versión visible de la app = número de la última entrada en CAMBIOS.md (esquema unificado).
-const APP_VERSION = 15;
+const APP_VERSION = 16;
 
 const S = {
   get:(k,fb={})=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}},
@@ -756,6 +896,22 @@ const saveCycles = c=>S.set('mg_cycles',c);
 const getExpenses  = id=>S.get('mg_exp_'+id,[]);
 const saveExpenses = (id,d)=>S.set('mg_exp_'+id,d);
 
+// ── Mundo Mes (v16): gastos sin TDC por mes calendario mg_mexp_<YYYY-MM> ──
+const getMExpenses  = ym=>S.get('mg_mexp_'+ym,[]);
+const saveMExpenses = (ym,d)=>S.set('mg_mexp_'+ym,d);
+// Fijos mensuales (plantillas) y meses ya precargados
+const getMRec   = ()=>S.get('mg_mrec',[]);
+const saveMRec  = d=>S.set('mg_mrec',d);
+const getMSeeded  = ()=>S.get('mg_mseeded',[]);
+const saveMSeeded = d=>S.set('mg_mseeded',d);
+// Métodos de pago del mundo Mes
+const METHODS=[
+  {id:'efectivo',icon:'💵',name:'Efectivo'},
+  {id:'debito',icon:'🏦',name:'Débito'},
+  {id:'transferencia',icon:'📲',name:'Transferencia'},
+];
+const methodInfo=id=>METHODS.find(m=>m.id===id)||METHODS[0];
+
 // ══════════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════════
@@ -784,6 +940,13 @@ function cycleLabel(startDate, existingCycles){
   return label;
 }
 
+// ── helpers de mes calendario (v16) ──
+const ymOf = d => (d||'').slice(0,7);
+function ymShift(off){const n=new Date();n.setDate(1);n.setMonth(n.getMonth()-off);return `${n.getFullYear()}-${_pad(n.getMonth()+1)}`;}
+const currentYM = ()=>ymShift(0);
+function ymLabel(ym){const p=ym.split('-');return `${FM[parseInt(p[1])-1]} ${p[0]}`;}
+function daysInMonth(ym){const p=ym.split('-').map(Number);return new Date(p[0],p[1],0).getDate();}
+
 let currentCycleIdx = 0; // 0 = most recent, 1 = one before, etc.
 let transportOpen = false;
 let searchQuery = '';
@@ -792,6 +955,14 @@ let editingCatId = null;
 let editingTrId = null;
 let isMsiMode = false;
 let selectedCat = '';
+// ── estado del mundo Mes (v16) ──
+let currentWorld = 'tdc';       // 'tdc' | 'mes'
+let currentMonthOffset = 0;     // 0 = mes actual, 1 = anterior, ...
+let activeScreen = 'main';
+let mSelectedCat = '', mSelectedMethod = 'efectivo';
+let editingMExpId = null;       // id|YYYY-MM
+let editingFijoId = null;
+let moverCtx = null, moverTarget = null;
 
 // ══════════════════════════════════════════════════════
 //  CYCLES
@@ -931,13 +1102,18 @@ function renderSummary(expenses, cycle){
   if(!cycle || cycle.open){
     activeMsi = msiList.filter(m=>(m.months-effectivePaid(m))>0);
   } else {
+    // v16 FIX: antes la ventana era [inicio del ciclo → fecha de pago], pero la
+    // fecha de pago del ciclo ANTERIOR cae dentro de esa ventana (~20 días después
+    // de su corte), así que sus pagos MSI se atribuían a DOS ciclos y el total
+    // subía al cerrar. Ahora un pago pertenece a un ciclo solo si lo generó SU
+    // propia fecha de pago: cada mensualidad cuenta en exactamente un ciclo.
     const refDate = cycle.payDate || cycle.endDate || null;
-    const beforeStart = cycle.startDate ? addDays(cycle.startDate,-1) : null;
     activeMsi = msiList.filter(m=>{
+      if(!refDate) return false;
       if(m.startDate && cycle.endDate && m.startDate > cycle.endDate) return false; // comprada después del corte
       const through = effectivePaidAsOf(m, refDate);
-      const before  = effectivePaidAsOf(m, beforeStart);
-      return (through - before) > 0; // hubo un pago dentro de este ciclo
+      const before  = effectivePaidAsOf(m, addDays(refDate,-1));
+      return (through - before) > 0; // el pago de ESTE ciclo la incluyó
     });
   }
   msiMonthly = activeMsi.reduce((s,m)=>s+(m.totalAmount/m.months),0);
@@ -990,7 +1166,7 @@ function expenseHTML(e, cycleKey){
 
   // Sin onclick inline con ids interpolados: se enlaza por data-* + delegación
   // (los ids de un respaldo importado podrían contener comillas/código).
-  const editBtn = cycleKey ? `<div class="exp-actions"><button class="exp-act-btn" data-eid="${esc(e.id)}" data-cid="${esc(cycleKey)}">✏️ Editar</button></div>` : '';
+  const editBtn = cycleKey ? `<div class="exp-actions"><button class="exp-act-btn" data-eid="${esc(e.id)}" data-cid="${esc(cycleKey)}">✏️ Editar</button>${!e.isMsi?`<button class="exp-act-btn" data-move-tdc="${esc(e.id)}" data-cid="${esc(cycleKey)}">📆 Mover</button>`:''}</div>` : '';
 
   return`<div class="expense-item ${cls}">
     <div class="exp-icon">${e.isMsi?'📅':esc(cat.icon)}</div>
@@ -1011,10 +1187,16 @@ function expenseHTML(e, cycleKey){
   </div>`;
 }
 
-// Delegación: un solo listener para todos los botones "Editar" de la lista.
+// Delegación: un solo listener para todas las acciones de la lista (ambos mundos).
 document.getElementById('main-scroll').addEventListener('click',e=>{
-  const btn = e.target.closest('.exp-act-btn[data-eid]');
-  if(btn) openEdit(btn.dataset.eid, btn.dataset.cid);
+  if(e.target.closest('#btn-add-fijo')){openFijo(null);return;}
+  const btn = e.target.closest('.exp-act-btn');
+  if(!btn) return;
+  if(btn.dataset.moveTdc){openMover('tdc', btn.dataset.moveTdc, btn.dataset.cid);return;}
+  if(btn.dataset.moveMes){openMover('mes', btn.dataset.moveMes, btn.dataset.mym);return;}
+  if(btn.dataset.meid){openMEdit(btn.dataset.meid, btn.dataset.mym);return;}
+  if(btn.dataset.fijoEdit){openFijo(btn.dataset.fijoEdit);return;}
+  if(btn.dataset.eid) openEdit(btn.dataset.eid, btn.dataset.cid);
 });
 
 // ══════════════════════════════════════════════════════
@@ -1389,7 +1571,7 @@ function renderTransportFab(){
   const fab=document.getElementById('transport-fab');
   const subsEl=document.getElementById('transport-sub-btns');
   if(!list.length){fab.style.display='none';return;}
-  fab.style.display='flex';
+  updateTransportFabVis();
 
   if(list.length===1){
     // Single transport: main button registers directly
@@ -1422,18 +1604,19 @@ function toggleTransportMenu(){
 }
 
 function registerTransport(t){
-  const cycles=getVisibleCycles();
-  const cycle=cycles[0];
-  if(!cycle){showToast('⚠️ No hay ciclo activo');return;}
-  const expenses=getExpenses(cycle.id);
-  expenses.push({id:uid(),name:t.name,amount:t.cost,cat:t.cat||'transporte',
-    date:today(),isRecurrent:false,note:'',isMsi:false});
-  saveExpenses(cycle.id,expenses);
+  // v16: el transporte se paga en efectivo → se registra en el mundo Mes.
+  const ym=currentYM();
+  seedMonth(ym);
+  const list=getMExpenses(ym);
+  list.push({id:uid(),name:t.name,amount:t.cost,cat:t.cat||'transporte',
+    method:'efectivo',date:today(),note:'',isFijo:false});
+  saveMExpenses(ym,list);
   transportOpen=false;
   const sub=document.getElementById('transport-sub-btns');
   sub.classList.add('hidden');sub.classList.remove('visible');
-  renderAll();
-  showToast(`🚇 ${t.name} — ${fmt(t.cost)} registrado`);
+  if(currentMonthOffset!==0)currentMonthOffset=0;
+  renderMes();
+  showToast(`🚇 ${t.name} — ${fmt(t.cost)} en efectivo (mes)`);
 }
 
 // ══════════════════════════════════════════════════════
@@ -1704,11 +1887,13 @@ document.getElementById('export-cancel').addEventListener('click',()=>closeModal
 //  BACKUP / RESTORE
 // ══════════════════════════════════════════════════════
 document.getElementById('cfg-export-json').addEventListener('click',()=>{
-  const backup={version:4,exportedAt:new Date().toISOString(),config:getConfig(),
-    cats:getCats(),msi:getMSI(),transport:getTransport(),cycles:getCycles(),expenses:{}};
+  const backup={version:5,exportedAt:new Date().toISOString(),config:getConfig(),
+    cats:getCats(),msi:getMSI(),transport:getTransport(),cycles:getCycles(),
+    mrec:getMRec(),mseeded:getMSeeded(),expenses:{},mexpenses:{}};
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k&&k.startsWith('mg_exp_'))backup.expenses[k]=S.get(k,[]);
+    if(k&&k.startsWith('mg_mexp_'))backup.mexpenses[k]=S.get(k,[]);
   }
   const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -1734,7 +1919,9 @@ document.getElementById('cfg-import-file').addEventListener('change',function(){
       const valid = b && typeof b==='object' && b.version
         && (!b.cats||isArr(b.cats)) && (!b.msi||isArr(b.msi))
         && (!b.transport||isArr(b.transport)) && (!b.cycles||isArr(b.cycles))
-        && (!b.expenses||(typeof b.expenses==='object'&&!isArr(b.expenses)&&Object.values(b.expenses).every(isArr)));
+        && (!b.mrec||isArr(b.mrec)) && (!b.mseeded||isArr(b.mseeded))
+        && (!b.expenses||(typeof b.expenses==='object'&&!isArr(b.expenses)&&Object.values(b.expenses).every(isArr)))
+        && (!b.mexpenses||(typeof b.mexpenses==='object'&&!isArr(b.mexpenses)&&Object.values(b.mexpenses).every(isArr)));
       if(!valid){showToast('⚠️ Archivo no válido');return;}
       const toDel=[];
       for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
@@ -1745,9 +1932,14 @@ document.getElementById('cfg-import-file').addEventListener('change',function(){
       if(b.transport)saveTransport(b.transport);
       if(b.cycles)saveCycles(b.cycles);
       if(b.expenses)Object.entries(b.expenses).forEach(([k,v])=>S.set(k,v));
-      applyAccent(b.config?.accentColor||'#c8f55a');
-      currentCycleIdx=0;
-      renderAll();renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
+      if(b.mrec)saveMRec(b.mrec);
+      if(b.mseeded)saveMSeeded(b.mseeded);
+      if(b.mexpenses)Object.entries(b.mexpenses).forEach(([k,v])=>S.set(k,v));
+      migrateAccents();
+      currentCycleIdx=0;currentMonthOffset=0;
+      setWorld(getConfig().lastWorld==='mes'?'mes':'tdc');
+      refreshSwatches();
+      renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
       showToast('✅ Datos restaurados');
     }catch(e){showToast('⚠️ Error al leer el archivo');}
   };
@@ -1773,7 +1965,28 @@ function applyAccent(color){
   // los acentos muy claros que harían ilegible el texto blanco).
   document.documentElement.style.setProperty('--accent-text','#ffffff');
   document.documentElement.style.setProperty('--accent-text-muted','rgba(255,255,255,0.82)');
-  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('active-swatch',s.dataset.color===color));
+}
+// v16: acento independiente por mundo
+function applyWorldAccent(){
+  const cfg=getConfig();
+  applyAccent(currentWorld==='mes'?(cfg.accentMes||'#c8f55a'):(cfg.accentTdc||cfg.accentColor||'#c8f55a'));
+}
+function refreshSwatches(){
+  const cfg=getConfig();
+  document.querySelectorAll('.color-swatch').forEach(s=>{
+    const key=s.dataset.world==='mes'?'accentMes':'accentTdc';
+    s.classList.toggle('active-swatch',s.dataset.color===(cfg[key]||'#c8f55a'));
+  });
+}
+function migrateAccents(){
+  const cfg=getConfig();
+  let base=cfg.accentColor||'#c8f55a';
+  if(base==='#ffffff'||base==='#ffdb5a')base='#c8f55a';
+  let changed=false;
+  if(!cfg.accentTdc){cfg.accentTdc=base;changed=true;}
+  if(!cfg.accentMes){cfg.accentMes=base;changed=true;}
+  if(cfg.accentColor!==base){cfg.accentColor=base;changed=true;}
+  if(changed)saveConfig(cfg);
 }
 
 // Two-step destructive confirmation — avoids native confirm() dialogs
@@ -1805,8 +2018,10 @@ function armDestructive(btn, onConfirm){
   }
 }
 document.querySelectorAll('.color-swatch').forEach(s=>s.addEventListener('click',()=>{
-  applyAccent(s.dataset.color);
-  const cfg=getConfig();saveConfig({...cfg,accentColor:s.dataset.color});
+  const key=s.dataset.world==='mes'?'accentMes':'accentTdc';
+  saveConfig({...getConfig(),[key]:s.dataset.color});
+  refreshSwatches();
+  applyWorldAccent();
 }));
 
 // ══════════════════════════════════════════════════════
@@ -1835,19 +2050,35 @@ document.getElementById('cfg-save-budget').addEventListener('click',()=>{
   renderAll();
 });
 
+// v16: tope mensual del mundo Mes
+document.getElementById('cfg-save-mbudget').addEventListener('click',()=>{
+  const v=parseFloat(document.getElementById('cfg-mbudget').value);
+  const cfg=getConfig();
+  if(v>0){
+    saveConfig({...cfg,monthBudget:v});
+    showToast('✅ Tope mensual guardado');
+  } else {
+    delete cfg.monthBudget;
+    saveConfig(cfg);
+    document.getElementById('cfg-mbudget').value='';
+    showToast('Tope mensual desactivado');
+  }
+  renderAll();
+});
+
 // ══════════════════════════════════════════════════════
 //  SEARCH
 // ══════════════════════════════════════════════════════
 document.getElementById('search-input').addEventListener('input',function(){
   searchQuery=this.value;
   document.getElementById('search-clear').style.display=this.value?'':'none';
-  renderTabs();
+  renderAll();
 });
 document.getElementById('search-clear').addEventListener('click',()=>{
   document.getElementById('search-input').value='';
   searchQuery='';
   document.getElementById('search-clear').style.display='none';
-  renderTabs();
+  renderAll();
 });
 
 // ══════════════════════════════════════════════════════
@@ -2099,21 +2330,22 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
 //  NAV
 // ══════════════════════════════════════════════════════
 function showScreen(name){
+  activeScreen=name;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('scr-'+name).classList.add('active');
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===name));
   if(name==='msi')renderMSI();
-  if(name==='config'){renderConfigCycleStatus();renderCatManager();renderTransportConfig();
+  if(name==='config'){renderConfigCycleStatus();renderCatManager();renderTransportConfig();refreshSwatches();
     const cfg=getConfig();
     if(cfg.cardName)document.getElementById('cfg-cardname').value=cfg.cardName;
     document.getElementById('cfg-budget').value=cfg.cycleBudget||'';
+    document.getElementById('cfg-mbudget').value=cfg.monthBudget||'';
   }
-  // Hide/show transport FAB
-  document.getElementById('transport-fab').style.display=(name==='main'&&getTransport().length)?'flex':'none';
+  updateTransportFabVis();
 }
 
 document.querySelectorAll('.bnav-btn').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.nav)));
-document.getElementById('fab-add').addEventListener('click',openAdd);
+document.getElementById('fab-add').addEventListener('click',()=>{currentWorld==='mes'?openMAdd():openAdd();});
 document.getElementById('btn-prev').addEventListener('click',()=>{
   const cycles=getVisibleCycles();
   if(currentCycleIdx<cycles.length-1){currentCycleIdx++;renderAll();}
@@ -2123,14 +2355,30 @@ document.getElementById('btn-next').addEventListener('click',()=>{
   if(currentCycleIdx>0){currentCycleIdx--;renderAll();}
   else showToast('Este es el ciclo más reciente');
 });
-document.querySelectorAll('.tab').forEach(btn=>{
+document.querySelectorAll('#tdc-tabs .tab').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#tdc-tabs .tab').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    ['todos','categorias','recurrentes','msi-tab'].forEach(t=>{
-      document.getElementById('tab-'+t).style.display=btn.dataset.tab===t?'':'none';
-    });
+    syncTabVisibility();
   });
+});
+document.querySelectorAll('#mes-tabs .tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#mes-tabs .tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    syncTabVisibility();
+  });
+});
+// Selector de mundos + navegación de meses
+document.getElementById('wb-tdc').addEventListener('click',()=>setWorld('tdc'));
+document.getElementById('wb-mes').addEventListener('click',()=>setWorld('mes'));
+document.getElementById('mbtn-prev').addEventListener('click',()=>{
+  if(currentMonthOffset<24){currentMonthOffset++;renderMes();}
+  else showToast('Límite de historial alcanzado');
+});
+document.getElementById('mbtn-next').addEventListener('click',()=>{
+  if(currentMonthOffset>0){currentMonthOffset--;renderMes();}
+  else showToast('Este es el mes actual');
 });
 
 // ══════════════════════════════════════════════════════
@@ -2195,12 +2443,468 @@ document.getElementById('msi-toggle-row').addEventListener('keydown',e=>{
   if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('msi-toggle-row').click();}
 });
 
+
+// ══════════════════════════════════════════════════════
+//  MUNDO MES (v16) — gastos sin TDC: efectivo / débito / transferencia
+// ══════════════════════════════════════════════════════
+// Precarga los fijos mensuales el primer render de cada mes (solo el mes actual).
+function seedMonth(ym){
+  const seeded=getMSeeded();
+  if(seeded.includes(ym))return;
+  const rec=getMRec();
+  if(rec.length){
+    const list=getMExpenses(ym);
+    rec.forEach(r=>list.push({id:uid(),name:r.name,amount:r.amount,cat:r.cat,
+      method:r.method||'transferencia',date:ym+'-01',note:'',isFijo:true,fijoId:r.id}));
+    saveMExpenses(ym,list);
+  }
+  seeded.push(ym);
+  saveMSeeded(seeded);
+}
+
+function setWorld(w){
+  currentWorld=w;
+  const cfg=getConfig();
+  if(cfg.lastWorld!==w)saveConfig({...cfg,lastWorld:w});
+  document.getElementById('wb-tdc').classList.toggle('active',w==='tdc');
+  document.getElementById('wb-mes').classList.toggle('active',w==='mes');
+  document.getElementById('sticky-top').style.display=w==='tdc'?'':'none';
+  document.getElementById('mes-top').style.display=w==='mes'?'':'none';
+  document.getElementById('tdc-tabs').style.display=w==='tdc'?'flex':'none';
+  document.getElementById('mes-tabs').style.display=w==='mes'?'flex':'none';
+  document.getElementById('fab-add-lbl').textContent=w==='mes'?'Gasto del mes':'Agregar gasto';
+  syncTabVisibility();
+  applyWorldAccent();
+  updateTransportFabVis();
+  renderAll();
+}
+
+function syncTabVisibility(){
+  const tdcActive=document.querySelector('#tdc-tabs .tab.active')?.dataset.tab||'todos';
+  const mesActive=document.querySelector('#mes-tabs .tab.active')?.dataset.mtab||'mgastos';
+  ['todos','categorias','recurrentes','msi-tab'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=(currentWorld==='tdc'&&t===tdcActive)?'':'none';
+  });
+  ['mgastos','mcats','mfijos'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=(currentWorld==='mes'&&t===mesActive)?'':'none';
+  });
+  document.getElementById('main-scroll').scrollTop=0;
+}
+
+function updateTransportFabVis(){
+  document.getElementById('transport-fab').style.display=
+    (activeScreen==='main'&&currentWorld==='mes'&&getTransport().length)?'flex':'none';
+}
+
+function mExpenseHTML(e,ym){
+  const cats=getCats();
+  const cat=cats.find(c=>c.id===e.cat)||{icon:'📦',name:'Sin categoría'};
+  const m=methodInfo(e.method);
+  return`<div class="expense-item ${e.isFijo?'is-recurrent':''}">
+    <div class="exp-icon">${esc(cat.icon)}</div>
+    <div class="exp-info">
+      <div class="exp-name">${esc(e.name)}</div>
+      <div class="exp-meta">
+        <span class="method-chip m-${esc(e.method||'efectivo')}">${m.icon} ${m.name}</span>
+        <span>· ${esc(cat.name)}</span>
+        ${e.isFijo?'<span class="est-badge">Fijo · estimado</span>':''}
+        <span>· ${fmtDate(e.date)}</span>
+      </div>
+      ${e.note?`<div class="exp-note">${esc(e.note)}</div>`:''}
+      <div class="exp-actions">
+        <button class="exp-act-btn" data-meid="${esc(e.id)}" data-mym="${esc(ym)}">✏️ Editar</button>
+        <button class="exp-act-btn" data-move-mes="${esc(e.id)}" data-mym="${esc(ym)}">📆 Mover</button>
+      </div>
+    </div>
+    <div class="exp-right"><div class="exp-amount">${fmt(e.amount)}</div></div>
+  </div>`;
+}
+
+function renderMes(){
+  const ym=ymShift(currentMonthOffset);
+  if(currentMonthOffset===0)seedMonth(ym);
+  const all=getMExpenses(ym);
+  const total=all.reduce((s,e)=>s+e.amount,0);
+  const fijoT=all.filter(e=>e.isFijo).reduce((s,e)=>s+e.amount,0);
+  document.getElementById('msum-total').textContent=fmt(total);
+  document.getElementById('msum-fijos').textContent=fmt(fijoT);
+  document.getElementById('msum-vars').textContent=fmt(total-fijoT);
+  document.getElementById('msum-count').textContent=all.length;
+
+  // Tope mensual (Config → Tope del mes)
+  const budget=parseFloat(getConfig().monthBudget)||0;
+  const bEl=document.getElementById('msum-budget');
+  if(budget>0){
+    bEl.style.display='';
+    const pct=Math.max(0,Math.min(100,(total/budget)*100));
+    const over=total>budget;
+    const fill=document.getElementById('msum-budget-fill');
+    fill.style.width=pct.toFixed(0)+'%';
+    fill.style.background=over?'var(--danger)':'var(--accent-text)';
+    document.getElementById('msum-budget-lbl').textContent=over
+      ?`Tope ${fmt(budget)} · excedido por ${fmt(total-budget)}`
+      :`${pct.toFixed(0)}% del tope · quedan ${fmt(budget-total)}`;
+  } else bEl.style.display='none';
+
+  // Barra de mes — rota sola, sin cierre manual
+  document.getElementById('mes-name').innerHTML=ymLabel(ym)
+    +(currentMonthOffset===0?' &nbsp;<span class="cycle-open-badge">Rota solo</span>':'');
+  const dim=daysInMonth(ym);
+  const dayPct=currentMonthOffset===0?Math.min(100,(new Date().getDate()/dim)*100):100;
+  document.getElementById('mes-prog-bar').style.width=dayPct.toFixed(0)+'%';
+
+  // Lista de gastos (respeta la búsqueda)
+  const q=searchQuery.toLowerCase().trim();
+  const filtered=q?all.filter(e=>e.name.toLowerCase().includes(q)||(e.note||'').toLowerCase().includes(q)):all;
+  const gEl=document.getElementById('tab-mgastos');
+  if(!filtered.length){
+    gEl.innerHTML=`<div class="empty"><div class="empty-icon">${q?'🔍':'📅'}</div><p>${q?'Sin resultados para "'+esc(q)+'"':'Sin gastos en '+esc(ymLabel(ym))+'.<br>Toca el botón para agregar.'}</p></div>`;
+  } else {
+    const byDay={};
+    filtered.forEach(e=>{const d=e.date||'sin-fecha';(byDay[d]=byDay[d]||[]).push(e);});
+    gEl.innerHTML=Object.keys(byDay).sort((a,b)=>b.localeCompare(a)).map(day=>{
+      const lbl=day==='sin-fecha'?'Sin fecha':new Date(day+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'long'});
+      return`<div class="day-lbl">${lbl}</div>${byDay[day].slice().reverse().map(e=>mExpenseHTML(e,ym)).join('')}`;
+    }).join('');
+  }
+
+  // Categorías del mes
+  const cEl=document.getElementById('tab-mcats');
+  const cats=getCats();const totals={};
+  all.forEach(e=>{totals[e.cat]=(totals[e.cat]||0)+e.amount;});
+  const catIds=new Set(cats.map(c=>c.id));
+  const cards=cats.filter(c=>totals[c.id]).map(c=>({icon:c.icon,name:c.name,amt:totals[c.id]}));
+  const orphan=Object.keys(totals).filter(k=>!catIds.has(k)).reduce((s,k)=>s+totals[k],0);
+  if(orphan>0)cards.push({icon:'📦',name:'Sin categoría',amt:orphan});
+  const maxA=Math.max(...cards.map(c=>c.amt),1);
+  cEl.innerHTML=!cards.length?`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos este mes.</p></div>`:
+    `<div class="cat-grid">${cards.sort((a,b)=>b.amt-a.amt).map(c=>`<div class="cat-card"><div class="cat-icon">${esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(c.amt)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((c.amt/maxA)*100)}%"></div></div></div>`).join('')}</div>`;
+
+  // Fijos mensuales (plantillas)
+  const fEl=document.getElementById('tab-mfijos');
+  const rec=getMRec();
+  fEl.innerHTML=`<div class="info-card" style="margin-top:12px;">Los fijos se <b>precargan solos el día 1</b> con su monto estimado. Si el monto real varía, edita el gasto ya cargado en la pestaña Gastos.</div>`
+    +(rec.length?rec.map(r=>{
+      const cat=cats.find(c=>c.id===r.cat)||{icon:'📦'};
+      const m=methodInfo(r.method);
+      return`<div class="expense-item is-recurrent">
+        <div class="exp-icon">${esc(cat.icon)}</div>
+        <div class="exp-info"><div class="exp-name">${esc(r.name)}</div>
+        <div class="exp-meta">Estimado ${fmt(r.amount)} · ${m.icon} ${m.name} · día 1</div></div>
+        <div class="exp-right"><button class="exp-act-btn" data-fijo-edit="${esc(r.id)}">✏️ Editar</button></div>
+      </div>`;
+    }).join(''):`<div class="empty"><div class="empty-icon">🔄</div><p>Sin fijos mensuales configurados.</p></div>`)
+    +`<button class="sec-btn" id="btn-add-fijo" style="width:100%;margin-top:8px;">+ Agregar fijo mensual</button>`;
+}
+
+// ── pills de método y categoría del mundo Mes ──
+function buildMethodPills(containerId, sel, onSel){
+  const el=document.getElementById(containerId);
+  el.innerHTML=METHODS.map(m=>`<button class="cpill${m.id===sel?' sel':''}" data-m="${m.id}">${m.icon} ${m.name}</button>`).join('');
+  el.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{
+    onSel(p.dataset.m);
+    el.querySelectorAll('.cpill').forEach(x=>x.classList.remove('sel'));
+    p.classList.add('sel');
+  }));
+}
+function buildMCatPills(containerId){
+  const cats=getCats();
+  if(!mSelectedCat&&cats.length)mSelectedCat=cats[0].id;
+  const el=document.getElementById(containerId);
+  el.innerHTML=cats.map(c=>`<button class="cpill${c.id===mSelectedCat?' sel':''}" data-cat="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)}</button>`).join('');
+  el.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{
+    mSelectedCat=p.dataset.cat;
+    el.querySelectorAll('.cpill').forEach(x=>x.classList.remove('sel'));
+    p.classList.add('sel');
+  }));
+}
+
+// ── agregar / editar gasto del mes ──
+function openMAdd(){
+  editingMExpId=null;
+  mSelectedMethod='efectivo';
+  const cats=getCats();mSelectedCat=cats.length?cats[0].id:'';
+  document.getElementById('modal-madd-title').textContent='Gasto del mes';
+  document.getElementById('minp-name').value='';
+  document.getElementById('minp-amount').value='';
+  document.getElementById('minp-note').value='';
+  const ym=ymShift(currentMonthOffset);
+  document.getElementById('minp-date').value=currentMonthOffset===0?today():ym+'-01';
+  document.getElementById('minp-fijo').value='no';
+  document.getElementById('minp-fijo-row').style.display='';
+  document.getElementById('madd-delete-row').style.display='none';
+  buildMethodPills('mmethod-pills',mSelectedMethod,v=>mSelectedMethod=v);
+  buildMCatPills('mcat-pills');
+  document.getElementById('modal-madd').classList.add('open');
+  setTimeout(()=>document.getElementById('minp-name').focus(),350);
+}
+
+function openMEdit(id,ym){
+  const list=getMExpenses(ym);
+  const e=list.find(x=>x.id===id);if(!e)return;
+  editingMExpId=id+'|'+ym;
+  mSelectedMethod=e.method||'efectivo';
+  mSelectedCat=e.cat||getCats()[0]?.id||'';
+  document.getElementById('modal-madd-title').textContent='Editar gasto del mes';
+  document.getElementById('minp-name').value=e.name;
+  document.getElementById('minp-amount').value=e.amount;
+  document.getElementById('minp-date').value=e.date||'';
+  document.getElementById('minp-note').value=e.note||'';
+  document.getElementById('minp-fijo').value='no';
+  document.getElementById('minp-fijo-row').style.display='none'; // la plantilla del fijo se edita en la pestaña Fijos
+  document.getElementById('madd-delete-row').style.display='';
+  buildMethodPills('mmethod-pills',mSelectedMethod,v=>mSelectedMethod=v);
+  buildMCatPills('mcat-pills');
+  document.getElementById('modal-madd').classList.add('open');
+}
+
+document.getElementById('modal-madd-save').addEventListener('click',()=>{
+  const name=document.getElementById('minp-name').value.trim();
+  const amount=parseFloat(document.getElementById('minp-amount').value);
+  const date=document.getElementById('minp-date').value;
+  if(!name||!amount||amount<=0){showToast('⚠️ Ingresa nombre y monto');return;}
+  if(!date){showToast('⚠️ Selecciona una fecha');return;}
+  const targetYM=ymOf(date); // el gasto vive en el mes de su fecha
+  const note=document.getElementById('minp-note').value.trim();
+
+  if(editingMExpId){
+    const parts=editingMExpId.split('|');
+    const eid=parts[0], srcYM=parts[1];
+    const src=getMExpenses(srcYM);
+    const idx=src.findIndex(x=>x.id===eid);
+    if(idx===-1){closeModal('modal-madd');return;}
+    const updated={...src[idx],name,amount,cat:mSelectedCat,method:mSelectedMethod,date,note};
+    if(targetYM===srcYM){
+      src[idx]=updated;saveMExpenses(srcYM,src);
+    } else {
+      // Cambiar la fecha a otro mes también mueve el gasto de "cubeta"
+      src.splice(idx,1);saveMExpenses(srcYM,src);
+      const dst=getMExpenses(targetYM);dst.push(updated);saveMExpenses(targetYM,dst);
+    }
+    closeModal('modal-madd');renderMes();
+    showToast(targetYM===srcYM?'✏️ Gasto actualizado':'📆 Actualizado y movido a '+ymLabel(targetYM));
+    return;
+  }
+
+  const obj={id:uid(),name,amount,cat:mSelectedCat,method:mSelectedMethod,date,note,isFijo:false};
+  const list=getMExpenses(targetYM);list.push(obj);saveMExpenses(targetYM,list);
+  // ¿Marcado como fijo mensual? → crear también la plantilla (este mes ya quedó registrado)
+  if(document.getElementById('minp-fijo').value==='yes'){
+    const rec=getMRec();
+    rec.push({id:uid(),name,amount,cat:mSelectedCat,method:mSelectedMethod});
+    saveMRec(rec);
+  }
+  closeModal('modal-madd');
+  // Saltar al mes donde quedó guardado
+  const now=new Date();const tp=targetYM.split('-').map(Number);
+  currentMonthOffset=Math.max(0,(now.getFullYear()-tp[0])*12+(now.getMonth()+1-tp[1]));
+  renderMes();
+  showToast('💾 Guardado en '+ymLabel(targetYM));
+});
+
+document.getElementById('modal-madd-delete').addEventListener('click',function(){
+  if(!editingMExpId)return;
+  armDestructive(this,()=>{
+    const parts=editingMExpId.split('|');
+    saveMExpenses(parts[1],getMExpenses(parts[1]).filter(x=>x.id!==parts[0]));
+    closeModal('modal-madd');renderMes();showToast('Gasto eliminado');
+  });
+});
+document.getElementById('modal-madd-cancel').addEventListener('click',()=>closeModal('modal-madd'));
+document.getElementById('modal-madd').addEventListener('click',function(e){if(e.target===this)closeModal('modal-madd');});
+
+// ── fijos mensuales (plantillas) ──
+function openFijo(id){
+  editingFijoId=id;
+  const cats=getCats();
+  if(id){
+    const r=getMRec().find(x=>x.id===id);if(!r)return;
+    mSelectedMethod=r.method||'transferencia';
+    mSelectedCat=r.cat||cats[0]?.id||'';
+    document.getElementById('modal-mfijo-title').textContent='Editar fijo mensual';
+    document.getElementById('finp-name').value=r.name;
+    document.getElementById('finp-amount').value=r.amount;
+    document.getElementById('mfijo-delete-row').style.display='';
+  } else {
+    mSelectedMethod='transferencia';
+    mSelectedCat=cats[0]?.id||'';
+    document.getElementById('modal-mfijo-title').textContent='Nuevo fijo mensual';
+    document.getElementById('finp-name').value='';
+    document.getElementById('finp-amount').value='';
+    document.getElementById('mfijo-delete-row').style.display='none';
+  }
+  buildMethodPills('fmethod-pills',mSelectedMethod,v=>mSelectedMethod=v);
+  buildMCatPills('fcat-pills');
+  document.getElementById('modal-mfijo').classList.add('open');
+}
+
+document.getElementById('modal-mfijo-save').addEventListener('click',()=>{
+  const name=document.getElementById('finp-name').value.trim();
+  const amount=parseFloat(document.getElementById('finp-amount').value);
+  if(!name||!amount||amount<=0){showToast('⚠️ Ingresa nombre y monto');return;}
+  const rec=getMRec();
+  if(editingFijoId){
+    const idx=rec.findIndex(x=>x.id===editingFijoId);
+    if(idx>-1)rec[idx]={...rec[idx],name,amount,cat:mSelectedCat,method:mSelectedMethod};
+    saveMRec(rec);
+    showToast('✏️ Fijo actualizado — aplica desde el próximo mes');
+  } else {
+    const nf={id:uid(),name,amount,cat:mSelectedCat,method:mSelectedMethod};
+    rec.push(nf);saveMRec(rec);
+    // Cargar también la instancia de este mes (el día 1 ya pasó)
+    const ym=currentYM();
+    seedMonth(ym);
+    const list=getMExpenses(ym);
+    list.push({id:uid(),name,amount,cat:mSelectedCat,method:mSelectedMethod,date:today(),note:'',isFijo:true,fijoId:nf.id});
+    saveMExpenses(ym,list);
+    showToast('✅ Fijo agregado y cargado este mes');
+  }
+  closeModal('modal-mfijo');renderMes();
+});
+
+document.getElementById('modal-mfijo-delete').addEventListener('click',function(){
+  if(!editingFijoId)return;
+  armDestructive(this,()=>{
+    saveMRec(getMRec().filter(x=>x.id!==editingFijoId));
+    closeModal('modal-mfijo');renderMes();
+    showToast('Fijo eliminado — los meses ya cargados no cambian');
+  });
+});
+document.getElementById('modal-mfijo-cancel').addEventListener('click',()=>closeModal('modal-mfijo'));
+document.getElementById('modal-mfijo').addEventListener('click',function(e){if(e.target===this)closeModal('modal-mfijo');});
+
+// ── mover gasto: entre ciclos (TDC) o entre meses (Mes) ──
+function openMover(kind,id,srcKey){
+  moverCtx={kind,id,srcKey};moverTarget=null;
+  const sub=document.getElementById('mover-sub');
+  const pills=document.getElementById('mover-pills');
+  let exp,targets;
+  if(kind==='tdc'){
+    exp=getExpenses(srcKey).find(x=>x.id===id);
+    targets=getVisibleCycles().filter(c=>c.id!==srcKey)
+      .map(c=>({key:c.id,label:c.label+(c.open?' (actual)':'')}));
+  } else {
+    exp=getMExpenses(srcKey).find(x=>x.id===id);
+    targets=[];
+    for(let off=0;off<12;off++){
+      const ym=ymShift(off);
+      if(ym!==srcKey)targets.push({key:ym,label:ymLabel(ym)+(off===0?' (actual)':'')});
+    }
+  }
+  if(!exp){showToast('⚠️ Gasto no encontrado');return;}
+  if(!targets.length){showToast('No hay otro destino disponible');return;}
+  sub.textContent=`"${exp.name} · ${fmt(exp.amount)}" — elige el ${kind==='tdc'?'ciclo':'mes'} destino.`;
+  pills.innerHTML=targets.map(t=>`<button class="cpill" data-key="${esc(t.key)}">${esc(t.label)}</button>`).join('');
+  pills.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{
+    moverTarget=p.dataset.key;
+    pills.querySelectorAll('.cpill').forEach(x=>x.classList.remove('sel'));
+    p.classList.add('sel');
+  }));
+  document.getElementById('modal-mover').classList.add('open');
+}
+
+document.getElementById('mover-confirm').addEventListener('click',()=>{
+  if(!moverCtx||!moverTarget){showToast('⚠️ Elige un destino');return;}
+  const kind=moverCtx.kind, id=moverCtx.id, srcKey=moverCtx.srcKey;
+  if(kind==='tdc'){
+    const src=getExpenses(srcKey);
+    const idx=src.findIndex(x=>x.id===id);if(idx===-1)return;
+    const moved=src.splice(idx,1)[0];
+    saveExpenses(srcKey,src);
+    const dst=getExpenses(moverTarget);dst.push(moved);saveExpenses(moverTarget,dst);
+    closeModal('modal-mover');renderAll();
+    const c=getCycles().find(x=>x.id===moverTarget);
+    showToast('📆 Movido a '+(c?c.label:'otro ciclo'));
+  } else {
+    const src=getMExpenses(srcKey);
+    const idx=src.findIndex(x=>x.id===id);if(idx===-1)return;
+    const moved=src.splice(idx,1)[0];
+    saveMExpenses(srcKey,src);
+    // Conservar el día, ajustado al largo del mes destino
+    const day=moved.date?parseInt(moved.date.slice(8,10),10):1;
+    moved.date=moverTarget+'-'+_pad(Math.min(day||1,daysInMonth(moverTarget)));
+    const dst=getMExpenses(moverTarget);dst.push(moved);saveMExpenses(moverTarget,dst);
+    closeModal('modal-mover');renderMes();
+    showToast('📆 Movido a '+ymLabel(moverTarget));
+  }
+  moverCtx=null;moverTarget=null;
+});
+document.getElementById('mover-cancel').addEventListener('click',()=>closeModal('modal-mover'));
+document.getElementById('modal-mover').addEventListener('click',function(e){if(e.target===this)closeModal('modal-mover');});
+
+// ── exportar resumen para Claude (.md) ──
+document.getElementById('cfg-export-claude').addEventListener('click',()=>{
+  const cfg=getConfig(),cats=getCats();
+  const catName=id=>{const c=cats.find(x=>x.id===id);return c?c.name:'Sin categoría';};
+  let md=`# MisGastos — Resumen para asesor financiero\n\n`;
+  md+=`- Generado: ${today()}\n- App: v${APP_VERSION}\n`;
+  if(cfg.cardName)md+=`- Tarjeta: ${cfg.cardName}\n`;
+
+  md+=`\n## 💳 Tarjeta de crédito (por ciclo)\n`;
+  const cycles=getVisibleCycles().slice(0,6);
+  if(!cycles.length)md+=`Sin ciclos registrados.\n`;
+  cycles.forEach(c=>{
+    const exps=getExpenses(c.id);
+    const normal=exps.filter(e=>!e.isMsi);
+    const nt=normal.reduce((s,e)=>s+e.amount,0);
+    md+=`\n### ${c.label}${c.open?' (abierto)':''}\n`;
+    md+=`- Periodo: ${c.startDate||'?'} → ${c.endDate||'hoy'}${c.payDate?` · pago ${c.payDate}`:''}\n`;
+    md+=`- Gastos directos: ${fmt(nt)} en ${normal.length} movimientos\n`;
+    const t={};normal.forEach(e=>{t[e.cat]=(t[e.cat]||0)+e.amount;});
+    Object.entries(t).sort((a,b)=>b[1]-a[1]).forEach(kv=>{md+=`  - ${catName(kv[0])}: ${fmt(kv[1])}\n`;});
+    if(cfg.cycleBudget)md+=`- Presupuesto del ciclo: ${fmt(cfg.cycleBudget)}\n`;
+  });
+
+  const msi=getMSI();
+  if(msi.length){
+    md+=`\n## 📅 Compras a meses (MSI)\n`;
+    msi.forEach(m=>{
+      const p=effectivePaid(m);
+      const mon=m.totalAmount/m.months;
+      md+=`- ${m.name}: ${fmt(m.totalAmount)} a ${m.months} meses · ${p}/${m.months} pagados · mensualidad ${fmt(mon)} · pendiente ${fmt((m.months-p)*mon)}\n`;
+    });
+  }
+
+  md+=`\n## 📆 Gasto mensual sin TDC (efectivo / débito / transferencias)\n`;
+  let anyMonth=false;
+  for(let off=0;off<6;off++){
+    const ym=ymShift(off);
+    const list=getMExpenses(ym);
+    if(!list.length)continue;
+    anyMonth=true;
+    const tot=list.reduce((s,e)=>s+e.amount,0);
+    const fij=list.filter(e=>e.isFijo).reduce((s,e)=>s+e.amount,0);
+    md+=`\n### ${ymLabel(ym)}\n`;
+    md+=`- Total: ${fmt(tot)} (fijos ${fmt(fij)} · variables ${fmt(tot-fij)})${cfg.monthBudget?` · tope ${fmt(cfg.monthBudget)}`:''}\n`;
+    const bc={},bm={};
+    list.forEach(e=>{bc[e.cat]=(bc[e.cat]||0)+e.amount;bm[e.method||'efectivo']=(bm[e.method||'efectivo']||0)+e.amount;});
+    Object.entries(bc).sort((a,b)=>b[1]-a[1]).forEach(kv=>{md+=`  - ${catName(kv[0])}: ${fmt(kv[1])}\n`;});
+    md+=`- Por método: `+Object.entries(bm).map(kv=>`${methodInfo(kv[0]).name} ${fmt(kv[1])}`).join(' · ')+`\n`;
+  }
+  if(!anyMonth)md+=`Sin gastos mensuales registrados aún.\n`;
+
+  const rec=getMRec();
+  if(rec.length){
+    md+=`\n## 🔄 Fijos mensuales configurados (montos estimados)\n`;
+    rec.forEach(r=>{md+=`- ${r.name}: ${fmt(r.amount)} · ${methodInfo(r.method).name} · ${catName(r.cat)}\n`;});
+  }
+
+  md+=`\n---\n*Regla de la app: el pago de la TDC y los retiros de cajero no se registran (evita doble conteo).*\n`;
+
+  const blob=new Blob([md],{type:'text/markdown;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`misgastos_resumen_${today()}.md`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('🤖 Resumen para Claude descargado');
+});
+
 // ══════════════════════════════════════════════════════
 //  RENDER ALL
 // ══════════════════════════════════════════════════════
 function renderAll(){
   renderCycleBar();
   renderTabs();
+  renderMes();
 }
 
 // ══════════════════════════════════════════════════════
@@ -2227,13 +2931,21 @@ function showToast(msg){
 //  INIT
 // ══════════════════════════════════════════════════════
 (function init(){
-  const cfg=getConfig();
-  // Si quedó guardado un acento que se eliminó (blanco/amarillo), volver al lima.
-  let accent=cfg.accentColor||'#c8f55a';
-  if(accent==='#ffffff'||accent==='#ffdb5a'){accent='#c8f55a';saveConfig({...cfg,accentColor:accent});}
-  applyAccent(accent);
+  // v16: acento independiente por mundo (migra el acento único anterior)
+  migrateAccents();
 
   document.getElementById('app-version-lbl').textContent=`MisGastos · Versión ${APP_VERSION}`;
+
+  // v16: categorías nuevas para los fijos del mundo Mes (solo una vez)
+  (function migrateCatsV16(){
+    const c=getConfig();
+    if(c.v16Cats)return;
+    const cats=getCats();
+    if(!cats.some(x=>x.id==='diezmo'))cats.push({id:'diezmo',name:'Diezmo',icon:'⛪'});
+    if(!cats.some(x=>x.id==='familia'))cats.push({id:'familia',name:'Familia',icon:'👨‍👩‍👦'});
+    saveCats(cats);
+    saveConfig({...getConfig(),v16Cats:true});
+  })();
 
   // ── Migración: MSI antiguas usaban paidMonths manual.
   // Lo convertimos a paidBaseline congelado para que el conteo automático continúe.
@@ -2257,8 +2969,10 @@ function showToast(msg){
     setTimeout(()=>showScreen('config'),800);
   }
 
-  renderAll();
+  seedMonth(currentYM());
+  setWorld(getConfig().lastWorld==='mes'?'mes':'tdc'); // renderiza todo
   renderTransportFab();
+  refreshSwatches();
 
   // ── Recordatorio de respaldo ──
   // Los datos viven solo en localStorage; si el último respaldo tiene más de 30
