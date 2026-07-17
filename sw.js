@@ -3,11 +3,14 @@
 //  - Documento (index.html): Stale-While-Revalidate — responde al instante desde
 //    caché y actualiza la copia en segundo plano. Los cambios en index.html llegan
 //    solos en la siguiente apertura, SIN necesidad de subir CACHE_NAME.
-//  - Fuentes de Google: Network First, fallback a caché.
+//  - Fuentes de Google: Cache First con revalidación en segundo plano.
 //  - Resto de recursos locales (íconos, manifest): Cache First.
+// Toda petición de red lleva límite de tiempo: en redes moribundas (metro) el
+// fetch no falla, se queda colgado — y un recurso que bloquea el render colgado
+// equivale a app que no carga aunque todo esté en caché.
 // CACHE_NAME solo necesita subirse cuando cambia este archivo (sw.js) o la lista
 // de precache; el navegador detecta el sw.js nuevo automáticamente en cada visita.
-const CACHE_NAME = 'misgastos-v12';
+const CACHE_NAME = 'misgastos-v13';
 
 // Recursos que se cachean al instalar
 const PRECACHE = [
@@ -24,6 +27,29 @@ const FONT_ORIGINS = [
   'https://fonts.googleapis.com',
   'https://fonts.gstatic.com',
 ];
+
+// fetch con límite de tiempo. Sin esto, en "lie-fi" (señal de una raya que no
+// transmite) la promesa de fetch puede tardar minutos en rechazar.
+function fetchTimeout(request, ms){
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    fetch(request).then(
+      r => { clearTimeout(timer); resolve(r); },
+      e => { clearTimeout(timer); reject(e); }
+    );
+  });
+}
+
+// Guardar en caché solo respuestas completas y NO redirigidas: Safari se niega a
+// navegar con una respuesta redirigida servida desde un service worker, y una
+// sola entrada así envenenada rompe todos los arranques offline siguientes.
+function cachePut(request, response){
+  if(response && response.status === 200 && !response.redirected){
+    const clone = response.clone();
+    caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+  }
+  return response;
+}
 
 // ── INSTALL: precachear recursos locales ──
 self.addEventListener('install', event => {
@@ -70,22 +96,42 @@ function offlineFallback(){
   );
 }
 
+// Buscar el documento en caché con red de seguridad: primero la URL pedida
+// (ignorando query string — la home screen de iOS puede añadir parámetros),
+// luego las entradas del precache. Si la copia guardada quedó marcada como
+// redirigida (precache viejo), se reconstruye limpia para que Safari la acepte.
+function matchDocument(request){
+  return caches.match(request, { ignoreSearch: true })
+    .then(r => r || caches.match('./index.html'))
+    .then(r => r || caches.match('./'))
+    .then(r => {
+      if(r && r.redirected){
+        return r.blob().then(body =>
+          new Response(body, { status: 200, headers: r.headers })
+        );
+      }
+      return r;
+    });
+}
+
 // ── FETCH ──
 self.addEventListener('fetch', event => {
   // Solo manejar GET
   if(event.request.method !== 'GET') return;
 
-  // Fuentes de Google: Network First, fallback a caché
+  // Fuentes de Google: Cache First + revalidación en segundo plano. Antes eran
+  // Network First y el CSS de fuentes BLOQUEA el render: en el metro la petición
+  // colgaba sin fallar y la app se quedaba en blanco pese a estar cacheada.
   if(FONT_ORIGINS.some(origin => event.request.url.startsWith(origin))){
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // Guardar copia fresca en caché
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => caches.match(event.request)) // sin red → usar caché
+      caches.match(event.request).then(cached => {
+        const fresh = fetchTimeout(event.request, 4000)
+          .then(response => cachePut(event.request, response))
+          .catch(() => null);
+        // Con caché responde ya (fresh actualiza para la próxima); sin caché,
+        // máximo 4 s de espera y se suelta el render con la fuente del sistema.
+        return cached || fresh.then(r => r || Response.error());
+      })
     );
     return;
   }
@@ -94,15 +140,9 @@ self.addEventListener('fetch', event => {
   // refresca en segundo plano; la siguiente apertura ya trae la versión nueva.
   if(event.request.mode === 'navigate' || event.request.destination === 'document'){
     event.respondWith(
-      caches.match(event.request).then(cached => {
-        const fresh = fetch(event.request)
-          .then(response => {
-            if(response && response.status === 200){
-              const clone = response.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-            }
-            return response;
-          })
+      matchDocument(event.request).then(cached => {
+        const fresh = fetchTimeout(event.request, 8000)
+          .then(response => cachePut(event.request, response))
           .catch(() => null);
         // Con caché: responde ya (fresh sigue corriendo y actualiza para la próxima).
         // Sin caché (primera visita): espera la red; si tampoco hay, página offline.
@@ -117,14 +157,8 @@ self.addEventListener('fetch', event => {
     caches.match(event.request)
       .then(cached => {
         if(cached) return cached;
-        return fetch(event.request)
-          .then(response => {
-            if(response && response.status === 200){
-              const clone = response.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-            }
-            return response;
-          })
+        return fetchTimeout(event.request, 8000)
+          .then(response => cachePut(event.request, response))
           // Sin red y sin caché: error de red explícito (antes devolvía
           // undefined, que rompe el respondWith con un TypeError críptico).
           .catch(() => Response.error());

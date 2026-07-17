@@ -20,7 +20,9 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- media="print"+onload: carga sin bloquear el render; si la red del metro cuelga,
+     la app pinta con la fuente del sistema y las fuentes llegan cuando puedan -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{
   --bg:#F8F8F7;--bg2:#FFFFFF;--bg3:#F2F2F0;--bg4:#E8E8E5;
@@ -859,7 +861,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 //  STORAGE HELPERS
 // ══════════════════════════════════════════════════════
 // Versión visible de la app = número de la última entrada en CAMBIOS.md (esquema unificado).
-const APP_VERSION = 16;
+const APP_VERSION = 18;
 
 const S = {
   get:(k,fb={})=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}},
@@ -1571,6 +1573,10 @@ function renderTransportFab(){
   const fab=document.getElementById('transport-fab');
   const subsEl=document.getElementById('transport-sub-btns');
   if(!list.length){fab.style.display='none';return;}
+  // Al reconstruir (p. ej. tras agregar un atajo) el menú arranca cerrado, para
+  // que transportOpen nunca quede desincronizado de las clases del DOM.
+  transportOpen=false;
+  subsEl.classList.add('hidden');subsEl.classList.remove('visible');
   updateTransportFabVis();
 
   if(list.length===1){
@@ -1596,7 +1602,12 @@ function renderTransportFab(){
   }
 }
 
+// Tras elegir un atajo, iOS puede disparar un "click fantasma" retrasado en la
+// coordenada del toque; si cae en el botón principal reabría el menú recién
+// cerrado. Se ignora todo toggle en los ~450 ms posteriores a un registro.
+let transportTapGuard = 0;
 function toggleTransportMenu(){
+  if(Date.now()-transportTapGuard < 450) return;
   transportOpen=!transportOpen;
   const sub=document.getElementById('transport-sub-btns');
   sub.classList.toggle('hidden',!transportOpen);
@@ -1612,6 +1623,7 @@ function registerTransport(t){
     method:'efectivo',date:today(),note:'',isFijo:false});
   saveMExpenses(ym,list);
   transportOpen=false;
+  transportTapGuard=Date.now(); // blinda contra el click fantasma que reabría el menú
   const sub=document.getElementById('transport-sub-btns');
   sub.classList.add('hidden');sub.classList.remove('visible');
   if(currentMonthOffset!==0)currentMonthOffset=0;
@@ -2185,12 +2197,14 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
   let vx = 0, vy = 0, lastT = 0, lastX = 0, lastY = 0; // velocidad para la inercia
   let finalizeTimer = null;
 
-  // Restore saved position
+  // Restore saved position (acotada al viewport: una posición guardada con otra
+  // orientación/teclado abierto no debe dejar la burbuja fuera de pantalla)
   function restorePos(){
     const saved = S.get(STORAGE_KEY, null);
     if(saved && saved.right !== undefined){
-      fab.style.right = saved.right + 'px';
-      fab.style.bottom = saved.bottom + 'px';
+      const vw = window.innerWidth, vh = window.innerHeight;
+      fab.style.right = Math.max(4, Math.min(vw - 60, saved.right)) + 'px';
+      fab.style.bottom = Math.max(8, Math.min(vh - 60, saved.bottom)) + 'px';
       fab.style.left = 'auto';
       fab.style.top = 'auto';
     }
@@ -2199,6 +2213,7 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
 
   function savePos(){
     const rect = fab.getBoundingClientRect();
+    if(!rect.width) return; // oculto (display:none): un rect en ceros corrompería la posición
     const vw = window.innerWidth, vh = window.innerHeight;
     S.set(STORAGE_KEY, {
       right: Math.round(vw - rect.right),
@@ -2210,7 +2225,9 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
   function finalizeToAnchor(){
     if(finalizeTimer){clearTimeout(finalizeTimer);finalizeTimer=null;}
     fab.classList.remove('snapping');
+    pinned = false;
     const rect = fab.getBoundingClientRect();
+    if(!rect.width) return; // el fab se ocultó a media animación; no anclar con ceros
     const vw = window.innerWidth, vh = window.innerHeight;
     fab.style.right = Math.round(vw - rect.right) + 'px';
     fab.style.bottom = Math.round(vh - rect.bottom) + 'px';
@@ -2238,9 +2255,27 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     finalizeTimer = setTimeout(finalizeToAnchor, 480); // respaldo si no dispara transitionend
   }
 
+  let pinned = false; // el fab está posicionado por left/top (arrastre o atrapada en vuelo)
+
+  // Cambia el anclaje a left/top SOLO mientras hace falta (arrastre real o atrapar
+  // la burbuja en pleno deslizamiento). BUG v16: esto corría en CADA touchstart y
+  // un tap simple dejaba el fab anclado por top sin restaurar ni guardar; como los
+  // chips se despliegan ENCIMA del botón (column-reverse), con anclaje top el menú
+  // empujaba el botón hacia abajo —fuera de pantalla si la burbuja estaba abajo—
+  // ("la burbuja desaparece"; reiniciar re-anclaba y por eso la revivía), y al
+  // contraerse el botón volvía a subir justo a la coordenada del toque, donde el
+  // click fantasma de iOS lo reabría ("no se contrae al seleccionar").
+  function pinToRect(){
+    fab.style.left = fabStartX + 'px';
+    fab.style.top  = fabStartY + 'px';
+    fab.style.right = 'auto';
+    fab.style.bottom = 'auto';
+    pinned = true;
+  }
+
   // Lógica compartida touch + mouse (la física de la burbuja es la misma).
   function startDrag(x, y){
-    // Si venía deslizándose, lo "atrapamos" donde esté en ese instante
+    const wasSnapping = fab.classList.contains('snapping');
     if(finalizeTimer){clearTimeout(finalizeTimer);finalizeTimer=null;}
     fab.removeEventListener('transitionend', finalizeToAnchor);
     fab.classList.remove('snapping');
@@ -2251,20 +2286,23 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     fabStartY = rect.top;
     isDragging = true;
     moved = false;
+    pinned = false;
     vx = vy = 0; lastT = performance.now(); lastX = x; lastY = y;
     btn.classList.add('dragging');
-    // Posicionamiento por left/top mientras se arrastra
-    fab.style.left = rect.left + 'px';
-    fab.style.top  = rect.top + 'px';
-    fab.style.right = 'auto';
-    fab.style.bottom = 'auto';
+    // Si venía deslizándose, se "atrapa" congelándola donde va en este instante;
+    // un tap normal NO toca el anclaje (el cambio a left/top espera al primer
+    // movimiento real, en moveDrag).
+    if(wasSnapping) pinToRect();
   }
 
   // Devuelve true cuando el gesto ya se considera arrastre (para preventDefault)
   function moveDrag(x, y){
     const dx = x - dragStartX;
     const dy = y - dragStartY;
-    if(Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
+    if(!moved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)){
+      moved = true;
+      if(!pinned) pinToRect(); // ahora sí es arrastre: pasar a left/top
+    }
     if(!moved) return false;
     // Velocidad instantánea (px/ms) con suavizado, para la inercia al soltar
     const now = performance.now();
@@ -2287,7 +2325,10 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     if(!isDragging) return;
     isDragging = false;
     btn.classList.remove('dragging');
-    if(moved){
+    // Se re-asienta al borde si hubo arrastre, o si la burbuja quedó "atrapada"
+    // a media animación (soltarla sin moverla retoma el viaje al borde; antes
+    // quedaba varada con anclaje left/top sin guardar).
+    if(moved || pinned){
       snapToEdge();
       transportOpen = false;
       const sub = document.getElementById('transport-sub-btns');
@@ -2312,6 +2353,9 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     if(moveDrag(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault();
   }, {passive:false});
   document.addEventListener('touchend', endDrag, {passive:true});
+  // iOS dispara touchcancel (llamada, gesto del sistema, etc.): sin esto el
+  // arrastre quedaba "pegado" (isDragging=true) hasta el siguiente toque.
+  document.addEventListener('touchcancel', endDrag, {passive:true});
 
   // — mouse (escritorio) —
   btn.addEventListener('mousedown', e=>{
@@ -2492,8 +2536,14 @@ function syncTabVisibility(){
 }
 
 function updateTransportFabVis(){
-  document.getElementById('transport-fab').style.display=
-    (activeScreen==='main'&&currentWorld==='mes'&&getTransport().length)?'flex':'none';
+  const show=(activeScreen==='main'&&currentWorld==='mes'&&getTransport().length);
+  document.getElementById('transport-fab').style.display=show?'flex':'none';
+  if(!show){
+    // Al ocultarse, el menú se cierra: que no reaparezca desplegado al volver
+    transportOpen=false;
+    const sub=document.getElementById('transport-sub-btns');
+    sub.classList.add('hidden');sub.classList.remove('visible');
+  }
 }
 
 function mExpenseHTML(e,ym){
