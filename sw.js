@@ -10,7 +10,7 @@
 // equivale a app que no carga aunque todo esté en caché.
 // CACHE_NAME solo necesita subirse cuando cambia este archivo (sw.js) o la lista
 // de precache; el navegador detecta el sw.js nuevo automáticamente en cada visita.
-const CACHE_NAME = 'misgastos-v13';
+const CACHE_NAME = 'misgastos-v14';
 
 // Recursos que se cachean al instalar
 const PRECACHE = [
@@ -21,6 +21,10 @@ const PRECACHE = [
   './icon-192.png',
   './icon-512.png',
 ];
+
+// CSS de fuentes: se precachea best-effort (si falla, la app usa fuente del
+// sistema; los .woff2 se cachean solos la primera vez que la red los entrega)
+const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap';
 
 // Dominios externos que también se cachean (fuentes)
 const FONT_ORIGINS = [
@@ -52,12 +56,37 @@ function cachePut(request, response){
 }
 
 // ── INSTALL: precachear recursos locales ──
+// Solo el documento es crítico; el resto es best-effort. Lección aprendida:
+// addAll es atómico y en GitHub Pages faltaban icon-192/512 → 404 → la
+// instalación fallaba completa y el iPhone se quedaba con un SW viejo sin los
+// fixes offline (aunque el HTML sí se actualizaba y mostraba versión nueva).
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE))
+      .then(cache => cache.addAll(['./', './index.html'])
+        .then(() => Promise.all(
+          PRECACHE.concat(FONT_CSS).map(url =>
+            cache.match(url).then(hit => hit || cache.add(url).catch(() => null))
+          )
+        )))
       .then(() => self.skipWaiting()) // activar inmediatamente
   );
+});
+
+// ── MESSAGE: reparación de caché bajo demanda ──
+// v19: iOS puede desechar CacheStorage (presión de almacenamiento) aunque la app
+// siga instalada — la página lo detecta al abrir con red y pide re-precachear.
+self.addEventListener('message', event => {
+  if(event.data && event.data.type === 'ENSURE_PRECACHE'){
+    event.waitUntil(
+      caches.open(CACHE_NAME).then(cache =>
+        Promise.all(PRECACHE.concat(FONT_CSS).map(url =>
+          cache.match(url, { ignoreSearch: true })
+            .then(hit => hit || cache.add(url).catch(() => null))
+        ))
+      )
+    );
+  }
 });
 
 // ── ACTIVATE: limpiar cachés viejos ──

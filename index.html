@@ -43,6 +43,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .hdr{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .hdr-logo{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;}
 .hdr-logo span{color:var(--accent);}
+/* v19: versión discreta en el inicio, para verificar qué build corre el teléfono */
+.ver-tag{font-size:9px;color:var(--muted);opacity:.6;font-weight:500;letter-spacing:.4px;align-self:flex-end;padding-bottom:4px;}
 .icon-btn{background:var(--bg2);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative;flex-shrink:0;}
 
 /* COLLAPSIBLE TOP */
@@ -118,7 +120,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .tab.active{background:var(--bg3);border-color:var(--border2);color:var(--text);}
 
 /* SCROLL */
-.scroll{flex:1;overflow-y:auto;padding:0 16px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+/* v20: colchón inferior para que el último elemento no quede pegado al borde */
+.scroll{flex:1;overflow-y:auto;padding:0 16px 10px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;}
 .scroll::-webkit-scrollbar{display:none;}
 .day-lbl{font-size:12px;font-weight:500;color:var(--muted);padding:0 2px;margin:12px 0 7px;}
 
@@ -185,31 +188,53 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .cat-manage-actions{display:flex;gap:6px;}
 .cat-icon-edit{font-size:18px;cursor:pointer;padding:4px;border-radius:8px;background:var(--bg3);}
 
-/* TRANSPORT SHORTCUTS — arrastrable */
+/* TRANSPORT SHORTCUTS — burbuja arrastrable tipo Messenger */
 .transport-fab{
   position:fixed;
-  /* posición inicial por defecto; JS la sobreescribe con posición guardada */
-  bottom:82px;right:18px;
+  /* posición inicial por defecto; JS la sobreescribe con el lateral guardado */
+  bottom:82px;right:12px;
   z-index:150;
   display:flex;flex-direction:column-reverse;align-items:flex-end;gap:10px;
-  touch-action:none; /* evita scroll al arrastrar */
+  /* la caja del contenedor puede ser más grande que la burbuja (menú, gap):
+     que NUNCA bloquee toques — solo burbuja y chips reciben eventos */
+  pointer-events:none;
   user-select:none;
 }
+/* v19: el menú se despliega hacia ABAJO si la burbuja está en la mitad superior */
+.transport-fab.menu-down{flex-direction:column;}
+.transport-fab.menu-down .transport-sub-btns{flex-direction:column;}
+/* v19: anclada al lateral izquierdo, todo se alinea a la izquierda */
+.transport-fab.dock-left{align-items:flex-start;}
+.transport-fab.dock-left .transport-sub-btns{align-items:flex-start;}
 .transport-main-btn{
   width:52px;height:52px;border-radius:50%;
   background:var(--bg2);border:2px solid var(--accent);
   display:flex;align-items:center;justify-content:center;
   font-size:22px;cursor:grab;
+  pointer-events:auto;
+  touch-action:none; /* evita scroll al arrastrar */
   box-shadow:0 4px 16px rgba(0,0,0,.18);
   transition:box-shadow .2s ease,transform .28s cubic-bezier(.34,1.4,.64,1);
 }
 .transport-main-btn.dragging{cursor:grabbing;box-shadow:0 10px 30px rgba(0,0,0,.3);transform:scale(1.12);}
-/* Deslizamiento suave al borde al soltar (tipo burbuja de Messenger) */
-.transport-fab.snapping{transition:left .42s cubic-bezier(.22,1,.36,1),top .42s cubic-bezier(.22,1,.36,1);}
-.transport-sub-btns{display:flex;flex-direction:column-reverse;gap:8px;overflow:hidden;transition:opacity .25s,max-height .3s cubic-bezier(0.2,0,0,1);}
-.transport-sub-btns.hidden{opacity:0;max-height:0;pointer-events:none;}
-.transport-sub-btns.visible{opacity:1;max-height:400px;}
-.transport-chip{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:8px 14px 8px 10px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.12);white-space:nowrap;font-size:13px;font-weight:500;}
+/* Deslizamiento al lateral al soltar, con rebote sutil (burbuja de Messenger) */
+.transport-fab.snapping{transition:left .45s cubic-bezier(.2,1.25,.4,1),top .45s cubic-bezier(.22,1,.36,1);}
+.transport-sub-btns{display:flex;flex-direction:column-reverse;align-items:flex-end;gap:8px;overflow:hidden;transition:opacity .22s,max-height .32s cubic-bezier(0.2,0,0,1);}
+/* max-width:0 al ocultarse: si no, el contenedor invisible conserva el ancho del
+   chip más largo y desvirtúa los cálculos de arrastre y anclaje (era la causa de
+   que el imán al borde usara el centro del menú y no el de la burbuja) */
+.transport-sub-btns.hidden{opacity:0;max-height:0;max-width:0;pointer-events:none;
+  transition:opacity .22s,max-height .32s cubic-bezier(0.2,0,0,1),max-width 0s linear .3s;}
+.transport-sub-btns.visible{opacity:1;max-height:420px;max-width:320px;}
+.transport-sub-btns.no-anim,.transport-sub-btns.no-anim .transport-chip{transition:none!important;}
+.transport-chip{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:8px 14px 8px 10px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.12);white-space:nowrap;font-size:13px;font-weight:500;
+  pointer-events:auto;
+  /* entrada escalonada: cada chip brota desde la burbuja (--i = índice) */
+  opacity:0;transform:scale(.55) translateY(14px);transform-origin:right center;
+  transition:transform .34s cubic-bezier(.34,1.45,.5,1) calc(var(--i,0)*.035s),opacity .18s ease calc(var(--i,0)*.035s);}
+.transport-fab.menu-down .transport-chip{transform:scale(.55) translateY(-14px);}
+.transport-fab.dock-left .transport-chip{transform-origin:left center;}
+.transport-sub-btns.visible .transport-chip{opacity:1;transform:scale(1) translateY(0);}
 .transport-chip:active{opacity:.8;}
 .transport-chip-icon{font-size:18px;}
 .transport-chip-label{flex:1;}
@@ -222,7 +247,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .fab:active{opacity:.88;transform:scale(.98);}
 
 /* BNAV */
-.bnav{display:flex;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;}
+/* v20: sin línea divisoria — el botón y la barra comparten fondo y se funden */
+.bnav{display:flex;background:var(--bg);flex-shrink:0;}
 .bnav-btn{flex:1;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:10px;font-family:'DM Sans',sans-serif;}
 .bnav-btn.active{color:var(--accent);}
 .bnav-icon{font-size:19px;}
@@ -231,7 +257,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);z-index:200;display:flex;align-items:flex-end;padding:0 12px 14px;opacity:0;pointer-events:none;transition:opacity .2s;}
 .overlay.open{opacity:1;pointer-events:all;}
 /* Hoja flotante: separada de los bordes, 4 esquinas redondeadas y sombra (Propuesta 1) */
-.modal{width:100%;max-width:430px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:26px;padding:10px 20px 26px;transform:translateY(110%);transition:transform .28s cubic-bezier(0.2,0,0,1);max-height:86vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4);overscroll-behavior:contain;}
+.modal{width:100%;max-width:430px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:26px;padding:10px 20px 26px;transform:translateY(110%);transition:transform .28s cubic-bezier(0.2,0,0,1);max-height:86vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4);overscroll-behavior:contain;scrollbar-width:none;}
+/* v20: sin barra de scroll visible en modales (en escritorio ensuciaba la hoja) */
+.modal::-webkit-scrollbar{display:none;}
+/* v20: checkboxes nativos (export de ciclos) en el color de acento */
+input[type=checkbox]{accent-color:var(--accent);}
 .overlay.open .modal{transform:translateY(0);}
 .modal-handle{width:34px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px;}
 .modal-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:18px;}
@@ -381,6 +411,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 <div class="screen active" id="scr-main">
   <div class="hdr">
     <div class="hdr-logo">mis<span>gastos</span></div>
+    <span class="ver-tag" id="ver-tag"></span>
   </div>
   <!-- v16: selector de mundos TDC / Mes -->
   <div class="world-switch">
@@ -418,8 +449,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
       </div>
     </div>
   </div>
-  <!-- v16: resumen del mundo Mes (oculto en mundo Tarjeta) -->
-  <div id="mes-top" style="display:none">
+  <!-- v16: resumen del mundo Mes (oculto en mundo Tarjeta).
+       v21: lleva la clase sticky-top para heredar el colapso al hacer scroll -->
+  <div id="mes-top" class="sticky-top" style="display:none">
     <div class="summary" style="margin:0 16px 10px;">
       <div class="sum-label">Gastado en el mes (sin TDC)</div>
       <div class="sum-total" id="msum-total">$0.00</div>
@@ -459,6 +491,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
     <button class="tab active" data-mtab="mgastos">Gastos</button>
     <button class="tab" data-mtab="mcats">Categorías</button>
     <button class="tab" data-mtab="mfijos">Fijos</button>
+    <button class="tab" data-mtab="mtodo">Todo</button>
   </div>
   <div class="scroll" id="main-scroll">
     <div id="tab-todos"></div>
@@ -468,6 +501,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
     <div id="tab-mgastos" style="display:none"></div>
     <div id="tab-mcats" style="display:none"></div>
     <div id="tab-mfijos" style="display:none"></div>
+    <div id="tab-mtodo" style="display:none"></div>
     <div style="height:14px"></div>
   </div>
   <div class="fab-wrap">
@@ -537,6 +571,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
           <input type="date" id="cfg-pay-date-input">
         </div>
         <button class="save-btn warn-btn" id="cfg-close-cycle-btn">✂️ Cerrar ciclo y abrir uno nuevo</button>
+        <!-- v21: corregir un cierre por error -->
+        <button class="sec-btn" id="cfg-reopen-cycle-btn" style="width:100%;margin-top:8px;display:none;">↩️ Reabrir el ciclo anterior</button>
       </div>
     </div>
 
@@ -699,7 +735,10 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
     <div class="modal-handle"></div>
     <div class="modal-title">Exportar a Excel</div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Selecciona los ciclos a exportar:</p>
-    <div id="export-cycle-list" style="max-height:260px;overflow-y:auto;"></div>
+    <div id="export-cycle-list" style="max-height:220px;overflow-y:auto;"></div>
+    <!-- v21: el CSV también exporta el mundo Mes -->
+    <p style="font-size:13px;color:var(--muted);margin:14px 0 0;" id="export-mes-title">Meses sin tarjeta (efectivo/débito/transferencia):</p>
+    <div id="export-mes-list" style="max-height:180px;overflow-y:auto;"></div>
     <div style="display:flex;gap:8px;margin-bottom:16px;margin-top:8px;">
       <button class="sec-btn" id="export-select-all" style="font-size:12px;padding:8px;">Todos</button>
       <button class="sec-btn" id="export-select-none" style="font-size:12px;padding:8px;">Ninguno</button>
@@ -861,7 +900,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 //  STORAGE HELPERS
 // ══════════════════════════════════════════════════════
 // Versión visible de la app = número de la última entrada en CAMBIOS.md (esquema unificado).
-const APP_VERSION = 18;
+const APP_VERSION = 21;
 
 const S = {
   get:(k,fb={})=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}},
@@ -1018,6 +1057,30 @@ function closeCycleAndOpenNew(cutDate, payDate){
   copyRecurrentsToCurrentCycle(newId);
   renderAll();
   showToast('✅ Ciclo cerrado. Nuevo ciclo abierto.');
+}
+
+// v21: corregir un cierre por error. El ciclo previo vuelve a quedar abierto y
+// los gastos capturados en el ciclo nuevo se conservan (pasan al reabierto).
+function reopenLastCycle(){
+  const cycles=getCycles();
+  const openIdx=cycles.findIndex(c=>c.open);
+  if(openIdx<1 || cycles[openIdx-1].open){showToast('No hay ciclo cerrado que reabrir');return;}
+  const prev=cycles[openIdx-1];
+  const cur=cycles[openIdx];
+  const prevExp=getExpenses(prev.id);
+  const curExp=getExpenses(cur.id);
+  // Los recurrentes que el cierre copió al ciclo nuevo ya existen en el previo:
+  // no duplicarlos al fusionar (mismo nombre+monto+recurrente).
+  const moved=curExp.filter(e=>!(e.isRecurrent && !e.isMsi
+    && prevExp.some(p=>p.isRecurrent && p.name===e.name && p.amount===e.amount)));
+  saveExpenses(prev.id, prevExp.concat(moved));
+  delete prev.endDate; delete prev.payDate; prev.open=true;
+  cycles.splice(openIdx,1);
+  saveCycles(cycles);
+  try{ localStorage.removeItem('mg_exp_'+cur.id); }catch(_){}
+  currentCycleIdx=0;
+  renderAll(); renderConfigCycleStatus();
+  showToast('↩️ Ciclo reabierto — gastos conservados');
 }
 
 function copyRecurrentsToCurrentCycle(newCycleId){
@@ -1575,8 +1638,7 @@ function renderTransportFab(){
   if(!list.length){fab.style.display='none';return;}
   // Al reconstruir (p. ej. tras agregar un atajo) el menú arranca cerrado, para
   // que transportOpen nunca quede desincronizado de las clases del DOM.
-  transportOpen=false;
-  subsEl.classList.add('hidden');subsEl.classList.remove('visible');
+  closeTransportMenuInstant();
   updateTransportFabVis();
 
   if(list.length===1){
@@ -1589,8 +1651,9 @@ function renderTransportFab(){
     document.getElementById('transport-main-btn').textContent='🚇';
     document.getElementById('transport-main-btn').onclick=toggleTransportMenu;
     // Sin onclick inline con datos: se escapa el contenido y se enlaza por id (evita inyección).
-    subsEl.innerHTML=list.map(t=>`
-      <div class="transport-chip" data-tr="${esc(t.id)}">
+    // --i: índice para la entrada escalonada (el chip más cercano a la burbuja sale primero)
+    subsEl.innerHTML=list.map((t,i)=>`
+      <div class="transport-chip" data-tr="${esc(t.id)}" style="--i:${i}">
         <span class="transport-chip-icon">${esc(t.icon||'🚇')}</span>
         <span class="transport-chip-label">${esc(t.name)}</span>
         <span class="transport-chip-amt">${fmt(t.cost)}</span>
@@ -1606,13 +1669,68 @@ function renderTransportFab(){
 // coordenada del toque; si cae en el botón principal reabría el menú recién
 // cerrado. Se ignora todo toggle en los ~450 ms posteriores a un registro.
 let transportTapGuard = 0;
+let menuAnchorTimer = null;
+
+// v19: cuando el menú se despliega hacia abajo, el contenedor debe crecer desde
+// arriba → se ancla temporalmente por top. Al cerrar se vuelve al anclaje por
+// bottom (estable ante rotación/teclado) tomando como referencia la burbuja.
+function reanchorFabBottom(){
+  const fab=document.getElementById('transport-fab');
+  const btn=document.getElementById('transport-main-btn');
+  const r=btn.getBoundingClientRect();
+  fab.classList.remove('menu-down');
+  if(!r.width) return; // oculto: no hay geometría que anclar
+  fab.style.bottom=Math.round(window.innerHeight-r.bottom)+'px';
+  fab.style.top='auto';
+}
+
+function closeTransportMenu(){
+  if(!transportOpen) return;
+  transportOpen=false;
+  const sub=document.getElementById('transport-sub-btns');
+  sub.classList.add('hidden');sub.classList.remove('visible');
+  if(menuAnchorTimer)clearTimeout(menuAnchorTimer);
+  // re-anclar cuando el colapso termina (hacerlo antes movería la burbuja)
+  menuAnchorTimer=setTimeout(()=>{menuAnchorTimer=null;reanchorFabBottom();},360);
+}
+
+// Cierre sin animación: para cuando empieza un arrastre y la geometría del
+// contenedor debe quedar estable ANTES de medir posiciones.
+function closeTransportMenuInstant(){
+  transportOpen=false;
+  if(menuAnchorTimer){clearTimeout(menuAnchorTimer);menuAnchorTimer=null;}
+  const sub=document.getElementById('transport-sub-btns');
+  sub.classList.add('no-anim','hidden');sub.classList.remove('visible');
+  reanchorFabBottom();
+  void sub.offsetHeight; // fuerza el cierre en este mismo frame
+  sub.classList.remove('no-anim');
+}
+
 function toggleTransportMenu(){
   if(Date.now()-transportTapGuard < 450) return;
-  transportOpen=!transportOpen;
+  if(transportOpen){closeTransportMenu();return;}
+  const fab=document.getElementById('transport-fab');
+  const btn=document.getElementById('transport-main-btn');
+  const r=btn.getBoundingClientRect();
+  if(menuAnchorTimer){clearTimeout(menuAnchorTimer);menuAnchorTimer=null;}
+  if(r.width){
+    // hacia abajo si la burbuja está en la mitad superior de la pantalla
+    const openDown=(r.top+r.height/2) < window.innerHeight/2;
+    fab.classList.toggle('menu-down',openDown);
+    if(openDown){fab.style.top=Math.round(r.top)+'px';fab.style.bottom='auto';}
+    else{fab.style.bottom=Math.round(window.innerHeight-r.bottom)+'px';fab.style.top='auto';}
+  }
+  transportOpen=true;
   const sub=document.getElementById('transport-sub-btns');
-  sub.classList.toggle('hidden',!transportOpen);
-  sub.classList.toggle('visible',transportOpen);
+  sub.classList.remove('hidden');sub.classList.add('visible');
 }
+
+// Tocar fuera de la burbuja cierra el menú (comportamiento Messenger)
+document.addEventListener('pointerdown',e=>{
+  if(!transportOpen) return;
+  if(e.target && e.target.closest && e.target.closest('#transport-fab')) return;
+  closeTransportMenu();
+},true);
 
 function registerTransport(t){
   // v16: el transporte se paga en efectivo → se registra en el mundo Mes.
@@ -1622,10 +1740,8 @@ function registerTransport(t){
   list.push({id:uid(),name:t.name,amount:t.cost,cat:t.cat||'transporte',
     method:'efectivo',date:today(),note:'',isFijo:false});
   saveMExpenses(ym,list);
-  transportOpen=false;
   transportTapGuard=Date.now(); // blinda contra el click fantasma que reabría el menú
-  const sub=document.getElementById('transport-sub-btns');
-  sub.classList.add('hidden');sub.classList.remove('visible');
+  closeTransportMenu();
   if(currentMonthOffset!==0)currentMonthOffset=0;
   renderMes();
   showToast(`🚇 ${t.name} — ${fmt(t.cost)} en efectivo (mes)`);
@@ -1840,36 +1956,64 @@ function renderConfigCycleStatus(){
     statusEl.innerHTML=`Ciclo abierto desde <b>${fmtDate(openCycle.startDate)}</b><br>Se cierra cuando tú lo indiques.`;
     openBtn.style.display='none';
     closeSection.style.display='';
+    // v21: reabrir solo si existe un ciclo cerrado inmediatamente anterior
+    const openIdx=cycles.findIndex(c=>c.open);
+    document.getElementById('cfg-reopen-cycle-btn').style.display=
+      (openIdx>0 && !cycles[openIdx-1].open)?'':'none';
   }
 }
+document.getElementById('cfg-reopen-cycle-btn').addEventListener('click',function(){
+  armDestructive(this, reopenLastCycle);
+});
 
 // ══════════════════════════════════════════════════════
 //  EXPORT CSV WITH CYCLE SELECTOR
 // ══════════════════════════════════════════════════════
+// v21: meses del mundo Mes con datos guardados (más reciente primero)
+function getMesMonths(){
+  const out=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.indexOf('mg_mexp_')===0) out.push(k.slice(8));
+  }
+  return out.sort().reverse();
+}
+
 document.getElementById('cfg-export-csv-btn').addEventListener('click',()=>{
   const cycles=getVisibleCycles();
-  if(!cycles.length){showToast('Sin ciclos para exportar');return;}
+  const months=getMesMonths();
+  if(!cycles.length && !months.length){showToast('Sin datos para exportar');return;}
   const listEl=document.getElementById('export-cycle-list');
   listEl.innerHTML=cycles.map(c=>`
     <label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;">
       <input type="checkbox" value="${c.id}" checked style="width:18px;height:18px;accent-color:var(--accent);">
       <span>${esc(c.label)}${c.open?' (ciclo actual)':''}</span>
     </label>`).join('');
+  // v21: selector de meses no-TDC
+  const mesList=document.getElementById('export-mes-list');
+  document.getElementById('export-mes-title').style.display=months.length?'':'none';
+  mesList.innerHTML=months.map(ym=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;">
+      <input type="checkbox" value="${esc(ym)}" checked style="width:18px;height:18px;accent-color:var(--accent);">
+      <span>${esc(ymLabel(ym))}${ym===currentYM()?' (mes actual)':''}</span>
+    </label>`).join('');
   document.getElementById('modal-export').classList.add('open');
 });
 
 document.getElementById('export-select-all').addEventListener('click',()=>{
-  document.querySelectorAll('#export-cycle-list input[type=checkbox]').forEach(c=>c.checked=true);
+  document.querySelectorAll('#export-cycle-list input[type=checkbox],#export-mes-list input[type=checkbox]').forEach(c=>c.checked=true);
 });
 document.getElementById('export-select-none').addEventListener('click',()=>{
-  document.querySelectorAll('#export-cycle-list input[type=checkbox]').forEach(c=>c.checked=false);
+  document.querySelectorAll('#export-cycle-list input[type=checkbox],#export-mes-list input[type=checkbox]').forEach(c=>c.checked=false);
 });
 
 document.getElementById('export-confirm').addEventListener('click',()=>{
   const selected=[...document.querySelectorAll('#export-cycle-list input[type=checkbox]:checked')].map(c=>c.value);
-  if(!selected.length){showToast('Selecciona al menos un ciclo');return;}
+  const selMonths=[...document.querySelectorAll('#export-mes-list input[type=checkbox]:checked')].map(c=>c.value);
+  if(!selected.length && !selMonths.length){showToast('Selecciona al menos un ciclo o mes');return;}
   const cats=getCats();
-  const rows=[['Ciclo','Fecha','Descripción','Categoría','Monto','Mensualidad','Es MSI','Meses','Es fijo','Nota']];
+  // v21: columna Origen (ciclo TDC o mes calendario) y Método al final
+  const rows=[['Origen','Fecha','Descripción','Categoría','Monto','Mensualidad','Es MSI','Meses','Es fijo','Nota','Método']];
   const cyclesMap=Object.fromEntries(getCycles().map(c=>[c.id,c]));
   selected.forEach(cid=>{
     const cycle=cyclesMap[cid];
@@ -1879,7 +2023,16 @@ document.getElementById('export-confirm').addEventListener('click',()=>{
       const monthly=e.isMsi?e.amount/(e.msiMonths||12):e.amount;
       rows.push([cycle?.label||cid,e.date||'',e.name,e.isMsi?'A meses':cat.name,
         e.amount.toFixed(2),monthly.toFixed(2),e.isMsi?'Sí':'No',e.msiMonths||'',
-        e.isRecurrent?'Sí':'No',e.note||'']);
+        e.isRecurrent?'Sí':'No',e.note||'','Tarjeta']);
+    });
+  });
+  // v21: gastos del mundo Mes (efectivo/débito/transferencia) por mes calendario
+  selMonths.forEach(ym=>{
+    getMExpenses(ym).forEach(e=>{
+      const cat=cats.find(c=>c.id===e.cat)||{name:'Otro'};
+      rows.push(['Mes '+ymLabel(ym),e.date||'',e.name,cat.name,
+        e.amount.toFixed(2),e.amount.toFixed(2),'No','',
+        e.isFijo?'Sí':'No',e.note||'',methodInfo(e.method).name]);
     });
   });
   // Anti-inyección de fórmulas: un texto que empiece con =, +, - o @ se interpreta
@@ -2117,7 +2270,9 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
 //     libera el colapso y NO colapsar si después no quedaría scroll.
 (function setupScrollCollapse(){
   const scroller = document.getElementById('main-scroll');
-  const stickyTop = document.getElementById('sticky-top');
+  // v21: el colapso aplica a la tarjeta-resumen del mundo ACTIVO (tdc o mes)
+  const tops = {tdc:document.getElementById('sticky-top'), mes:document.getElementById('mes-top')};
+  const stickyTop = ()=>tops[currentWorld]||tops.tdc;
   let collapsed = false;
   let lastY = 0;
   let cachedGain = 0, gainMeasuredAt = -1;
@@ -2125,8 +2280,15 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
   function setCollapsed(v){
     if(v===collapsed)return;
     collapsed = v;
-    stickyTop.classList.toggle('collapsed', v);
+    stickyTop().classList.toggle('collapsed', v);
   }
+
+  // Al cambiar de mundo: estado limpio y medición de alto invalidada
+  window.resetTopCollapse = function(){
+    collapsed = false; lastY = 0; gainMeasuredAt = -1;
+    tops.tdc.classList.remove('collapsed');
+    tops.mes.classList.remove('collapsed');
+  };
 
   // Mide cuántos px de alto gana la lista al colapsar la tarjeta. Se hace con las
   // transiciones desactivadas y se revierte en el mismo frame: no llega a pintarse
@@ -2136,12 +2298,12 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     const now = performance.now();
     if(gainMeasuredAt >= 0 && now - gainMeasuredAt < 800) return cachedGain;
     const st = document.createElement('style');
-    st.textContent = '#sticky-top,#sticky-top *{transition:none!important;}';
+    st.textContent = '#sticky-top,#sticky-top *,#mes-top,#mes-top *{transition:none!important;}';
     document.head.appendChild(st);
     const before = scroller.clientHeight;
-    stickyTop.classList.add('collapsed');
+    stickyTop().classList.add('collapsed');
     const after = scroller.clientHeight;   // fuerza reflow en estado colapsado
-    stickyTop.classList.remove('collapsed');
+    stickyTop().classList.remove('collapsed');
     void scroller.clientHeight;            // reflow de vuelta antes de reactivar transiciones
     document.head.removeChild(st);
     cachedGain = after - before;
@@ -2185,7 +2347,8 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
   const fab = document.getElementById('transport-fab');
   const btn = document.getElementById('transport-main-btn');
   const STORAGE_KEY = 'mg_transport_fab_pos';
-  const EDGE_SNAP = 12;     // px desde el borde al asentarse
+  const EDGE_SNAP = 12;     // px desde el lateral al asentarse
+  const FAB_W = 56;         // burbuja: 52px + 2px de borde por lado
   const PROJECT_MS = 90;    // cuánto "proyecta" la inercia del lanzamiento
   const TOP_LIMIT = 70;     // límite superior (debajo del header)
   const BOTTOM_LIMIT = 80;  // límite inferior (encima de la barra inferior)
@@ -2196,32 +2359,48 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
   let moved = false;
   let vx = 0, vy = 0, lastT = 0, lastX = 0, lastY = 0; // velocidad para la inercia
   let finalizeTimer = null;
+  let pinned = false; // el fab está posicionado por left/top (arrastre o atrapada en vuelo)
 
-  // Restore saved position (acotada al viewport: una posición guardada con otra
-  // orientación/teclado abierto no debe dejar la burbuja fuera de pantalla)
+  // Ancla la burbuja a un lateral: el anclaje horizontal SIEMPRE es el borde
+  // donde vive (left o right = EDGE_SNAP), así el menú crece hacia el centro
+  // y la alineación de los chips sigue al lateral (clase dock-left).
+  function setDock(side){
+    fab.classList.toggle('dock-left', side === 'left');
+    if(side === 'left'){ fab.style.left = EDGE_SNAP + 'px'; fab.style.right = 'auto'; }
+    else { fab.style.right = EDGE_SNAP + 'px'; fab.style.left = 'auto'; }
+  }
+
+  // v19: la burbuja SOLO vive en los laterales. Se guarda {side, bottom}; una
+  // posición de versión vieja ({right,bottom}, posiblemente a media pantalla)
+  // se normaliza al lateral más cercano.
   function restorePos(){
     const saved = S.get(STORAGE_KEY, null);
-    if(saved && saved.right !== undefined){
-      const vw = window.innerWidth, vh = window.innerHeight;
-      fab.style.right = Math.max(4, Math.min(vw - 60, saved.right)) + 'px';
-      fab.style.bottom = Math.max(8, Math.min(vh - 60, saved.bottom)) + 'px';
-      fab.style.left = 'auto';
-      fab.style.top = 'auto';
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let side = 'right', bottom = 82;
+    if(saved && saved.side){ side = saved.side; bottom = saved.bottom; }
+    else if(saved && saved.right !== undefined){
+      side = saved.right > (vw - FAB_W)/2 ? 'left' : 'right';
+      bottom = saved.bottom;
     }
+    bottom = Math.max(BOTTOM_LIMIT, Math.min(vh - FAB_W - TOP_LIMIT, bottom || 82));
+    setDock(side);
+    fab.style.bottom = Math.round(bottom) + 'px';
+    fab.style.top = 'auto';
   }
   restorePos();
+  // Rotación/cambio de tamaño: re-asentar en el lateral con la posición guardada
+  window.addEventListener('resize', ()=>{ if(!isDragging && !transportOpen) restorePos(); });
 
   function savePos(){
     const rect = fab.getBoundingClientRect();
     if(!rect.width) return; // oculto (display:none): un rect en ceros corrompería la posición
-    const vw = window.innerWidth, vh = window.innerHeight;
     S.set(STORAGE_KEY, {
-      right: Math.round(vw - rect.right),
-      bottom: Math.round(vh - rect.bottom),
+      side: fab.classList.contains('dock-left') ? 'left' : 'right',
+      bottom: Math.round(window.innerHeight - rect.bottom),
     });
   }
 
-  // Tras el deslizamiento, pasa de left/top a right/bottom (mejor anclaje en rotación/resize)
+  // Tras el deslizamiento, vuelve al anclaje lateral+bottom (estable en rotación)
   function finalizeToAnchor(){
     if(finalizeTimer){clearTimeout(finalizeTimer);finalizeTimer=null;}
     fab.classList.remove('snapping');
@@ -2229,14 +2408,13 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     const rect = fab.getBoundingClientRect();
     if(!rect.width) return; // el fab se ocultó a media animación; no anclar con ceros
     const vw = window.innerWidth, vh = window.innerHeight;
-    fab.style.right = Math.round(vw - rect.right) + 'px';
+    setDock((rect.left + rect.width/2) < vw/2 ? 'left' : 'right');
     fab.style.bottom = Math.round(vh - rect.bottom) + 'px';
-    fab.style.left = 'auto';
     fab.style.top = 'auto';
     savePos();
   }
 
-  // Planea al borde más cercano con inercia y aterrizaje suave (animado por CSS)
+  // Planea al lateral más cercano con inercia y rebote suave (animado por CSS)
   function snapToEdge(){
     const rect = fab.getBoundingClientRect();
     const vw = window.innerWidth, vh = window.innerHeight;
@@ -2252,24 +2430,19 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     fab.style.left = targetLeft + 'px';
     fab.style.top  = targetTop + 'px';
     fab.addEventListener('transitionend', finalizeToAnchor, {once:true});
-    finalizeTimer = setTimeout(finalizeToAnchor, 480); // respaldo si no dispara transitionend
+    finalizeTimer = setTimeout(finalizeToAnchor, 520); // respaldo si no dispara transitionend
   }
 
-  let pinned = false; // el fab está posicionado por left/top (arrastre o atrapada en vuelo)
-
-  // Cambia el anclaje a left/top SOLO mientras hace falta (arrastre real o atrapar
-  // la burbuja en pleno deslizamiento). BUG v16: esto corría en CADA touchstart y
-  // un tap simple dejaba el fab anclado por top sin restaurar ni guardar; como los
-  // chips se despliegan ENCIMA del botón (column-reverse), con anclaje top el menú
-  // empujaba el botón hacia abajo —fuera de pantalla si la burbuja estaba abajo—
-  // ("la burbuja desaparece"; reiniciar re-anclaba y por eso la revivía), y al
-  // contraerse el botón volvía a subir justo a la coordenada del toque, donde el
-  // click fantasma de iOS lo reabría ("no se contrae al seleccionar").
+  // Cambia el anclaje a left/top SOLO mientras hace falta (arrastre real o
+  // atrapar la burbuja en pleno deslizamiento), midiendo la posición ACTUAL.
   function pinToRect(){
-    fab.style.left = fabStartX + 'px';
-    fab.style.top  = fabStartY + 'px';
+    const rect = fab.getBoundingClientRect();
+    fab.style.left = rect.left + 'px';
+    fab.style.top  = rect.top + 'px';
     fab.style.right = 'auto';
     fab.style.bottom = 'auto';
+    fabStartX = rect.left;
+    fabStartY = rect.top;
     pinned = true;
   }
 
@@ -2279,6 +2452,9 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     if(finalizeTimer){clearTimeout(finalizeTimer);finalizeTimer=null;}
     fab.removeEventListener('transitionend', finalizeToAnchor);
     fab.classList.remove('snapping');
+    // Si hay un cierre de menú a medias (colapso animado), rematarlo en seco
+    // para que las mediciones de geometría sean estables.
+    if(menuAnchorTimer && !transportOpen) closeTransportMenuInstant();
     const rect = fab.getBoundingClientRect();
     dragStartX = x;
     dragStartY = y;
@@ -2297,11 +2473,15 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
 
   // Devuelve true cuando el gesto ya se considera arrastre (para preventDefault)
   function moveDrag(x, y){
-    const dx = x - dragStartX;
-    const dy = y - dragStartY;
-    if(!moved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)){
+    if(!moved && (Math.abs(x - dragStartX) > 5 || Math.abs(y - dragStartY) > 5)){
       moved = true;
-      if(!pinned) pinToRect(); // ahora sí es arrastre: pasar a left/top
+      // Si el menú estaba abierto, se cierra en seco: la geometría del
+      // contenedor cambia y las coordenadas de partida deben ser las reales.
+      if(transportOpen){
+        closeTransportMenuInstant();
+        dragStartX = x; dragStartY = y;
+      }
+      pinToRect(); // ahora sí es arrastre: pasar a left/top con el rect actual
     }
     if(!moved) return false;
     // Velocidad instantánea (px/ms) con suavizado, para la inercia al soltar
@@ -2313,8 +2493,8 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
       lastT = now; lastX = x; lastY = y;
     }
     const vw = window.innerWidth, vh = window.innerHeight;
-    const newLeft = Math.max(4, Math.min(vw - fab.offsetWidth - 4, fabStartX + dx));
-    const newTop  = Math.max(4, Math.min(vh - fab.offsetHeight - 4, fabStartY + dy));
+    const newLeft = Math.max(4, Math.min(vw - fab.offsetWidth - 4, fabStartX + (x - dragStartX)));
+    const newTop  = Math.max(4, Math.min(vh - fab.offsetHeight - 4, fabStartY + (y - dragStartY)));
     fab.style.left = newLeft + 'px';
     fab.style.top  = newTop  + 'px';
     return true;
@@ -2325,14 +2505,11 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     if(!isDragging) return;
     isDragging = false;
     btn.classList.remove('dragging');
-    // Se re-asienta al borde si hubo arrastre, o si la burbuja quedó "atrapada"
-    // a media animación (soltarla sin moverla retoma el viaje al borde; antes
-    // quedaba varada con anclaje left/top sin guardar).
+    // Se re-asienta al lateral si hubo arrastre, o si la burbuja quedó
+    // "atrapada" a media animación (soltarla sin moverla retoma el viaje).
+    // El menú ya se cerró al iniciar el movimiento (moveDrag).
     if(moved || pinned){
       snapToEdge();
-      transportOpen = false;
-      const sub = document.getElementById('transport-sub-btns');
-      sub.classList.add('hidden'); sub.classList.remove('visible');
       // Con mouse, el click llega justo después del mouseup: se suprime ese
       // click fantasma para que arrastrar no abra el menú. (En touch el
       // preventDefault del touchmove ya lo evita; el flag se limpia al instante.)
@@ -2517,6 +2694,7 @@ function setWorld(w){
   document.getElementById('tdc-tabs').style.display=w==='tdc'?'flex':'none';
   document.getElementById('mes-tabs').style.display=w==='mes'?'flex':'none';
   document.getElementById('fab-add-lbl').textContent=w==='mes'?'Gasto del mes':'Agregar gasto';
+  if(window.resetTopCollapse)resetTopCollapse(); // v21: colapso limpio al cambiar de mundo
   syncTabVisibility();
   applyWorldAccent();
   updateTransportFabVis();
@@ -2529,7 +2707,7 @@ function syncTabVisibility(){
   ['todos','categorias','recurrentes','msi-tab'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=(currentWorld==='tdc'&&t===tdcActive)?'':'none';
   });
-  ['mgastos','mcats','mfijos'].forEach(t=>{
+  ['mgastos','mcats','mfijos','mtodo'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=(currentWorld==='mes'&&t===mesActive)?'':'none';
   });
   document.getElementById('main-scroll').scrollTop=0;
@@ -2629,6 +2807,43 @@ function renderMes(){
   const maxA=Math.max(...cards.map(c=>c.amt),1);
   cEl.innerHTML=!cards.length?`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos este mes.</p></div>`:
     `<div class="cat-grid">${cards.sort((a,b)=>b.amt-a.amt).map(c=>`<div class="cat-card"><div class="cat-icon">${esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(c.amt)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((c.amt/maxA)*100)}%"></div></div></div>`).join('')}</div>`;
+
+  // v21: pestaña "Todo" — el mes calendario completo: no-TDC + tarjeta + MSI.
+  // La tarjeta se cuenta por FECHA del gasto (cruza ciclos); las compras MSI no
+  // van por su total sino como mensualidad: para el mes en curso se proyecta la
+  // mensualidad de las MSI activas (igual que el resumen TDC), para meses
+  // pasados se usa la atribución exacta por fecha de pago (misma regla v16).
+  const tEl=document.getElementById('tab-mtodo');
+  const firstD=ym+'-01', lastD=ym+'-'+_pad(daysInMonth(ym));
+  const tdcTotals={};let tdcSum=0;
+  getCycles().forEach(c=>{getExpenses(c.id).forEach(e=>{
+    if(!e.date||e.date<firstD||e.date>lastD||e.isMsi)return;
+    tdcTotals[e.cat]=(tdcTotals[e.cat]||0)+e.amount;tdcSum+=e.amount;
+  });});
+  const msiM=getMSI().reduce((s,m)=>{
+    const mon=m.totalAmount/m.months;
+    if(ym===currentYM())
+      return s+((m.months-effectivePaid(m))>0?mon:0);
+    const paidIn=effectivePaidAsOf(m,lastD)-effectivePaidAsOf(m,addDays(firstD,-1));
+    return s+paidIn*mon;
+  },0);
+  const grand=total+tdcSum+msiM;
+  const comb={};
+  Object.keys(totals).forEach(k=>comb[k]=(comb[k]||0)+totals[k]);
+  Object.keys(tdcTotals).forEach(k=>comb[k]=(comb[k]||0)+tdcTotals[k]);
+  const combCards=cats.filter(c=>comb[c.id]).map(c=>({icon:c.icon,name:c.name,amt:comb[c.id]}));
+  const combOrphan=Object.keys(comb).filter(k=>!catIds.has(k)).reduce((s,k)=>s+comb[k],0);
+  if(combOrphan>0)combCards.push({icon:'📦',name:'Sin categoría',amt:combOrphan});
+  if(msiM>0)combCards.push({icon:'📆',name:'A meses (mensualidades)',amt:msiM});
+  const maxC=Math.max(...combCards.map(c=>c.amt),1);
+  tEl.innerHTML=`
+    <div class="msi-summary-card" style="margin-top:12px;">
+      <div class="msi-sum-row"><span class="msi-sum-label">Todo mi mes</span><span class="msi-sum-total">${fmt(grand)}</span></div>
+      <div style="font-size:12px;color:var(--muted);">Sin tarjeta ${fmt(total)} · Tarjeta ${fmt(tdcSum)} · Mensualidades ${fmt(msiM)}</div>
+    </div>
+    ${combCards.length?`<div class="cat-grid">${combCards.sort((a,b)=>b.amt-a.amt).map(c=>`<div class="cat-card"><div class="cat-icon">${esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(c.amt)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((c.amt/maxC)*100)}%"></div></div></div>`).join('')}</div>`
+      :`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos este mes.</p></div>`}
+    <div class="info-card" style="margin-top:12px;">Vista combinada del mes calendario: efectivo/débito/transferencias + gastos de <b>tarjeta por fecha</b> (sin importar el ciclo) + mensualidades MSI. El pago de la tarjeta no se cuenta (evita doble conteo).</div>`;
 
   // Fijos mensuales (plantillas)
   const fEl=document.getElementById('tab-mfijos');
@@ -2972,9 +3187,11 @@ document.getElementById('tutorial-toggle-btn').addEventListener('click',()=>{
 //  TOAST
 // ══════════════════════════════════════════════════════
 let toastTimer;
-function showToast(msg){
+function showToast(msg,onTap){
   const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);
+  // v19: toast accionable (p. ej. "toca para actualizar"); dura más para dar tiempo
+  el.onclick=onTap?()=>{el.classList.remove('show');onTap();}:null;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),onTap?6000:2800);
 }
 
 // ══════════════════════════════════════════════════════
@@ -2985,6 +3202,7 @@ function showToast(msg){
   migrateAccents();
 
   document.getElementById('app-version-lbl').textContent=`MisGastos · Versión ${APP_VERSION}`;
+  document.getElementById('ver-tag').textContent=`v${APP_VERSION}`;
 
   // v16: categorías nuevas para los fijos del mundo Mes (solo una vez)
   (function migrateCatsV16(){
@@ -3046,18 +3264,51 @@ function showToast(msg){
   })();
 
   // Registrar Service Worker para modo offline
+  // v19: iOS a veces desecha la caché offline o el propio SW (presión de
+  // almacenamiento) aunque la PWA siga instalada — por eso a veces la app no
+  // cargaba en el metro pese a estar "cacheada". Defensas:
+  //  1) navigator.storage.persist(): pide a iOS no purgar el almacenamiento.
+  //  2) Auto-reparación: en cada apertura/regreso con red se verifica que
+  //     index.html siga en caché; si iOS la borró, se re-precachea al momento.
+  //  3) updateViaCache:'none': sw.js siempre se busca fresco (GitHub Pages lo
+  //     cachea 10 min por HTTP y retrasaba la llegada de versiones nuevas).
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('sw.js')
+    if(navigator.storage && navigator.storage.persist)
+      navigator.storage.persist().catch(()=>{});
+    const ensureOfflineReady=reg=>{
+      if(!navigator.onLine) return;
+      caches.match('./index.html',{ignoreSearch:true}).then(cached=>{
+        const sw = reg.active || reg.waiting || reg.installing;
+        if(cached || !sw) return;
+        sw.postMessage({type:'ENSURE_PRECACHE'});
+        // si la reparación funcionó, avisar discretamente (útil para saber
+        // que iOS sí está purgando la caché)
+        setTimeout(()=>{
+          caches.match('./index.html',{ignoreSearch:true})
+            .then(ok=>{ if(ok) showToast('🛡️ Modo offline restaurado'); })
+            .catch(()=>{});
+        },4000);
+      }).catch(()=>{});
+    };
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'})
       .then(reg=>{
-        // Si hay una nueva versión disponible, notificar
+        // Si hay una nueva versión disponible, notificar (toast accionable)
         reg.onupdatefound = ()=>{
           const w = reg.installing;
           w.onstatechange = ()=>{
             if(w.state==='installed' && navigator.serviceWorker.controller){
-              showToast('🔄 Nueva versión disponible — recarga para actualizar');
+              showToast('🔄 Nueva versión lista — toca aquí para actualizar',()=>location.reload());
             }
           };
         };
+        ensureOfflineReady(reg);
+        // Al volver a la app con señal: buscar actualización y reparar caché
+        document.addEventListener('visibilitychange',()=>{
+          if(document.visibilityState==='visible'){
+            reg.update().catch(()=>{});
+            ensureOfflineReady(reg);
+          }
+        });
       })
       .catch(()=>{}); // silencioso si falla (ej. localhost sin HTTPS)
   }
