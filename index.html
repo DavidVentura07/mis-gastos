@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MisGastos">
 <title>MisGastos</title>
-<meta name="description" content="Control personal de gastos de tarjeta de crédito. Ciclos, MSI y gastos fijos sin esfuerzo.">
+<meta name="description" content="Control personal de gastos: tarjeta de crédito por ciclos y MSI, efectivo/débito/transferencias por mes y depósitos en efectivo.">
 <meta property="og:title" content="MisGastos">
-<meta property="og:description" content="Control personal de gastos de tarjeta de crédito">
+<meta property="og:description" content="Control personal de gastos: tarjeta, efectivo, débito, transferencias y depósitos">
 <!-- ícono real PNG — súbelo junto con index.html en GitHub Pages -->
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
@@ -288,8 +288,12 @@ input[type=checkbox]{accent-color:var(--accent);}
 .msi-preview-box-inner{padding:12px 14px;}
 .empty{text-align:center;padding:48px 20px;color:var(--muted);}
 .empty-icon{font-size:44px;margin-bottom:12px;}
-.toast{position:fixed;bottom:140px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);border:1px solid transparent;border-radius:100px;padding:10px 20px;font-size:13px;color:var(--bg);z-index:400;opacity:0;transition:opacity .22s cubic-bezier(0.23,1,0.32,1),transform .22s cubic-bezier(0.23,1,0.32,1);pointer-events:none;white-space:nowrap;max-width:calc(100vw - 40px);text-align:center;}
+/* v24: los mensajes largos ya no se salen de la píldora (antes white-space:nowrap
+   los cortaba fuera de pantalla) y el toast accionable sí recibe el toque (antes
+   pointer-events:none hacía imposible tocar "toca aquí para actualizar") */
+.toast{position:fixed;bottom:140px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);border:1px solid transparent;border-radius:22px;padding:10px 20px;font-size:13px;line-height:1.4;color:var(--bg);z-index:400;opacity:0;transition:opacity .22s cubic-bezier(0.23,1,0.32,1),transform .22s cubic-bezier(0.23,1,0.32,1);pointer-events:none;width:max-content;max-width:calc(100vw - 40px);text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.show.tappable{pointer-events:auto;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
 .info-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
 
 /* HOVER + ACTIVE STATES */
@@ -339,6 +343,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 .msi-sum-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
 .msi-sum-label{font-size:13px;color:var(--muted2);}
 .msi-sum-total{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
+/* v23: la mensualidad total de A meses va en el acento (jerarquía; preferencia de David) */
+#msi-monthly-total{color:var(--accent);}
 .msi-sum-footer{padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;}
 .msi-sum-footer span:first-child{color:var(--muted);}
 .msi-sum-footer span:last-child{font-weight:500;}
@@ -400,7 +406,12 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 .st-over .acc-left b{color:var(--danger);}
 .limit-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--r);padding:11px 14px;margin:4px 0 8px;font-size:13px;color:var(--muted2);}
 .limit-row b{font-family:'Syne',sans-serif;color:var(--text);font-size:14px;font-variant-numeric:tabular-nums;}
-.dep-arch-toggle{display:block;width:100%;background:none;border:none;font-size:12px;color:var(--muted);text-align:center;padding:12px 0 8px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+/* v23: la tarjeta deposita al tocarla; el ＋ lo hace evidente */
+.acc-card.can-dep{padding-right:12px;}
+.acc-plus{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;line-height:1;flex-shrink:0;}
+.dep-manage-link{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:none;border:none;font-size:13px;color:var(--muted2);padding:12px 0 6px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.dep-manage-sect{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin:14px 0 8px;}
+.limit-row .exp-act-btn{white-space:nowrap;}
 .hist-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
 .hist-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px;}
 .hist-month{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
@@ -647,12 +658,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
     <div id="tab-dhist" style="display:none"></div>
     <div style="height:14px"></div>
   </div>
-  <div class="fab-wrap">
-    <button class="fab" id="fab-dep">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-      <span>Registrar depósito</span>
-    </button>
-  </div>
+  <!-- v23: sin botón grande — se deposita tocando la tarjeta de la cuenta -->
   <div class="bnav">
     <button class="bnav-btn" data-nav="main"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Inicio</button>
     <button class="bnav-btn" data-nav="msi"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>A meses</button>
@@ -757,7 +763,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
       <div class="cfg-section-title">Respaldo y exportación</div>
       <button class="sec-btn" id="cfg-export-json" style="width:100%;margin-bottom:8px;">📦 Exportar respaldo (JSON)</button>
       <button class="sec-btn" id="cfg-import-json-btn" style="width:100%;margin-bottom:8px;">📥 Importar respaldo (JSON)</button>
-      <input type="file" id="cfg-import-file" accept=".json" style="display:none;">
+      <input type="file" id="cfg-import-file" accept=".json,application/json" style="display:none;">
       <button class="sec-btn" id="cfg-export-csv-btn" style="width:100%;margin-bottom:8px;">📊 Exportar a Excel (CSV)</button>
       <button class="sec-btn" id="cfg-export-claude" style="width:100%;margin-bottom:8px;">🤖 Exportar resumen para Claude (MD)</button>
       <button class="sec-btn danger-btn" id="cfg-clear" style="width:100%;">🗑 Borrar todos los datos</button>
@@ -809,7 +815,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;">
             <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">🏦 Depósitos en efectivo</div>
-            <div style="font-size:13px;color:var(--muted2);line-height:1.6;">En <b style="color:var(--text)">Depósitos</b> llevas el registro del efectivo que depositas a tus cuentas de banco, por mes calendario (rota solo). Hay un <b style="color:var(--text)">límite mensual</b> que aplica a <b style="color:var(--text)">cada cuenta por separado</b>: verás cuánto le has depositado y cuánto le queda; ámbar desde el 80% y rojo si se excede. Si cambias el límite aplica desde el mes actual y los meses pasados conservan el suyo. Archivar una cuenta la oculta para depósitos nuevos sin borrar su historial. Es independiente de tus gastos: un depósito no suma a ningún total.</div>
+            <div style="font-size:13px;color:var(--muted2);line-height:1.6;">En <b style="color:var(--text)">Depósitos</b> llevas el registro del efectivo que depositas a tus cuentas de banco, por mes calendario (rota solo). <b style="color:var(--text)">Toca la tarjeta de una cuenta</b> para registrarle un depósito; editar, archivar o agregar cuentas está en "⚙️ Gestionar cuentas", al final de la pestaña Cuentas. Hay un <b style="color:var(--text)">límite mensual</b> que aplica a <b style="color:var(--text)">cada cuenta por separado</b>: verás cuánto le has depositado y cuánto le queda; ámbar desde el 80% y rojo si se excede. Si cambias el límite aplica desde el mes actual y los meses pasados conservan el suyo. Archivar una cuenta la oculta para depósitos nuevos sin borrar su historial. Es independiente de tus gastos: un depósito no suma a ningún total.</div>
           </div>
 
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;">
@@ -918,7 +924,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-cat-title">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-cat-title">Nueva categoría</div>
-    <div class="field"><label>Ícono (emoji)</label><input type="text" id="cat-inp-icon" placeholder="ej. 🛒" maxlength="4"></div>
+    <div class="field"><label>Ícono (emoji)</label><input type="text" id="cat-inp-icon" placeholder="ej. 🛒" maxlength="16"></div>
     <div class="field"><label>Nombre</label><input type="text" id="cat-inp-name" placeholder="ej. Súper" autocomplete="off"></div>
     <div class="btn-row">
       <button class="sec-btn" id="modal-cat-cancel">Cancelar</button>
@@ -935,7 +941,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-transport-title">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-transport-title">Nuevo atajo de transporte</div>
-    <div class="field"><label>Ícono (emoji)</label><input type="text" id="tr-inp-icon" placeholder="🚇" maxlength="4"></div>
+    <div class="field"><label>Ícono (emoji)</label><input type="text" id="tr-inp-icon" placeholder="🚇" maxlength="16"></div>
     <div class="field"><label>Nombre</label><input type="text" id="tr-inp-name" placeholder="ej. Metro" autocomplete="off"></div>
     <div class="field"><label>Costo ($)</label><div class="pfx-wrap"><input type="number" id="tr-inp-cost" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
     <div class="field">
@@ -1042,7 +1048,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-depacc-title">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-depacc-title">Nueva cuenta</div>
-    <div class="field"><label>Ícono (emoji)</label><input type="text" id="dacc-icon" placeholder="🏦" maxlength="8"></div>
+    <div class="field"><label>Ícono (emoji)</label><input type="text" id="dacc-icon" placeholder="🏦" maxlength="16"></div>
     <div class="field"><label>Nombre</label><input type="text" id="dacc-name" placeholder="ej. BBVA Nómina" autocomplete="off"></div>
     <div class="btn-row">
       <button class="sec-btn" id="modal-depacc-cancel">Cancelar</button>
@@ -1052,6 +1058,18 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
       <button class="sec-btn" id="modal-depacc-archive" style="width:100%;">🗄️ Archivar cuenta</button>
       <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5;" id="dacc-archive-desc">Ya no aparece para registrar depósitos nuevos. Su historial se conserva y puedes reactivarla cuando quieras.</p>
     </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: GESTIONAR CUENTAS (v23) ══ -->
+<div class="overlay" id="modal-depmanage">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-depmanage-title">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-depmanage-title" style="margin-bottom:4px;">Gestionar cuentas</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Edita, archiva o agrega las cuentas donde depositas.</p>
+    <div id="depmanage-list"></div>
+    <button class="sec-btn" id="depmanage-add" style="width:100%;margin-top:8px;">+ Agregar cuenta</button>
+    <button class="sec-btn" id="depmanage-close" style="width:100%;margin-top:8px;background:transparent;">Cerrar</button>
   </div>
 </div>
 
@@ -1076,13 +1094,28 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 //  STORAGE HELPERS
 // ══════════════════════════════════════════════════════
 // Versión visible de la app = número de la última entrada en CAMBIOS.md (esquema unificado).
-const APP_VERSION = 22;
+const APP_VERSION = 24;
 
 const S = {
-  get:(k,fb={})=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}},
+  // v24: si lo guardado no tiene la forma esperada (null, objeto donde va una
+  // lista…) se devuelve el valor por defecto: un dato corrupto ya no tumba la app.
+  get:(k,fb={})=>{
+    try{
+      const raw=localStorage.getItem(k);
+      if(!raw)return fb;
+      const v=JSON.parse(raw);
+      if(v==null)return fb;
+      if(Array.isArray(fb)&&!Array.isArray(v))return fb;
+      if(fb&&typeof fb==='object'&&!Array.isArray(fb)&&(typeof v!=='object'||Array.isArray(v)))return fb;
+      return v;
+    }catch(e){return fb;}
+  },
   // Si el almacenamiento está lleno (o en modo privado) el guardado truena en
   // silencio y el usuario cree que registró; avisamos en vez de tragarnos el error.
-  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){showToast('⚠️ No se pudo guardar — almacenamiento lleno o bloqueado');}},
+  // Devuelve true/false para quien necesite saber si realmente se guardó.
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){S.failAt=Date.now();showToast(S.FAIL_MSG);return false;}},
+  FAIL_MSG:'⚠️ No se pudo guardar — almacenamiento lleno o bloqueado',
+  failAt:0,
   del:(k)=>localStorage.removeItem(k),
 };
 
@@ -1148,7 +1181,20 @@ const catCardHTML = (c,maxAmt)=>`<div class="cat-card"><div class="cat-icon">${c
 // ══════════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════════
-const fmt = n=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(n);
+// v24: un solo formateador (crearlo en cada llamada costaba en listas largas)
+const MXN = new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'});
+const fmt = n=>MXN.format(Number(n)||0);
+// v24: primer "carácter visible" de un texto (un emoji compuesto como 👨‍👩‍👦 o 🇲🇽
+// cuenta como uno). Se usa para los íconos: antes maxlength=4 impedía teclear
+// emojis compuestos y dejaba escribir texto como "abcd".
+function firstGrapheme(s){
+  s=String(s||'').trim();
+  if(!s)return'';
+  if(window.Intl&&Intl.Segmenter){
+    for(const {segment} of new Intl.Segmenter('es',{granularity:'grapheme'}).segment(s))return segment;
+  }
+  return Array.from(s)[0];
+}
 const fmtDate = d=>{
   if(!d)return'—';
   const dt=typeof d==='string'?new Date(d+'T12:00:00'):d;
@@ -1311,7 +1357,7 @@ function renderCycleBar(){
   }
 
   // Compact line
-  let nameLine = cycle.label;
+  let nameLine = esc(cycle.label); // v24: la etiqueta puede venir de un respaldo importado
   if(cycle.open){
     nameLine += ' &nbsp;<span class="cycle-open-badge">Abierto</span>';
   } else if(cycle.endDate){
@@ -1417,7 +1463,7 @@ function expenseHTML(e, cycleKey){
   const cats = getCats();
   const cat = cats.find(c=>c.id===e.cat)||NO_CAT;
   const displayAmt = e.isMsi ? e.amount/(e.msiMonths||12) : e.amount;
-  const sub = e.isMsi ? `<div class="exp-amount-sub">${fmt(e.amount)} total · ${e.msiMonths}MSI</div>`:
+  const sub = e.isMsi ? `<div class="exp-amount-sub">${fmt(e.amount)} total · ${esc(e.msiMonths)}MSI</div>`:
               e.isRecurrent ? `<div class="exp-amount-sub">Fijo mensual</div>`:'';
   let cls = e.isMsi?'is-msi':e.isRecurrent?'is-recurrent':'';
 
@@ -1459,6 +1505,14 @@ document.getElementById('main-scroll').addEventListener('click',e=>{
 // ══════════════════════════════════════════════════════
 //  RENDER TABS
 // ══════════════════════════════════════════════════════
+// v24: la búsqueda encuentra por descripción, nota o nombre de categoría, y sin
+// importar acentos ("super" encuentra "Súper")
+const normTxt = s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function matchesSearch(e,q){
+  const nq=normTxt(q);
+  const cat=getCats().find(c=>c.id===e.cat);
+  return normTxt(e.name).includes(nq)||normTxt(e.note).includes(nq)||(!!cat&&normTxt(cat.name).includes(nq));
+}
 function renderTabs(){
   const cycle = getCurrentCycle();
   const expenses = cycle ? getExpenses(cycle.id) : [];
@@ -1466,7 +1520,7 @@ function renderTabs(){
 
   // Apply search filter
   const q = searchQuery.toLowerCase().trim();
-  const filtered = q ? expenses.filter(e=>e.name.toLowerCase().includes(q)||(e.note||'').toLowerCase().includes(q)) : expenses;
+  const filtered = q ? expenses.filter(e=>matchesSearch(e,q)) : expenses;
 
   // TODOS
   const todosEl = document.getElementById('tab-todos');
@@ -1525,7 +1579,10 @@ function effectivePaidAsOf(m, asOfStr){
   const auto = getCycles().filter(c=>{
     if(c.open || !c.payDate) return false;
     const pd = new Date(c.payDate+'T12:00:00');
-    return (!since || pd >= since) && pd <= asOf;
+    // v24: estrictamente DESPUÉS de la línea base. Con >= un pago cuya fecha límite
+    // coincidía con el día de la edición ya iba incluido en paidBaseline y se volvía
+    // a sumar (editar una MSI el día de pago la adelantaba un mes).
+    return (!since || pd > since) && pd <= asOf;
   }).length;
   return Math.min(m.months, baseline + auto);
 }
@@ -1584,7 +1641,7 @@ function renderMSI(){
       </div>
       <div class="msi-prog-wrap"><div class="msi-prog-bar" style="width:0%" data-pct="${pct}"></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;">
-        <span style="font-size:12px;color:var(--muted);">${paid} de ${m.months} pagados${done?'':' · 🔄 auto'}${liqDate?'<br><span style="font-size:11px;">'+liqDate+'</span>':''}</span>
+        <span style="font-size:12px;color:var(--muted);">${paid} de ${esc(m.months)} pagados${done?'':' · 🔄 auto'}${liqDate?'<br><span style="font-size:11px;">'+liqDate+'</span>':''}</span>
         <button class="exp-act-btn" data-msi-edit="${esc(m.id)}" style="flex-shrink:0;">✏️ Editar</button>
       </div>
     </div>`;
@@ -1730,6 +1787,13 @@ document.getElementById('modal-save').addEventListener('click',()=>{
   const name=document.getElementById('inp-name').value.trim();
   const amount=parseFloat(document.getElementById('inp-amount').value);
   if(!name||!amount||amount<=0){showToast('⚠️ Ingresa nombre y monto');return;}
+  // v24: sin fecha el gasto quedaba en "Sin fecha" y no contaba en la pestaña Todo
+  // (que suma por fecha); en una MSI rompía la liquidación estimada.
+  if(!document.getElementById('inp-date').value){showToast('⚠️ Selecciona una fecha');return;}
+  // v24: meses ya pagados siempre entre 0 y el plazo (antes aceptaba negativos)
+  const msiMonthsSel=parseInt(document.getElementById('inp-msi-months').value)||12;
+  const paidInp=document.getElementById('inp-msi-paid');
+  paidInp.value=Math.max(0,Math.min(msiMonthsSel,parseInt(paidInp.value)||0));
 
   // Edit MSI standalone
   if(editingExpId&&editingExpId.startsWith('msi:')){
@@ -1964,6 +2028,9 @@ document.addEventListener('pointerdown',e=>{
 },true);
 
 function registerTransport(t){
+  // v24: con UN solo atajo la burbuja registra directo al tocarla; un doble toque
+  // o el click fantasma de iOS registraban dos pasajes. Ventana anti-rebote.
+  if(Date.now()-transportTapGuard < 700) return;
   // v16: el transporte se paga en efectivo → se registra en el mundo Mes.
   const ym=currentYM();
   seedMonth(ym);
@@ -2036,7 +2103,7 @@ document.getElementById('cfg-add-cat').addEventListener('click',()=>{
 });
 
 document.getElementById('modal-cat-save').addEventListener('click',()=>{
-  const icon=document.getElementById('cat-inp-icon').value.trim()||'📦';
+  const icon=firstGrapheme(document.getElementById('cat-inp-icon').value)||'📦';
   const name=document.getElementById('cat-inp-name').value.trim();
   if(!name){showToast('⚠️ Ingresa un nombre');return;}
   const cats=getCats();
@@ -2109,7 +2176,7 @@ function openEditTransport(id){
 }
 
 document.getElementById('modal-tr-save').addEventListener('click',()=>{
-  const icon=document.getElementById('tr-inp-icon').value.trim()||'🚇';
+  const icon=firstGrapheme(document.getElementById('tr-inp-icon').value)||'🚇';
   const name=document.getElementById('tr-inp-name').value.trim();
   const cost=parseFloat(document.getElementById('tr-inp-cost').value);
   const cat=document.getElementById('tr-inp-cat').value;
@@ -2158,13 +2225,24 @@ document.getElementById('modal-cycle-save').addEventListener('click',()=>{
   showToast('✅ Primer ciclo abierto');
 });
 document.getElementById('modal-cycle-cancel').addEventListener('click',()=>closeModal('modal-cycle'));
+// v24: tocar el fondo también cierra estas hojas (como en el resto de modales)
+['modal-cycle','modal-export'].forEach(id=>document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeModal(id);}));
 
 document.getElementById('cfg-close-cycle-btn').addEventListener('click',function(){
   const cutDate=document.getElementById('cfg-cut-date-input').value;
   const payDate=document.getElementById('cfg-pay-date-input').value;
   if(!cutDate||!payDate){showToast('⚠️ Ingresa ambas fechas');return;}
+  // v24: el corte viene del estado de cuenta, así que ya ocurrió; una fecha futura
+  // casi siempre es un error de dedo y abriría un ciclo nuevo que aún no empieza.
+  if(cutDate>today()){showToast('⚠️ La fecha de corte no puede ser futura');return;}
   armDestructive(this,()=>{
+    const before=getCycles().length;
     closeCycleAndOpenNew(cutDate,payDate);
+    // v24: limpiar las fechas tras cerrar, para no reutilizarlas por error el mes siguiente
+    if(getCycles().length>before){
+      document.getElementById('cfg-cut-date-input').value='';
+      document.getElementById('cfg-pay-date-input').value='';
+    }
     renderConfigCycleStatus();
   });
 });
@@ -2205,7 +2283,8 @@ function getMesMonths(){
   const out=[];
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
-    if(k && k.indexOf('mg_mexp_')===0) out.push(k.slice(8));
+    // v24: solo meses con gastos (un mes que quedó vacío tras mover gastos no se lista)
+    if(k && k.indexOf('mg_mexp_')===0 && S.get(k,[]).length) out.push(k.slice(8));
   }
   return out.sort().reverse();
 }
@@ -2217,7 +2296,7 @@ document.getElementById('cfg-export-csv-btn').addEventListener('click',()=>{
   const listEl=document.getElementById('export-cycle-list');
   listEl.innerHTML=cycles.map(c=>`
     <label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;">
-      <input type="checkbox" value="${c.id}" checked style="width:18px;height:18px;accent-color:var(--accent);">
+      <input type="checkbox" value="${esc(c.id)}" checked style="width:18px;height:18px;accent-color:var(--accent);">
       <span>${esc(c.label)}${c.open?' (ciclo actual)':''}</span>
     </label>`).join('');
   // v21: selector de meses no-TDC
@@ -2270,14 +2349,20 @@ document.getElementById('export-confirm').addEventListener('click',()=>{
   // como fórmula al abrir el CSV en Excel; se antepone ' (los montos empiezan con
   // dígito, así que no se ven afectados).
   const csv=rows.map(r=>r.map(v=>{let s=String(v);if(/^[=+\-@]/.test(s))s="'"+s;return `"${s.replace(/"/g,'""')}"`;}).join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`misgastos_${today()}.csv`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  downloadFile(`misgastos_${today()}.csv`,'\uFEFF'+csv,'text/csv;charset=utf-8;');
   closeModal('modal-export');
   showToast('📊 CSV descargado');
 });
 document.getElementById('export-cancel').addEventListener('click',()=>closeModal('modal-export'));
+
+// v24: descarga única para JSON/CSV/MD. La URL del archivo se libera con retraso:
+// liberarla en el mismo instante del click puede cancelar la descarga en Safari/iOS.
+function downloadFile(filename, content, type){
+  const url=URL.createObjectURL(new Blob([content],{type}));
+  const a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
 
 // ══════════════════════════════════════════════════════
 //  BACKUP / RESTORE
@@ -2294,10 +2379,7 @@ document.getElementById('cfg-export-json').addEventListener('click',()=>{
     if(k&&k.startsWith('mg_mexp_'))backup.mexpenses[k]=S.get(k,[]);
     if(k&&k.startsWith('mg_depm_'))backup.deposits[k]=S.get(k,[]);
   }
-  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`misgastos_respaldo_${today()}.json`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  downloadFile(`misgastos_respaldo_${today()}.json`,JSON.stringify(backup,null,2),'application/json');
   saveConfig({...getConfig(),lastBackupAt:today()}); // para el recordatorio de respaldo
   showToast('📦 Respaldo descargado');
 });
@@ -2305,59 +2387,130 @@ document.getElementById('cfg-export-json').addEventListener('click',()=>{
 document.getElementById('cfg-import-json-btn').addEventListener('click',function(){
   armDestructive(this,()=>document.getElementById('cfg-import-file').click());
 });
+// v24: foto de TODOS los datos (texto crudo de cada clave mg_) para poder deshacer
+// un borrado/importación, o revertir una importación que no cupo a medias.
+function snapshotData(){
+  const snap={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith('mg_'))snap[k]=localStorage.getItem(k);
+  }
+  return snap;
+}
+function wipeData(){
+  const toDel=[];
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
+  toDel.forEach(k=>localStorage.removeItem(k));
+}
+function restoreSnapshot(snap){
+  wipeData();
+  Object.entries(snap).forEach(([k,v])=>{try{localStorage.setItem(k,v);}catch(e){}});
+}
+// Re-pinta todo tras reemplazar los datos por completo
+function refreshAfterDataChange(){
+  migrateAccents();
+  currentCycleIdx=0;currentMonthOffset=0;depMonthOffset=0;
+  setWorld(getConfig().lastWorld==='mes'?'mes':'tdc');
+  refreshSwatches();fillConfigInputs();
+  renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
+  if(activeScreen==='msi')renderMSI();
+  if(activeScreen==='dep')renderDep();
+}
+
+// v24: normaliza lo importado. Descarta entradas que no son objetos y convierte
+// montos a número: un respaldo editado a mano con "100" (texto) sumaba como
+// cadena ("0100") y rompía totales y CSV.
+function cleanItems(list, numFields, required){
+  if(!Array.isArray(list))return [];
+  return list.filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).map(x=>{
+    const o={...x};
+    if(o.id!=null)o.id=String(o.id);
+    if(o.name!=null)o.name=String(o.name);
+    numFields.forEach(f=>{if(o[f]!=null&&o[f]!=='')o[f]=Number(o[f]);});
+    return o;
+  }).filter(o=>required.every(f=>f==='id'?!!o.id:Number.isFinite(o[f])));
+}
+const CLEAN = {
+  expenses:l=>cleanItems(l,['amount','msiMonths'],['id','amount']),
+  msi:l=>cleanItems(l,['totalAmount','months','paidBaseline'],['id','totalAmount','months']).filter(m=>m.months>0),
+  cycles:l=>cleanItems(l,[],['id']).filter(c=>typeof c.startDate==='string'),
+  cats:l=>cleanItems(l,[],['id']),
+  transport:l=>cleanItems(l,['cost'],['id','cost']),
+  mrec:l=>cleanItems(l,['amount'],['id','amount']),
+  depAccounts:l=>cleanItems(l,[],['id']),
+  depLimits:l=>cleanItems(l,['amount'],['amount']).filter(x=>typeof x.from==='string'),
+  deposits:l=>cleanItems(l,['amount'],['id','amount']),
+};
+
 document.getElementById('cfg-import-file').addEventListener('change',function(){
   const file=this.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=ev=>{
-    try{
-      const b=JSON.parse(ev.target.result);
-      // Validar la estructura ANTES de borrar los datos actuales: un archivo con
-      // formas incorrectas (cats como objeto, gastos como string…) rompería la
-      // app en silencio después de haber destruido lo que había.
-      const isArr=Array.isArray;
-      const valid = b && typeof b==='object' && b.version
-        && (!b.cats||isArr(b.cats)) && (!b.msi||isArr(b.msi))
-        && (!b.transport||isArr(b.transport)) && (!b.cycles||isArr(b.cycles))
-        && (!b.mrec||isArr(b.mrec)) && (!b.mseeded||isArr(b.mseeded))
-        && (!b.expenses||(typeof b.expenses==='object'&&!isArr(b.expenses)&&Object.values(b.expenses).every(isArr)))
-        && (!b.mexpenses||(typeof b.mexpenses==='object'&&!isArr(b.mexpenses)&&Object.values(b.mexpenses).every(isArr)))
-        && (!b.depAccounts||isArr(b.depAccounts)) && (!b.depLimits||isArr(b.depLimits))
-        && (!b.deposits||(typeof b.deposits==='object'&&!isArr(b.deposits)
-            &&Object.entries(b.deposits).every(([k,v])=>k.startsWith('mg_depm_')&&isArr(v))));
-      if(!valid){showToast('⚠️ Archivo no válido');return;}
-      const toDel=[];
-      for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
-      toDel.forEach(k=>localStorage.removeItem(k));
-      if(b.config)saveConfig(b.config);
-      if(b.cats)saveCats(b.cats);
-      if(b.msi)saveMSI(b.msi);
-      if(b.transport)saveTransport(b.transport);
-      if(b.cycles)saveCycles(b.cycles);
-      if(b.expenses)Object.entries(b.expenses).forEach(([k,v])=>S.set(k,v));
-      if(b.mrec)saveMRec(b.mrec);
-      if(b.mseeded)saveMSeeded(b.mseeded);
-      if(b.mexpenses)Object.entries(b.mexpenses).forEach(([k,v])=>S.set(k,v));
-      if(b.depAccounts)saveDepAccounts(b.depAccounts);
-      if(b.depLimits)saveDepLimits(b.depLimits);
-      if(b.deposits)Object.entries(b.deposits).forEach(([k,v])=>S.set(k,v));
-      migrateAccents();
-      currentCycleIdx=0;currentMonthOffset=0;depMonthOffset=0;depShowArchived=false;
-      setWorld(getConfig().lastWorld==='mes'?'mes':'tdc');
-      refreshSwatches();
-      renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
-      showToast('✅ Datos restaurados');
-    }catch(e){showToast('⚠️ Error al leer el archivo');}
+    let b;
+    try{ b=JSON.parse(ev.target.result); }catch(e){ showToast('⚠️ Error al leer el archivo'); return; }
+    // Validar la estructura ANTES de borrar los datos actuales: un archivo con
+    // formas incorrectas (cats como objeto, gastos como string…) rompería la
+    // app en silencio después de haber destruido lo que había.
+    const isArr=Array.isArray;
+    const isMap=o=>o&&typeof o==='object'&&!isArr(o)&&Object.values(o).every(isArr);
+    const valid = b && typeof b==='object' && b.version
+      && (!b.config||(typeof b.config==='object'&&!isArr(b.config)))
+      && (!b.cats||isArr(b.cats)) && (!b.msi||isArr(b.msi))
+      && (!b.transport||isArr(b.transport)) && (!b.cycles||isArr(b.cycles))
+      && (!b.mrec||isArr(b.mrec)) && (!b.mseeded||isArr(b.mseeded))
+      && (!b.expenses||isMap(b.expenses)) && (!b.mexpenses||isMap(b.mexpenses))
+      && (!b.depAccounts||isArr(b.depAccounts)) && (!b.depLimits||isArr(b.depLimits))
+      && (!b.deposits||isMap(b.deposits));
+    if(!valid){showToast('⚠️ Archivo no válido');return;}
+
+    // Lista de escrituras ya limpias. Las claves de gastos/depósitos solo se
+    // aceptan con su prefijo (un archivo manipulado no puede escribir otras claves).
+    const writes=[];
+    const add=(k,v)=>writes.push([k,v]);
+    if(b.config)add('mg_cfg',b.config);
+    if(b.cats)add('mg_cats',CLEAN.cats(b.cats));
+    if(b.msi)add('mg_msi',CLEAN.msi(b.msi));
+    if(b.transport)add('mg_transport',CLEAN.transport(b.transport));
+    if(b.cycles)add('mg_cycles',CLEAN.cycles(b.cycles));
+    if(b.mrec)add('mg_mrec',CLEAN.mrec(b.mrec));
+    if(b.mseeded)add('mg_mseeded',b.mseeded.filter(x=>typeof x==='string'));
+    if(b.depAccounts)add('mg_dep_accounts',CLEAN.depAccounts(b.depAccounts));
+    if(b.depLimits)add('mg_dep_limits',CLEAN.depLimits(b.depLimits));
+    [['expenses','mg_exp_',CLEAN.expenses],['mexpenses','mg_mexp_',CLEAN.expenses],['deposits','mg_depm_',CLEAN.deposits]]
+      .forEach(([field,prefix,clean])=>{
+        if(b[field])Object.entries(b[field]).forEach(([k,v])=>{if(k.startsWith(prefix))add(k,clean(v));});
+      });
+
+    // v24: importación atómica. Si algo no cabe a media escritura, se revierte a
+    // los datos anteriores en vez de dejar la app a medias.
+    const snap=snapshotData();
+    wipeData();
+    let ok=true;
+    for(const [k,v] of writes){
+      try{localStorage.setItem(k,JSON.stringify(v));}catch(e){ok=false;break;}
+    }
+    if(!ok){
+      restoreSnapshot(snap);refreshAfterDataChange();
+      showToast('⚠️ El respaldo no cupo en el teléfono — tus datos anteriores siguen intactos');
+      return;
+    }
+    refreshAfterDataChange();
+    showToast('✅ Datos restaurados — toca aquí para deshacer',()=>{
+      restoreSnapshot(snap);refreshAfterDataChange();showToast('↩️ Importación deshecha');
+    });
   };
   reader.readAsText(file);this.value='';
 });
 
 document.getElementById('cfg-clear').addEventListener('click',function(){
   armDestructive(this,()=>{
-    const toDel=[];
-    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
-    toDel.forEach(k=>localStorage.removeItem(k));
-    currentCycleIdx=0;currentMonthOffset=0;depMonthOffset=0;renderAll();renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
-    showToast('Datos borrados');
+    // v24: se guarda una foto en memoria para poder deshacer durante unos segundos
+    const snap=snapshotData();
+    wipeData();
+    refreshAfterDataChange();
+    showToast('🗑 Datos borrados — toca aquí para deshacer',()=>{
+      restoreSnapshot(snap);refreshAfterDataChange();showToast('↩️ Datos recuperados');
+    });
   });
 });
 
@@ -2404,6 +2557,9 @@ function disarmDestructive(btn){
   }
 }
 function armDestructive(btn, onConfirm){
+  // v24: un doble toque accidental (dos toques en <400 ms) ya no confirma: la
+  // confirmación exige un segundo toque deliberado.
+  if(btn._armed && Date.now()-(btn._armedAt||0) < 400) return;
   if(btn._armed){
     clearTimeout(btn._armTimer);
     btn._armed=false;
@@ -2412,6 +2568,7 @@ function armDestructive(btn, onConfirm){
     onConfirm();
   } else {
     btn._armed=true;
+    btn._armedAt=Date.now();
     btn._origText=btn.textContent;
     btn.textContent='Toca de nuevo para confirmar';
     btn.classList.add('btn-armed');
@@ -2796,6 +2953,13 @@ window.resetDepCollapse = setupScrollCollapse(document.getElementById('dep-scrol
 // ══════════════════════════════════════════════════════
 //  NAV
 // ══════════════════════════════════════════════════════
+// Campos de Config con los valores guardados (también tras importar/borrar datos)
+function fillConfigInputs(){
+  const cfg=getConfig();
+  document.getElementById('cfg-cardname').value=cfg.cardName||'';
+  document.getElementById('cfg-budget').value=cfg.cycleBudget||'';
+  document.getElementById('cfg-mbudget').value=cfg.monthBudget||'';
+}
 function showScreen(name){
   activeScreen=name;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -2807,12 +2971,7 @@ function showScreen(name){
     resetDepCollapse();
     renderDep();
   }
-  if(name==='config'){renderConfigCycleStatus();renderCatManager();renderTransportConfig();refreshSwatches();
-    const cfg=getConfig();
-    if(cfg.cardName)document.getElementById('cfg-cardname').value=cfg.cardName;
-    document.getElementById('cfg-budget').value=cfg.cycleBudget||'';
-    document.getElementById('cfg-mbudget').value=cfg.monthBudget||'';
-  }
+  if(name==='config'){renderConfigCycleStatus();renderCatManager();renderTransportConfig();refreshSwatches();fillConfigInputs();}
   updateTransportFabVis();
 }
 
@@ -2934,6 +3093,21 @@ function seedMonth(ym){
   saveMSeeded(seeded);
 }
 
+// v24: precarga también los meses que quedaron "saltados". Antes solo se precargaba
+// el mes en curso: si un mes entero no se abría la app (viaje, teléfono nuevo), ese
+// mes se quedaba sin sus fijos. Se rellena desde el último mes precargado hasta el
+// actual (máximo 12). Sin historial previo solo se precarga el mes actual.
+function seedPendingMonths(){
+  const cur=currentYM();
+  const seeded=getMSeeded().filter(x=>/^\d{4}-\d{2}$/.test(x)).sort();
+  const last=seeded[seeded.length-1];
+  if(last && last<cur){
+    const gap=ymOffset(last); // meses entre el último precargado y hoy
+    for(let off=Math.min(gap-1,12); off>=1; off--) seedMonth(ymShift(off));
+  }
+  seedMonth(cur);
+}
+
 function setWorld(w){
   currentWorld=w;
   const cfg=getConfig();
@@ -2986,7 +3160,7 @@ function mExpenseHTML(e,ym){
       <div class="exp-meta">
         <span class="method-chip m-${esc(e.method||'efectivo')}">${m.icon} ${m.name}</span>
         <span>· ${esc(cat.name)}</span>
-        ${e.isFijo?'<span class="est-badge">Fijo · estimado</span>':''}
+        ${e.isFijo?`<span class="est-badge">${e.confirmed?'Fijo':'Fijo · estimado'}</span>`:''}
         <span>· ${fmtDate(e.date)}</span>
       </div>
       ${e.note?`<div class="exp-note">${esc(e.note)}</div>`:''}
@@ -3034,7 +3208,7 @@ function renderMes(){
 
   // Lista de gastos (respeta la búsqueda)
   const q=searchQuery.toLowerCase().trim();
-  const filtered=q?all.filter(e=>e.name.toLowerCase().includes(q)||(e.note||'').toLowerCase().includes(q)):all;
+  const filtered=q?all.filter(e=>matchesSearch(e,q)):all;
   const gEl=document.getElementById('tab-mgastos');
   if(!filtered.length){
     gEl.innerHTML=`<div class="empty"><div class="empty-icon">${q?'🔍':'📅'}</div><p>${q?'Sin resultados para "'+esc(q)+'"':'Sin gastos en '+esc(ymLabel(ym))+'.<br>Toca el botón para agregar.'}</p></div>`;
@@ -3185,6 +3359,8 @@ document.getElementById('modal-madd-save').addEventListener('click',()=>{
     const idx=src.findIndex(x=>x.id===eid);
     if(idx===-1){closeModal('modal-madd');return;}
     const updated={...src[idx],name,amount,cat:mSelectedCat,method:mSelectedMethod,date,note};
+    // v24: un fijo precargado que ya revisaste y guardaste deja de ser "estimado"
+    if(updated.isFijo)updated.confirmed=true;
     if(targetYM===srcYM){
       src[idx]=updated;saveMExpenses(srcYM,src);
     } else {
@@ -3259,11 +3435,13 @@ document.getElementById('modal-mfijo-save').addEventListener('click',()=>{
     saveMRec(rec);
     showToast('✏️ Fijo actualizado — aplica desde el próximo mes');
   } else {
+    // v24: precargar el mes ANTES de guardar la plantilla nueva; al revés, si el mes
+    // aún no estaba precargado, seedMonth también cargaba esta plantilla y quedaba duplicada.
+    const ym=currentYM();
+    seedMonth(ym);
     const nf={id:uid(),name,amount,cat:mSelectedCat,method:mSelectedMethod};
     rec.push(nf);saveMRec(rec);
     // Cargar también la instancia de este mes (el día 1 ya pasó)
-    const ym=currentYM();
-    seedMonth(ym);
     const list=getMExpenses(ym);
     list.push({id:uid(),name,amount,cat:mSelectedCat,method:mSelectedMethod,date:today(),note:'',isFijo:true,fijoId:nf.id});
     saveMExpenses(ym,list);
@@ -3346,7 +3524,6 @@ document.getElementById('modal-mover').addEventListener('click',function(e){if(e
 //  DEPÓSITOS (v22) — efectivo depositado a cuentas de banco
 // ══════════════════════════════════════════════════════
 let depMonthOffset = 0;       // 0 = mes actual
-let depShowArchived = false;
 let depSelAcc = '';           // cuenta elegida en el modal
 let editingDepId = null;      // id|YYYY-MM
 let editingDepAccId = null;
@@ -3460,43 +3637,46 @@ function renderDep(){
   // ── Pestaña Cuentas ──
   let h='';
   if(!allAccs.length){
-    h=`<div class="empty"><div class="empty-icon">🏦</div><p>Agrega las cuentas donde depositas efectivo<br>para llevar la cuenta de cada mes.</p></div>`;
-  } else if(!accs.length){
-    h=`<div class="empty"><div class="empty-icon">🏦</div><p>Sin cuentas con depósitos en ${esc(ymLabel(ym))}.</p></div>`;
+    // Primer uso: sin botón grande, el alta de cuenta tiene que estar a la vista
+    $('tab-dcuentas').innerHTML=`<div class="empty"><div class="empty-icon">🏦</div><p>Agrega las cuentas donde depositas efectivo<br>para llevar la cuenta de cada mes.</p></div>
+      <button class="save-btn" data-dep-act="add-acc" style="margin-top:0;">+ Agregar cuenta</button>`;
   } else {
-    h=accs.map(a=>{
-      const dep=totals[a.id]||0;
-      const st=depStatus(dep,limit);
-      const p=Math.min(100,st.pct).toFixed(1);
-      const attrs=a.ghost?'':` data-acc-edit="${esc(a.id)}" role="button" tabindex="0"`;
-      return`<div class="acc-card ${st.cls}${a.archived?' is-archived':''}"${attrs}>
-        <div class="ring" style="--p:${p}"><span>${limit>0?Math.round(st.pct)+'%':'—'}</span></div>
-        <div class="acc-info">
-          <div class="acc-name">${esc(a.icon)} ${esc(a.name)}${a.archived?'<span class="acc-tag">archivada</span>':''}</div>
-          <div class="acc-amts"><span class="acc-dep">${fmt(dep)}</span><span class="acc-left">${st.left}</span></div>
-          <div class="acc-bar"><i style="width:0%" data-pct="${limit>0?p:0}"></i></div>
-        </div>
-      </div>`;
-    }).join('');
+    if(!accs.length){
+      h=`<div class="empty"><div class="empty-icon">🏦</div><p>Sin cuentas con depósitos en ${esc(ymLabel(ym))}.</p></div>`;
+    } else {
+      // v23: tocar la tarjeta de una cuenta activa = registrar depósito en ella.
+      // Una archivada (visible por tener depósitos ese mes) abre Gestionar cuentas.
+      h=accs.map(a=>{
+        const dep=totals[a.id]||0;
+        const st=depStatus(dep,limit);
+        const p=Math.min(100,st.pct).toFixed(1);
+        const attrs=a.ghost?''
+          :a.archived?` data-dep-act="manage" role="button" tabindex="0"`
+          :` data-dep-acc="${esc(a.id)}" role="button" tabindex="0" aria-label="Registrar depósito en ${esc(a.name)}"`;
+        const canDep=!a.ghost&&!a.archived;
+        return`<div class="acc-card ${st.cls}${a.archived?' is-archived':''}${canDep?' can-dep':''}"${attrs}>
+          <div class="ring" style="--p:${p}"><span>${limit>0?Math.round(st.pct)+'%':'—'}</span></div>
+          <div class="acc-info">
+            <div class="acc-name">${esc(a.icon)} ${esc(a.name)}${a.archived?'<span class="acc-tag">archivada</span>':''}</div>
+            <div class="acc-amts"><span class="acc-dep">${fmt(dep)}</span><span class="acc-left">${st.left}</span></div>
+            <div class="acc-bar"><i style="width:0%" data-pct="${limit>0?p:0}"></i></div>
+          </div>
+          ${canDep?'<span class="acc-plus" aria-hidden="true">＋</span>':''}
+        </div>`;
+      }).join('');
+    }
+    h+=`<div class="limit-row"><span>${isCur?'Límite mensual por cuenta':'Límite en '+esc(ymLabel(ym))} <b>${limit>0?fmt(limit):'Sin límite'}</b></span><button class="exp-act-btn" data-dep-act="limit" style="flex-shrink:0;">✏️ Cambiar</button></div>`;
+    // v23: editar/archivar/agregar cuentas se usa poco → enlace discreto al final
+    const nArch=allAccs.filter(a=>a.archived).length;
+    h+=`<button class="dep-manage-link" data-dep-act="manage">⚙️ Gestionar cuentas${nArch?` · ${nArch} archivada${nArch!==1?'s':''}`:''}</button>`;
+    $('tab-dcuentas').innerHTML=h;
   }
-  h+=`<div class="limit-row"><span>${isCur?'Límite mensual por cuenta':'Límite en '+esc(ymLabel(ym))} <b>${limit>0?fmt(limit):'Sin límite'}</b></span><button class="exp-act-btn" data-dep-act="limit" style="flex-shrink:0;">✏️ Cambiar</button></div>
-    <button class="sec-btn" data-dep-act="add-acc" style="width:100%;">+ Agregar cuenta</button>`;
-  const archived=allAccs.filter(a=>a.archived);
-  if(archived.length){
-    const s=archived.length!==1?'s':'';
-    h+=`<button class="dep-arch-toggle" data-dep-act="toggle-arch">${archived.length} cuenta${s} archivada${s} · ${depShowArchived?'ocultar':'ver'}</button>`;
-    if(depShowArchived) h+=archived.map(a=>`<div class="cat-manage-item">
-        <span class="cat-manage-icon">${esc(a.icon)}</span><span class="cat-manage-name">${esc(a.name)}</span>
-        <button class="exp-act-btn" data-acc-restore="${esc(a.id)}">♻️ Reactivar</button>
-      </div>`).join('');
-  }
-  $('tab-dcuentas').innerHTML=h;
 
   // ── Pestaña Movimientos ──
   const accMap=Object.fromEntries(allAccs.map(a=>[a.id,a]));
   const mEl=$('tab-dmovs');
   if(!deps.length){
-    mEl.innerHTML=`<div class="empty"><div class="empty-icon">💵</div><p>Sin depósitos en ${esc(ymLabel(ym))}.<br>Toca el botón para registrar uno.</p></div>`;
+    mEl.innerHTML=`<div class="empty"><div class="empty-icon">💵</div><p>Sin depósitos en ${esc(ymLabel(ym))}.<br>Toca una cuenta en la pestaña Cuentas para registrar uno.</p></div>`;
   } else {
     const byDay={};
     deps.forEach(d=>{const k=d.date||'sin-fecha';(byDay[k]=byDay[k]||[]).push(d);});
@@ -3546,18 +3726,13 @@ document.getElementById('dep-scroll').addEventListener('click',e=>{
     const a=act.dataset.depAct;
     if(a==='limit')openDepLimit();
     else if(a==='add-acc')openDepAccount(null);
-    else if(a==='toggle-arch'){depShowArchived=!depShowArchived;renderDep();}
+    else if(a==='manage')openDepManage();
     return;
-  }
-  const rs=t.closest('[data-acc-restore]');
-  if(rs){
-    saveDepAccounts(getDepAccounts().map(a=>a.id===rs.dataset.accRestore?{...a,archived:false}:a));
-    renderDep();showToast('♻️ Cuenta reactivada');return;
   }
   const de=t.closest('[data-dep-edit]');
   if(de){openDepEdit(de.dataset.depEdit,de.dataset.dym);return;}
-  const ae=t.closest('[data-acc-edit]');
-  if(ae){openDepAccount(ae.dataset.accEdit);return;}
+  const da=t.closest('[data-dep-acc]');
+  if(da){openDepAdd(da.dataset.depAcc);return;}
   const hm=t.closest('[data-dep-month]');
   if(hm){depMonthOffset=ymOffset(hm.dataset.depMonth);setDepTab('dcuentas');renderDep();}
 });
@@ -3574,7 +3749,39 @@ document.getElementById('dbtn-next').addEventListener('click',()=>{
   if(depMonthOffset>0){depMonthOffset--;renderDep();}
   else showToast('Este es el mes actual');
 });
-document.getElementById('fab-dep').addEventListener('click',()=>openDepAdd());
+
+// ── gestionar cuentas (v23): editar, reactivar archivadas y agregar ──
+function renderDepManage(){
+  const all=getDepAccounts();
+  const row=(a,btn)=>`<div class="cat-manage-item"${a.archived?' style="opacity:.7"':''}>
+      <span class="cat-manage-icon">${esc(a.icon)}</span>
+      <span class="cat-manage-name">${esc(a.name)}</span>${btn}
+    </div>`;
+  const act=all.filter(a=>!a.archived), arch=all.filter(a=>a.archived);
+  let h=act.length?act.map(a=>row(a,`<button class="exp-act-btn" data-acc-edit="${esc(a.id)}">✏️ Editar</button>`)).join('')
+    :`<p class="cfg-desc" style="text-align:center;">Sin cuentas activas.</p>`;
+  if(arch.length){
+    h+=`<div class="dep-manage-sect">Archivadas · historial conservado</div>`
+      +arch.map(a=>row(a,`<button class="exp-act-btn" data-acc-edit="${esc(a.id)}">✏️</button><button class="exp-act-btn" data-acc-restore="${esc(a.id)}">♻️ Reactivar</button>`)).join('');
+  }
+  document.getElementById('depmanage-list').innerHTML=h;
+}
+function openDepManage(){
+  renderDepManage();
+  document.getElementById('modal-depmanage').classList.add('open');
+}
+document.getElementById('depmanage-list').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-acc-edit]');
+  if(ed){closeModal('modal-depmanage');openDepAccount(ed.dataset.accEdit);return;}
+  const rs=e.target.closest('[data-acc-restore]');
+  if(rs){
+    saveDepAccounts(getDepAccounts().map(a=>a.id===rs.dataset.accRestore?{...a,archived:false}:a));
+    renderDepManage();renderDep();showToast('♻️ Cuenta reactivada');
+  }
+});
+document.getElementById('depmanage-add').addEventListener('click',()=>{closeModal('modal-depmanage');openDepAccount(null);});
+document.getElementById('depmanage-close').addEventListener('click',()=>closeModal('modal-depmanage'));
+document.getElementById('modal-depmanage').addEventListener('click',function(e){if(e.target===this)closeModal('modal-depmanage');});
 
 // ── registrar / editar depósito ──
 function buildDepAccPills(){
@@ -3618,11 +3825,12 @@ function updateDepPreview(){
 document.getElementById('dinp-amount').addEventListener('input',updateDepPreview);
 document.getElementById('dinp-date').addEventListener('change',()=>{buildDepAccPills();updateDepPreview();});
 
-function openDepAdd(){
+// v23: se abre al tocar la tarjeta de una cuenta → esa cuenta ya elegida
+function openDepAdd(accId){
   const active=getDepAccounts().filter(a=>!a.archived);
   if(!active.length){showToast('🏦 Primero agrega una cuenta');openDepAccount(null);return;}
   editingDepId=null;
-  depSelAcc=active.length===1?active[0].id:''; // con una sola cuenta, ya elegida
+  depSelAcc=active.some(a=>a.id===accId)?accId:(active.length===1?active[0].id:'');
   document.getElementById('modal-dep-title').textContent='Registrar depósito';
   document.getElementById('dinp-amount').value='';
   document.getElementById('dinp-note').value='';
@@ -3709,7 +3917,7 @@ function openDepAccount(id){
 }
 document.getElementById('modal-depacc-save').addEventListener('click',()=>{
   const name=document.getElementById('dacc-name').value.trim();
-  const icon=document.getElementById('dacc-icon').value.trim()||'🏦';
+  const icon=firstGrapheme(document.getElementById('dacc-icon').value)||'🏦';
   if(!name){showToast('⚠️ Ingresa el nombre de la cuenta');return;}
   const list=getDepAccounts();
   if(editingDepAccId){
@@ -3843,10 +4051,7 @@ document.getElementById('cfg-export-claude').addEventListener('click',()=>{
 
   md+=`\n---\n*Regla de la app: el pago de la TDC y los retiros de cajero no se registran (evita doble conteo). Los depósitos en efectivo no son gastos: no suman a ningún total.*\n`;
 
-  const blob=new Blob([md],{type:'text/markdown;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`misgastos_resumen_${today()}.md`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  downloadFile(`misgastos_resumen_${today()}.md`,md,'text/markdown;charset=utf-8;');
   showToast('🤖 Resumen para Claude descargado');
 });
 
@@ -3875,10 +4080,14 @@ document.getElementById('tutorial-toggle-btn').addEventListener('click',()=>{
 // ══════════════════════════════════════════════════════
 let toastTimer;
 function showToast(msg,onTap){
+  // v24: si acaba de fallar un guardado, no dejar que el "💾 Guardado" que sigue en
+  // el mismo flujo tape el aviso y haga creer que sí se guardó.
+  if(msg!==S.FAIL_MSG && Date.now()-S.failAt<2500) return;
   const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
   // v19: toast accionable (p. ej. "toca para actualizar"); dura más para dar tiempo
-  el.onclick=onTap?()=>{el.classList.remove('show');onTap();}:null;
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),onTap?6000:2800);
+  el.classList.toggle('tappable',!!onTap);
+  el.onclick=onTap?()=>{el.classList.remove('show','tappable');onTap();}:null;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show','tappable'),onTap?6000:2800);
 }
 
 // ══════════════════════════════════════════════════════
@@ -3918,13 +4127,18 @@ function showToast(msg,onTap){
   })();
 
   const cycles=getCycles();
-  if(!cycles.length){
-    // First launch
+  // v24: ¿hay datos en CUALQUIER parte? (antes solo se miraban los ciclos de tarjeta:
+  // quien usara solo el mundo Mes o Depósitos era mandado a Config en cada apertura
+  // y nunca recibía el recordatorio de respaldo)
+  const hasAnyData = cycles.some(c=>getExpenses(c.id).length)
+    || Object.keys(localStorage).some(k=>(k.startsWith('mg_mexp_')||k.startsWith('mg_depm_'))&&S.get(k,[]).length);
+  if(!cycles.length && !hasAnyData){
+    // Primer uso de verdad
     showToast('⚙️ Configura tu primer ciclo en Config');
     setTimeout(()=>showScreen('config'),800);
   }
 
-  seedMonth(currentYM());
+  seedPendingMonths();
   setWorld(getConfig().lastWorld==='mes'?'mes':'tdc'); // renderiza todo
   renderTransportFab();
   refreshSwatches();
@@ -3933,9 +4147,7 @@ function showToast(msg,onTap){
   // Los datos viven solo en localStorage; si el último respaldo tiene más de 30
   // días (o nunca se hizo) se avisa, máximo una vez al día, y solo si ya hay datos.
   (function backupReminder(){
-    if(!cycles.length) return; // sin ciclo aún: el aviso de primer ciclo tiene prioridad
-    const hasExpenses = cycles.some(c=>getExpenses(c.id).length);
-    if(!hasExpenses) return;
+    if(!hasAnyData) return; // sin datos aún no hay nada que respaldar
     const c=getConfig();
     const t=today();
     if(c.lastBackupNudgeAt===t) return;
@@ -3949,6 +4161,21 @@ function showToast(msg,onTap){
       saveConfig({...c,lastBackupNudgeAt:t});
     }
   })();
+
+  // v24: iOS mantiene la PWA viva en segundo plano. Si se retoma OTRO día, la
+  // pantalla mostraba el mes/fecha de cuando se dejó (p. ej. el mes anterior tras
+  // el día 1, sin sus fijos precargados). Al volver con fecha distinta se refresca.
+  let lastRenderDay=today();
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState!=='visible')return;
+    const t=today();
+    if(t===lastRenderDay)return;
+    lastRenderDay=t;
+    seedPendingMonths();
+    renderAll();
+    if(activeScreen==='msi')renderMSI();
+    if(activeScreen==='dep')renderDep();
+  });
 
   // Registrar Service Worker para modo offline
   // v19: iOS a veces desecha la caché offline o el propio SW (presión de
