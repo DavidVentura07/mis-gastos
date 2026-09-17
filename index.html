@@ -364,6 +364,59 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 .est-badge{font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(24,95,165,.14);color:var(--info);font-weight:500;}
 .swatch-row-lbl{font-size:12px;color:var(--muted2);font-weight:600;margin-bottom:8px;}
 
+/* v22: gasto SIN categoría — cuadro punteado vacío (distinto de 📦 "Otro") */
+.exp-icon.blank{background:transparent;border:1.5px dashed var(--border2);}
+.cat-blank{display:inline-block;width:24px;height:24px;border-radius:8px;border:1.5px dashed var(--border2);vertical-align:middle;}
+.lbl-hint{font-weight:400;color:var(--muted);font-size:11px;}
+
+/* v22: orden de la pantalla A meses */
+.msi-sort{display:flex;align-items:center;gap:5px;margin:0 0 10px;overflow-x:auto;scrollbar-width:none;}
+.msi-sort::-webkit-scrollbar{display:none;}
+.msi-sort-lbl{font-size:13px;color:var(--muted);flex-shrink:0;}
+.msi-sort .tab{padding:5px 10px;font-size:12px;}
+.msi-date{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* DEPÓSITOS (v22) */
+.acc-card{display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,transform .1s;}
+.acc-card:active{transform:scale(.98);}
+.acc-card.is-archived{opacity:.62;}
+/* Anillo de avance con conic-gradient (CSS puro); --c lo fija el estado de la tarjeta */
+.ring{width:58px;height:58px;border-radius:50%;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(var(--c,var(--accent)) calc(var(--p,0)*1%), var(--bg3) 0);}
+.ring::before{content:'';position:absolute;inset:6px;border-radius:50%;background:var(--bg2);}
+.ring span{position:relative;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
+.acc-info{flex:1;min-width:0;}
+.acc-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.acc-tag{font-size:10px;padding:1px 7px;border-radius:100px;background:var(--bg3);color:var(--muted2);font-weight:500;margin-left:4px;}
+.acc-amts{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px;gap:8px;}
+.acc-dep{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;}
+.acc-left{font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.acc-left b{color:var(--text);font-weight:600;}
+.acc-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:7px;}
+.acc-bar i{display:block;height:100%;border-radius:2px;background:var(--c,var(--accent));transition:width .65s cubic-bezier(0.25,1,0.5,1);}
+.st-warn{--c:var(--warn);}
+.st-over{--c:var(--danger);}
+.st-warn .acc-left b{color:var(--warn);}
+.st-over .acc-left b{color:var(--danger);}
+.limit-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--r);padding:11px 14px;margin:4px 0 8px;font-size:13px;color:var(--muted2);}
+.limit-row b{font-family:'Syne',sans-serif;color:var(--text);font-size:14px;font-variant-numeric:tabular-nums;}
+.dep-arch-toggle{display:block;width:100%;background:none;border:none;font-size:12px;color:var(--muted);text-align:center;padding:12px 0 8px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.hist-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.hist-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px;}
+.hist-month{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.hist-total{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;}
+.hist-line{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;margin-top:5px;font-size:12px;}
+.hist-line .hb{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.hist-line .hb i{display:block;height:100%;background:var(--c,var(--accent));border-radius:3px;}
+.hist-line .hv{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted2);min-width:64px;}
+.hist-line .hv b{color:var(--danger);font-weight:600;}
+.dep-pill small{display:block;font-size:10px;opacity:.8;margin-top:1px;}
+.dep-warn{color:var(--warn);font-weight:600;}
+#dep-preview-box.open{max-height:120px;}
+@media (hover:hover) and (pointer:fine){
+  .acc-card:hover,.hist-card:hover{border-color:var(--border2);}
+}
+
 /* DARK MODE */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -513,6 +566,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   <div class="bnav">
     <button class="bnav-btn active" data-nav="main"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Inicio</button>
     <button class="bnav-btn" data-nav="msi"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>A meses</button>
+    <button class="bnav-btn" data-nav="dep"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><polyline points="7.5 9.5 12 14 16.5 9.5"/><path d="M3 14v4a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-4"/></svg></div>Depósitos</button>
     <button class="bnav-btn" data-nav="config"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>Config</button>
   </div>
 </div>
@@ -538,12 +592,71 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
         <span id="msi-remaining-total">$0.00</span>
       </div>
     </div>
+    <!-- v22: orden de las compras (se recuerda en cfg.msiSort) -->
+    <div class="msi-sort" id="msi-sort" role="group" aria-label="Ordenar compras a meses" style="display:none">
+      <span class="msi-sort-lbl" aria-hidden="true">↕</span>
+      <button class="tab" data-msort="recent">Recientes</button>
+      <button class="tab" data-msort="old">Antiguas</button>
+      <button class="tab" data-msort="liq">Por liquidar</button>
+      <button class="tab" data-msort="monthly">Mensualidad</button>
+    </div>
     <div id="msi-list"></div>
     <div style="height:14px"></div>
   </div>
   <div class="bnav">
     <button class="bnav-btn" data-nav="main"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Inicio</button>
     <button class="bnav-btn active" data-nav="msi"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>A meses</button>
+    <button class="bnav-btn" data-nav="dep"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><polyline points="7.5 9.5 12 14 16.5 9.5"/><path d="M3 14v4a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-4"/></svg></div>Depósitos</button>
+    <button class="bnav-btn" data-nav="config"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>Config</button>
+  </div>
+</div>
+
+<!-- ══════════ DEPÓSITOS (v22) ══════════ -->
+<div class="screen" id="scr-dep">
+  <div class="hdr"><div class="hdr-logo">de<span>pósitos</span></div></div>
+  <!-- clase sticky-top: hereda el colapso de la tarjeta al hacer scroll -->
+  <div class="sticky-top" id="dep-top">
+    <div class="summary">
+      <div class="sum-label" id="dep-sum-label">Depositado en efectivo</div>
+      <div class="sum-total" id="dep-sum-total">$0.00</div>
+      <div class="sum-row">
+        <div class="sum-item"><strong id="dep-sum-avail">—</strong> <span id="dep-sum-avail-lbl">disponible</span></div>
+        <div class="sum-item"><strong id="dep-sum-limit">—</strong> límite c/u</div>
+        <div class="sum-item"><strong id="dep-sum-over">0</strong> <span id="dep-sum-over-lbl">excedidas</span></div>
+      </div>
+    </div>
+    <div class="cycle-bar" style="cursor:default;">
+      <div class="cycle-compact">
+        <span class="cycle-name" id="dep-name">—</span>
+        <div class="cycle-arrows">
+          <button class="arr-btn" id="dbtn-prev" aria-label="Mes anterior">‹</button>
+          <button class="arr-btn" id="dbtn-next" aria-label="Mes siguiente">›</button>
+        </div>
+      </div>
+      <div class="cycle-progress-thin"><div class="cycle-progress-bar" id="dep-prog-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="tabs" id="dep-tabs">
+    <button class="tab active" data-dtab="dcuentas">Cuentas</button>
+    <button class="tab" data-dtab="dmovs">Movimientos</button>
+    <button class="tab" data-dtab="dhist">Historial</button>
+  </div>
+  <div class="scroll" id="dep-scroll">
+    <div id="tab-dcuentas"></div>
+    <div id="tab-dmovs" style="display:none"></div>
+    <div id="tab-dhist" style="display:none"></div>
+    <div style="height:14px"></div>
+  </div>
+  <div class="fab-wrap">
+    <button class="fab" id="fab-dep">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <span>Registrar depósito</span>
+    </button>
+  </div>
+  <div class="bnav">
+    <button class="bnav-btn" data-nav="main"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Inicio</button>
+    <button class="bnav-btn" data-nav="msi"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>A meses</button>
+    <button class="bnav-btn active" data-nav="dep"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><polyline points="7.5 9.5 12 14 16.5 9.5"/><path d="M3 14v4a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-4"/></svg></div>Depósitos</button>
     <button class="bnav-btn" data-nav="config"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>Config</button>
   </div>
 </div>
@@ -695,6 +808,11 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
           </div>
 
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">🏦 Depósitos en efectivo</div>
+            <div style="font-size:13px;color:var(--muted2);line-height:1.6;">En <b style="color:var(--text)">Depósitos</b> llevas el registro del efectivo que depositas a tus cuentas de banco, por mes calendario (rota solo). Hay un <b style="color:var(--text)">límite mensual</b> que aplica a <b style="color:var(--text)">cada cuenta por separado</b>: verás cuánto le has depositado y cuánto le queda; ámbar desde el 80% y rojo si se excede. Si cambias el límite aplica desde el mes actual y los meses pasados conservan el suyo. Archivar una cuenta la oculta para depósitos nuevos sin borrar su historial. Es independiente de tus gastos: un depósito no suma a ningún total.</div>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;">
             <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">📦 Respaldo de datos</div>
             <div style="font-size:13px;color:var(--muted2);line-height:1.6;">Tus datos viven solo en este dispositivo. Si limpias Safari o cambias de teléfono, los perderías. Usa <b style="color:var(--text)">Exportar respaldo (JSON)</b> periódicamente y guarda el archivo en iCloud, WhatsApp o correo. Para restaurar, usa <b style="color:var(--text)">Importar respaldo (JSON)</b>.</div>
           </div>
@@ -710,6 +828,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   <div class="bnav">
     <button class="bnav-btn" data-nav="main"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Inicio</button>
     <button class="bnav-btn" data-nav="msi"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>A meses</button>
+    <button class="bnav-btn" data-nav="dep"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><polyline points="7.5 9.5 12 14 16.5 9.5"/><path d="M3 14v4a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-4"/></svg></div>Depósitos</button>
     <button class="bnav-btn active" data-nav="config"><div class="bnav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>Config</button>
   </div>
 </div>
@@ -774,7 +893,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
         <div id="msi-preview-text"></div>
       </div>
     </div>
-    <div class="field"><label>Categoría</label><div class="cat-pills" id="cat-pills"></div></div>
+    <div class="field"><label>Categoría <span class="lbl-hint">(opcional · toca otra vez para quitarla)</span></label><div class="cat-pills" id="cat-pills"></div></div>
     <div class="field"><label>Fecha</label><input type="date" id="inp-date"></div>
     <div class="field">
       <label>¿Es recurrente (gasto fijo)?</label>
@@ -841,7 +960,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
     <div class="field"><label>Descripción</label><input type="text" id="minp-name" placeholder="¿En qué gastaste?" autocomplete="off"></div>
     <div class="field"><label>Monto ($)</label><div class="pfx-wrap"><input type="number" id="minp-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
     <div class="field"><label>Método de pago</label><div class="cat-pills" id="mmethod-pills"></div></div>
-    <div class="field"><label>Categoría</label><div class="cat-pills" id="mcat-pills"></div></div>
+    <div class="field"><label>Categoría <span class="lbl-hint">(opcional · toca otra vez para quitarla)</span></label><div class="cat-pills" id="mcat-pills"></div></div>
     <div class="field"><label>Fecha <span style="font-weight:400;color:var(--muted);font-size:11px;">(el gasto se guarda en el mes de esta fecha)</span></label><input type="date" id="minp-date"></div>
     <div class="field" id="minp-fijo-row">
       <label>¿Es un fijo mensual?</label>
@@ -870,7 +989,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
     <div class="field"><label>Nombre</label><input type="text" id="finp-name" placeholder="ej. Diezmo" autocomplete="off"></div>
     <div class="field"><label>Monto estimado ($)</label><div class="pfx-wrap"><input type="number" id="finp-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
     <div class="field"><label>Método de pago</label><div class="cat-pills" id="fmethod-pills"></div></div>
-    <div class="field"><label>Categoría</label><div class="cat-pills" id="fcat-pills"></div></div>
+    <div class="field"><label>Categoría <span class="lbl-hint">(opcional · toca otra vez para quitarla)</span></label><div class="cat-pills" id="fcat-pills"></div></div>
     <div class="btn-row">
       <button class="sec-btn" id="modal-mfijo-cancel">Cancelar</button>
       <button class="save-btn" id="modal-mfijo-save" style="flex:2;margin-top:0;">Guardar</button>
@@ -893,6 +1012,63 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
   </div>
 </div>
 
+<!-- ══ MODAL: DEPÓSITO (v22) ══ -->
+<div class="overlay" id="modal-dep">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-dep-title">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-dep-title">Registrar depósito</div>
+    <div class="field"><label>Cuenta</label><div class="cat-pills" id="dep-acc-pills"></div></div>
+    <div class="field"><label>Monto en efectivo ($)</label><div class="pfx-wrap"><input type="number" id="dinp-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
+    <div id="dep-preview-box" class="msi-preview-box">
+      <div class="msi-preview-box-inner" id="dep-preview-text"></div>
+    </div>
+    <div class="field"><label>Fecha <span class="lbl-hint">(se guarda en el mes de esta fecha)</span></label><input type="date" id="dinp-date"></div>
+    <div class="field">
+      <label>Nota (opcional)</label>
+      <textarea id="dinp-note" rows="2" placeholder="ej. venta, préstamo, ahorro…" style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif;padding:11px 13px;width:100%;resize:none;outline:none;"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="sec-btn" id="modal-dep-cancel">Cancelar</button>
+      <button class="save-btn" id="modal-dep-save" style="flex:2;margin-top:0;">Guardar</button>
+    </div>
+    <div id="dep-delete-row" style="display:none;margin-top:10px;">
+      <button class="sec-btn danger-btn" id="modal-dep-delete" style="width:100%;">Eliminar depósito</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CUENTA DE DEPÓSITO (v22) ══ -->
+<div class="overlay" id="modal-depacc">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-depacc-title">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-depacc-title">Nueva cuenta</div>
+    <div class="field"><label>Ícono (emoji)</label><input type="text" id="dacc-icon" placeholder="🏦" maxlength="8"></div>
+    <div class="field"><label>Nombre</label><input type="text" id="dacc-name" placeholder="ej. BBVA Nómina" autocomplete="off"></div>
+    <div class="btn-row">
+      <button class="sec-btn" id="modal-depacc-cancel">Cancelar</button>
+      <button class="save-btn" id="modal-depacc-save" style="flex:2;margin-top:0;">Guardar</button>
+    </div>
+    <div id="dacc-archive-row" style="display:none;margin-top:10px;">
+      <button class="sec-btn" id="modal-depacc-archive" style="width:100%;">🗄️ Archivar cuenta</button>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5;" id="dacc-archive-desc">Ya no aparece para registrar depósitos nuevos. Su historial se conserva y puedes reactivarla cuando quieras.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: LÍMITE DE DEPÓSITO (v22) ══ -->
+<div class="overlay" id="modal-deplimit">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-deplimit-title">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-deplimit-title">Límite mensual por cuenta</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Es el mismo monto para <b>cada cuenta por separado</b>. Aplica desde el mes actual; los meses anteriores conservan el límite que tenían. Déjalo vacío para quitarlo.</p>
+    <div class="field"><label>Monto ($)</label><div class="pfx-wrap"><input type="number" id="dlim-amount" placeholder="0.00" inputmode="decimal" step="0.01"></div></div>
+    <div class="btn-row">
+      <button class="sec-btn" id="modal-deplimit-cancel">Cancelar</button>
+      <button class="save-btn" id="modal-deplimit-save" style="flex:2;margin-top:0;">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -900,7 +1076,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);ou
 //  STORAGE HELPERS
 // ══════════════════════════════════════════════════════
 // Versión visible de la app = número de la última entrada en CAMBIOS.md (esquema unificado).
-const APP_VERSION = 21;
+const APP_VERSION = 22;
 
 const S = {
   get:(k,fb={})=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}},
@@ -952,6 +1128,22 @@ const METHODS=[
   {id:'transferencia',icon:'📲',name:'Transferencia'},
 ];
 const methodInfo=id=>METHODS.find(m=>m.id===id)||METHODS[0];
+
+// ── Depósitos (v22): efectivo depositado a cuentas bancarias, por mes calendario ──
+// Independiente del resto: un depósito no es gasto (no suma a totales ni al CSV).
+const getDepAccounts  = ()=>S.get('mg_dep_accounts',[]);   // [{id,name,icon,archived,createdYM}]
+const saveDepAccounts = d=>S.set('mg_dep_accounts',d);
+// Historial de límites [{from:'YYYY-MM', amount}]: cambiar el límite aplica desde el
+// mes actual y los meses pasados conservan el que tenían.
+const getDepLimits  = ()=>S.get('mg_dep_limits',[]);
+const saveDepLimits = d=>S.set('mg_dep_limits',d);
+const getDeposits   = ym=>S.get('mg_depm_'+ym,[]);          // [{id,accId,amount,date,note}]
+const saveDeposits  = (ym,d)=>S.set('mg_depm_'+ym,d);
+
+// v22: la categoría es opcional. Gasto sin categoría (o con una categoría ya
+// eliminada) → cuadro punteado vacío, para no confundirlo con 📦 "Otro".
+const NO_CAT = {icon:'',name:'Sin categoría',blank:true};
+const catCardHTML = (c,maxAmt)=>`<div class="cat-card"><div class="cat-icon">${c.blank?'<span class="cat-blank"></span>':esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(c.amt)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((c.amt/maxAmt)*100)}%"></div></div></div>`;
 
 // ══════════════════════════════════════════════════════
 //  HELPERS
@@ -1223,7 +1415,7 @@ function renderSummary(expenses, cycle){
 // ══════════════════════════════════════════════════════
 function expenseHTML(e, cycleKey){
   const cats = getCats();
-  const cat = cats.find(c=>c.id===e.cat)||{icon:'📦',name:'Sin categoría'};
+  const cat = cats.find(c=>c.id===e.cat)||NO_CAT;
   const displayAmt = e.isMsi ? e.amount/(e.msiMonths||12) : e.amount;
   const sub = e.isMsi ? `<div class="exp-amount-sub">${fmt(e.amount)} total · ${e.msiMonths}MSI</div>`:
               e.isRecurrent ? `<div class="exp-amount-sub">Fijo mensual</div>`:'';
@@ -1234,7 +1426,7 @@ function expenseHTML(e, cycleKey){
   const editBtn = cycleKey ? `<div class="exp-actions"><button class="exp-act-btn" data-eid="${esc(e.id)}" data-cid="${esc(cycleKey)}">✏️ Editar</button>${!e.isMsi?`<button class="exp-act-btn" data-move-tdc="${esc(e.id)}" data-cid="${esc(cycleKey)}">📆 Mover</button>`:''}</div>` : '';
 
   return`<div class="expense-item ${cls}">
-    <div class="exp-icon">${e.isMsi?'📅':esc(cat.icon)}</div>
+    <div class="exp-icon${!e.isMsi&&cat.blank?' blank':''}">${e.isMsi?'📅':esc(cat.icon)}</div>
     <div class="exp-info">
       <div class="exp-name">${esc(e.name)}</div>
       <div class="exp-meta">
@@ -1300,10 +1492,10 @@ function renderTabs(){
   const catIds=new Set(cats.map(c=>c.id));
   const cards=cats.filter(c=>totals[c.id]).map(c=>({icon:c.icon,name:c.name,amt:totals[c.id]}));
   const orphanTotal=Object.keys(totals).filter(k=>!catIds.has(k)).reduce((s,k)=>s+totals[k],0);
-  if(orphanTotal>0)cards.push({icon:'📦',name:'Sin categoría',amt:orphanTotal});
+  if(orphanTotal>0)cards.push({...NO_CAT,amt:orphanTotal});
   const maxAmt=Math.max(...cards.map(c=>c.amt),1);
   catEl.innerHTML=!cards.length?`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos en este ciclo.</p></div>`:
-    `<div class="cat-grid">${cards.sort((a,b)=>b.amt-a.amt).map(c=>`<div class="cat-card"><div class="cat-icon">${esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(c.amt)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((c.amt/maxAmt)*100)}%"></div></div></div>`).join('')}</div>`;
+    `<div class="cat-grid">${cards.sort((a,b)=>b.amt-a.amt).map(c=>catCardHTML(c,maxAmt)).join('')}</div>`;
 
   // RECURRENTES (respeta la búsqueda)
   const recEl = document.getElementById('tab-recurrentes');
@@ -1350,8 +1542,24 @@ function renderMSI(){
   document.getElementById('msi-remaining-total').textContent=fmt(remaining);
 
   const listEl=document.getElementById('msi-list');
+  // v22: selector de orden (recordado en cfg.msiSort); con 0-1 compras no aporta nada
+  const mode=getConfig().msiSort||'recent';
+  const sortEl=document.getElementById('msi-sort');
+  sortEl.style.display=list.length>1?'':'none';
+  sortEl.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.msort===mode));
   if(!list.length){listEl.innerHTML=`<div class="empty"><div class="empty-icon">📅</div><p>Sin compras a meses.<br>Agrégalas desde "Agregar gasto".</p></div>`;return;}
-  listEl.innerHTML=list.map(m=>{
+  const pos=new Map(list.map((m,i)=>[m.id,i]));
+  const remOf=new Map(list.map(m=>[m.id,Math.max(0,m.months-effectivePaid(m))]));
+  // Por fecha de compra; empate (o sin fecha) → orden de registro
+  const byDate=(a,b)=>(a.startDate||'').localeCompare(b.startDate||'')||(pos.get(a.id)-pos.get(b.id));
+  const sorters={
+    recent:(a,b)=>byDate(b,a),
+    old:byDate,
+    // menos meses restantes primero; las liquidadas al final
+    liq:(a,b)=>((remOf.get(a.id)===0)-(remOf.get(b.id)===0))||(remOf.get(a.id)-remOf.get(b.id))||byDate(b,a),
+    monthly:(a,b)=>(b.totalAmount/b.months-a.totalAmount/a.months)||byDate(b,a),
+  };
+  listEl.innerHTML=list.slice().sort(sorters[mode]||sorters.recent).map(m=>{
     const mon=m.totalAmount/m.months;
     const paid=effectivePaid(m);
     const rem=Math.max(0,m.months-paid);
@@ -1366,7 +1574,7 @@ function renderMSI(){
     }
     return`<div class="msi-card">
       <div class="msi-card-header">
-        <div class="msi-name">${esc(m.name)}</div>
+        <div><div class="msi-name">${esc(m.name)}</div>${m.startDate?`<div class="msi-date">Compra: ${fmtDate(m.startDate)}</div>`:''}</div>
         <span class="msi-badge${done?' done':''}">${done?'✅ Liquidado':`${rem} meses restantes`}</span>
       </div>
       <div class="msi-amounts">
@@ -1391,6 +1599,12 @@ document.getElementById('msi-list').addEventListener('click',e=>{
   const btn = e.target.closest('[data-msi-edit]');
   if(btn) openEditMSI(btn.dataset.msiEdit);
 });
+document.getElementById('msi-sort').addEventListener('click',e=>{
+  const b=e.target.closest('[data-msort]');
+  if(!b)return;
+  saveConfig({...getConfig(),msiSort:b.dataset.msort});
+  renderMSI();
+});
 
 function openEditMSI(id){
   const m=getMSI().find(x=>x.id===id);if(!m)return;
@@ -1405,6 +1619,14 @@ function openEditMSI(id){
   document.getElementById('inp-recurrent').value='no';
   document.getElementById('inp-note').value=m.note||'';
   document.getElementById('edit-delete-row').style.display='';
+  // v22: mostrar la categoría real del gasto vinculado (sin categoría si no tiene)
+  selectedCat='';
+  if(m.linkedExpId){
+    for(const c of getCycles()){
+      const x=getExpenses(c.id).find(y=>y.id===m.linkedExpId);
+      if(x){selectedCat=x.cat||'';break;}
+    }
+  }
   setMsiMode(true,true);
   buildCatPills();
   document.getElementById('msi-toggle-row').style.pointerEvents='none';
@@ -1446,17 +1668,25 @@ document.getElementById('msi-toggle-row').addEventListener('click',()=>{
 document.getElementById('inp-amount').addEventListener('input',updateMsiPreview);
 document.getElementById('inp-msi-months').addEventListener('change',updateMsiPreview);
 
+// v22: la categoría es opcional — ninguna preseleccionada; tocar la elegida la quita.
+// (Antes se preseleccionaba la primera y todo acababa en "Otro" por fricción.)
+function bindCatPills(el, get, set){
+  el.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{
+    const v = get()===p.dataset.cat ? '' : p.dataset.cat;
+    set(v);
+    el.querySelectorAll('.cpill').forEach(x=>x.classList.toggle('sel',x.dataset.cat===v&&v!==''));
+  }));
+}
 function buildCatPills(){
   const cats=getCats();
   const el=document.getElementById('cat-pills');
-  if(!selectedCat&&cats.length)selectedCat=cats[0].id;
   el.innerHTML=cats.map(c=>`<button class="cpill${c.id===selectedCat?' sel':''}" data-cat="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)}</button>`).join('');
-  el.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{selectedCat=p.dataset.cat;el.querySelectorAll('.cpill').forEach(x=>x.classList.remove('sel'));p.classList.add('sel');}));
+  bindCatPills(el,()=>selectedCat,v=>{selectedCat=v;});
 }
 
 function openAdd(){
   editingExpId=null;
-  const cats=getCats();selectedCat=cats.length?cats[0].id:'';
+  selectedCat='';
   document.getElementById('modal-add-title').textContent='Nuevo gasto';
   ['inp-name','inp-amount','inp-msi-paid','inp-note'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('inp-date').value=today();
@@ -1480,7 +1710,7 @@ function openEdit(expId, cycleId){
     if(link){ openEditMSI(link.id); return; }
   }
   editingExpId=expId+'|'+cycleId;
-  selectedCat=e.cat||getCats()[0]?.id||'';
+  selectedCat=e.cat||''; // v22: sin categoría se queda sin categoría
   document.getElementById('modal-add-title').textContent='Editar gasto';
   document.getElementById('inp-name').value=e.name;
   document.getElementById('inp-amount').value=e.amount;
@@ -1519,7 +1749,7 @@ document.getElementById('modal-save').addEventListener('click',()=>{
     }
     saveMSI(list);
     // Mantener sincronizado el gasto MSI guardado en el ciclo (nombre/monto/meses/nota/fecha).
-    if(linkedExpId) updateLinkedExpense(linkedExpId,{name,amount,msiMonths:months,note,date:startDate});
+    if(linkedExpId) updateLinkedExpense(linkedExpId,{name,amount,msiMonths:months,note,date:startDate,cat:selectedCat});
     closeModal('modal-add');
     renderMSI();renderAll();
     showToast('✏️ Compra a meses actualizada');
@@ -1590,7 +1820,8 @@ function updateLinkedExpense(linkedExpId, f){
     const exps=getExpenses(c.id);
     const idx=exps.findIndex(x=>x.id===linkedExpId);
     if(idx>-1){
-      exps[idx]={...exps[idx],name:f.name,amount:f.amount,msiMonths:f.msiMonths,note:f.note,date:f.date};
+      exps[idx]={...exps[idx],name:f.name,amount:f.amount,msiMonths:f.msiMonths,note:f.note,date:f.date,
+        cat:f.cat!==undefined?f.cat:exps[idx].cat};
       saveExpenses(c.id,exps);return;
     }
   }
@@ -2019,7 +2250,7 @@ document.getElementById('export-confirm').addEventListener('click',()=>{
     const cycle=cyclesMap[cid];
     const expenses=getExpenses(cid);
     expenses.forEach(e=>{
-      const cat=cats.find(c=>c.id===e.cat)||{name:'Otro'};
+      const cat=cats.find(c=>c.id===e.cat)||NO_CAT; // v22: no mezclar con la categoría "Otro" real
       const monthly=e.isMsi?e.amount/(e.msiMonths||12):e.amount;
       rows.push([cycle?.label||cid,e.date||'',e.name,e.isMsi?'A meses':cat.name,
         e.amount.toFixed(2),monthly.toFixed(2),e.isMsi?'Sí':'No',e.msiMonths||'',
@@ -2029,7 +2260,7 @@ document.getElementById('export-confirm').addEventListener('click',()=>{
   // v21: gastos del mundo Mes (efectivo/débito/transferencia) por mes calendario
   selMonths.forEach(ym=>{
     getMExpenses(ym).forEach(e=>{
-      const cat=cats.find(c=>c.id===e.cat)||{name:'Otro'};
+      const cat=cats.find(c=>c.id===e.cat)||NO_CAT;
       rows.push(['Mes '+ymLabel(ym),e.date||'',e.name,cat.name,
         e.amount.toFixed(2),e.amount.toFixed(2),'No','',
         e.isFijo?'Sí':'No',e.note||'',methodInfo(e.method).name]);
@@ -2052,13 +2283,16 @@ document.getElementById('export-cancel').addEventListener('click',()=>closeModal
 //  BACKUP / RESTORE
 // ══════════════════════════════════════════════════════
 document.getElementById('cfg-export-json').addEventListener('click',()=>{
-  const backup={version:5,exportedAt:new Date().toISOString(),config:getConfig(),
+  // v6 (v22): + depósitos (cuentas, historial de límites y depósitos por mes)
+  const backup={version:6,exportedAt:new Date().toISOString(),config:getConfig(),
     cats:getCats(),msi:getMSI(),transport:getTransport(),cycles:getCycles(),
-    mrec:getMRec(),mseeded:getMSeeded(),expenses:{},mexpenses:{}};
+    mrec:getMRec(),mseeded:getMSeeded(),depAccounts:getDepAccounts(),depLimits:getDepLimits(),
+    expenses:{},mexpenses:{},deposits:{}};
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k&&k.startsWith('mg_exp_'))backup.expenses[k]=S.get(k,[]);
     if(k&&k.startsWith('mg_mexp_'))backup.mexpenses[k]=S.get(k,[]);
+    if(k&&k.startsWith('mg_depm_'))backup.deposits[k]=S.get(k,[]);
   }
   const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -2086,7 +2320,10 @@ document.getElementById('cfg-import-file').addEventListener('change',function(){
         && (!b.transport||isArr(b.transport)) && (!b.cycles||isArr(b.cycles))
         && (!b.mrec||isArr(b.mrec)) && (!b.mseeded||isArr(b.mseeded))
         && (!b.expenses||(typeof b.expenses==='object'&&!isArr(b.expenses)&&Object.values(b.expenses).every(isArr)))
-        && (!b.mexpenses||(typeof b.mexpenses==='object'&&!isArr(b.mexpenses)&&Object.values(b.mexpenses).every(isArr)));
+        && (!b.mexpenses||(typeof b.mexpenses==='object'&&!isArr(b.mexpenses)&&Object.values(b.mexpenses).every(isArr)))
+        && (!b.depAccounts||isArr(b.depAccounts)) && (!b.depLimits||isArr(b.depLimits))
+        && (!b.deposits||(typeof b.deposits==='object'&&!isArr(b.deposits)
+            &&Object.entries(b.deposits).every(([k,v])=>k.startsWith('mg_depm_')&&isArr(v))));
       if(!valid){showToast('⚠️ Archivo no válido');return;}
       const toDel=[];
       for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
@@ -2100,8 +2337,11 @@ document.getElementById('cfg-import-file').addEventListener('change',function(){
       if(b.mrec)saveMRec(b.mrec);
       if(b.mseeded)saveMSeeded(b.mseeded);
       if(b.mexpenses)Object.entries(b.mexpenses).forEach(([k,v])=>S.set(k,v));
+      if(b.depAccounts)saveDepAccounts(b.depAccounts);
+      if(b.depLimits)saveDepLimits(b.depLimits);
+      if(b.deposits)Object.entries(b.deposits).forEach(([k,v])=>S.set(k,v));
       migrateAccents();
-      currentCycleIdx=0;currentMonthOffset=0;
+      currentCycleIdx=0;currentMonthOffset=0;depMonthOffset=0;depShowArchived=false;
       setWorld(getConfig().lastWorld==='mes'?'mes':'tdc');
       refreshSwatches();
       renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
@@ -2116,7 +2356,7 @@ document.getElementById('cfg-clear').addEventListener('click',function(){
     const toDel=[];
     for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('mg_'))toDel.push(k);}
     toDel.forEach(k=>localStorage.removeItem(k));
-    currentCycleIdx=0;renderAll();renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
+    currentCycleIdx=0;currentMonthOffset=0;depMonthOffset=0;renderAll();renderConfigCycleStatus();renderCatManager();renderTransportConfig();renderTransportFab();
     showToast('Datos borrados');
   });
 });
@@ -2268,11 +2508,13 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
 //     área de scroll: scrollTop se recorta a 0 y la regla "sin scroll → expandir"
 //     regresaba al usuario forzado al tope en bucle. Solución: medir cuánto alto
 //     libera el colapso y NO colapsar si después no quedaría scroll.
-(function setupScrollCollapse(){
-  const scroller = document.getElementById('main-scroll');
-  // v21: el colapso aplica a la tarjeta-resumen del mundo ACTIVO (tdc o mes)
-  const tops = {tdc:document.getElementById('sticky-top'), mes:document.getElementById('mes-top')};
-  const stickyTop = ()=>tops[currentWorld]||tops.tdc;
+// v22: convertido en fábrica para reutilizarlo en la pantalla Depósitos.
+// tops = {clave: elemento .sticky-top}; getKey() dice cuál está activo.
+// Devuelve la función de reset (estado limpio + medición invalidada).
+function setupScrollCollapse(scroller, tops, getKey){
+  const topList = Object.values(tops);
+  const stickyTop = ()=>tops[getKey()]||topList[0];
+  const noTransitionCSS = topList.map(t=>`#${t.id},#${t.id} *`).join(',')+'{transition:none!important;}';
   let collapsed = false;
   let lastY = 0;
   let cachedGain = 0, gainMeasuredAt = -1;
@@ -2283,13 +2525,6 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     stickyTop().classList.toggle('collapsed', v);
   }
 
-  // Al cambiar de mundo: estado limpio y medición de alto invalidada
-  window.resetTopCollapse = function(){
-    collapsed = false; lastY = 0; gainMeasuredAt = -1;
-    tops.tdc.classList.remove('collapsed');
-    tops.mes.classList.remove('collapsed');
-  };
-
   // Mide cuántos px de alto gana la lista al colapsar la tarjeta. Se hace con las
   // transiciones desactivadas y se revierte en el mismo frame: no llega a pintarse
   // ni dispara animaciones. Se cachea para no forzar reflow en cada evento de scroll.
@@ -2298,7 +2533,7 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     const now = performance.now();
     if(gainMeasuredAt >= 0 && now - gainMeasuredAt < 800) return cachedGain;
     const st = document.createElement('style');
-    st.textContent = '#sticky-top,#sticky-top *,#mes-top,#mes-top *{transition:none!important;}';
+    st.textContent = noTransitionCSS;
     document.head.appendChild(st);
     const before = scroller.clientHeight;
     stickyTop().classList.add('collapsed');
@@ -2338,7 +2573,18 @@ document.getElementById('cycle-bar').addEventListener('click', function(e){
     if(!collapsed && delta > 4 && canCollapse(maxScroll)) setCollapsed(true);
     else if(collapsed && delta < -4) setCollapsed(false);
   }, {passive:true});
-})();
+
+  return function reset(){
+    collapsed = false; lastY = 0; gainMeasuredAt = -1;
+    topList.forEach(t=>t.classList.remove('collapsed'));
+  };
+}
+// v21: en Inicio el colapso aplica a la tarjeta-resumen del mundo ACTIVO (tdc o mes);
+// al cambiar de mundo se resetea (setWorld llama a resetTopCollapse).
+window.resetTopCollapse = setupScrollCollapse(document.getElementById('main-scroll'),
+  {tdc:document.getElementById('sticky-top'), mes:document.getElementById('mes-top')}, ()=>currentWorld);
+window.resetDepCollapse = setupScrollCollapse(document.getElementById('dep-scroll'),
+  {dep:document.getElementById('dep-top')}, ()=>'dep');
 
 // ══════════════════════════════════════════════════════
 //  DRAGGABLE TRANSPORT FAB
@@ -2556,6 +2802,11 @@ function showScreen(name){
   document.getElementById('scr-'+name).classList.add('active');
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===name));
   if(name==='msi')renderMSI();
+  if(name==='dep'){
+    document.getElementById('dep-scroll').scrollTop=0;
+    resetDepCollapse();
+    renderDep();
+  }
   if(name==='config'){renderConfigCycleStatus();renderCatManager();renderTransportConfig();refreshSwatches();
     const cfg=getConfig();
     if(cfg.cardName)document.getElementById('cfg-cardname').value=cfg.cardName;
@@ -2726,10 +2977,10 @@ function updateTransportFabVis(){
 
 function mExpenseHTML(e,ym){
   const cats=getCats();
-  const cat=cats.find(c=>c.id===e.cat)||{icon:'📦',name:'Sin categoría'};
+  const cat=cats.find(c=>c.id===e.cat)||NO_CAT;
   const m=methodInfo(e.method);
   return`<div class="expense-item ${e.isFijo?'is-recurrent':''}">
-    <div class="exp-icon">${esc(cat.icon)}</div>
+    <div class="exp-icon${cat.blank?' blank':''}">${esc(cat.icon)}</div>
     <div class="exp-info">
       <div class="exp-name">${esc(e.name)}</div>
       <div class="exp-meta">
@@ -2803,10 +3054,10 @@ function renderMes(){
   const catIds=new Set(cats.map(c=>c.id));
   const cards=cats.filter(c=>totals[c.id]).map(c=>({icon:c.icon,name:c.name,amt:totals[c.id]}));
   const orphan=Object.keys(totals).filter(k=>!catIds.has(k)).reduce((s,k)=>s+totals[k],0);
-  if(orphan>0)cards.push({icon:'📦',name:'Sin categoría',amt:orphan});
+  if(orphan>0)cards.push({...NO_CAT,amt:orphan});
   const maxA=Math.max(...cards.map(c=>c.amt),1);
   cEl.innerHTML=!cards.length?`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos este mes.</p></div>`:
-    `<div class="cat-grid">${cards.sort((a,b)=>b.amt-a.amt).map(c=>`<div class="cat-card"><div class="cat-icon">${esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(c.amt)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((c.amt/maxA)*100)}%"></div></div></div>`).join('')}</div>`;
+    `<div class="cat-grid">${cards.sort((a,b)=>b.amt-a.amt).map(c=>catCardHTML(c,maxA)).join('')}</div>`;
 
   // v21: pestaña "Todo" — el mes calendario completo: no-TDC + tarjeta + MSI.
   // La tarjeta se cuenta por FECHA del gasto (cruza ciclos); las compras MSI no
@@ -2833,7 +3084,7 @@ function renderMes(){
   Object.keys(tdcTotals).forEach(k=>comb[k]=(comb[k]||0)+tdcTotals[k]);
   const combCards=cats.filter(c=>comb[c.id]).map(c=>({icon:c.icon,name:c.name,amt:comb[c.id]}));
   const combOrphan=Object.keys(comb).filter(k=>!catIds.has(k)).reduce((s,k)=>s+comb[k],0);
-  if(combOrphan>0)combCards.push({icon:'📦',name:'Sin categoría',amt:combOrphan});
+  if(combOrphan>0)combCards.push({...NO_CAT,amt:combOrphan});
   if(msiM>0)combCards.push({icon:'📆',name:'A meses (mensualidades)',amt:msiM});
   const maxC=Math.max(...combCards.map(c=>c.amt),1);
   tEl.innerHTML=`
@@ -2841,7 +3092,7 @@ function renderMes(){
       <div class="msi-sum-row"><span class="msi-sum-label">Todo mi mes</span><span class="msi-sum-total">${fmt(grand)}</span></div>
       <div style="font-size:12px;color:var(--muted);">Sin tarjeta ${fmt(total)} · Tarjeta ${fmt(tdcSum)} · Mensualidades ${fmt(msiM)}</div>
     </div>
-    ${combCards.length?`<div class="cat-grid">${combCards.sort((a,b)=>b.amt-a.amt).map(c=>`<div class="cat-card"><div class="cat-icon">${esc(c.icon)}</div><div class="cat-lbl">${esc(c.name)}</div><div class="cat-amt">${fmt(c.amt)}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((c.amt/maxC)*100)}%"></div></div></div>`).join('')}</div>`
+    ${combCards.length?`<div class="cat-grid">${combCards.sort((a,b)=>b.amt-a.amt).map(c=>catCardHTML(c,maxC)).join('')}</div>`
       :`<div class="empty"><div class="empty-icon">📊</div><p>Sin datos este mes.</p></div>`}
     <div class="info-card" style="margin-top:12px;">Vista combinada del mes calendario: efectivo/débito/transferencias + gastos de <b>tarjeta por fecha</b> (sin importar el ciclo) + mensualidades MSI. El pago de la tarjeta no se cuenta (evita doble conteo).</div>`;
 
@@ -2850,10 +3101,10 @@ function renderMes(){
   const rec=getMRec();
   fEl.innerHTML=`<div class="info-card" style="margin-top:12px;">Los fijos se <b>precargan solos el día 1</b> con su monto estimado. Si el monto real varía, edita el gasto ya cargado en la pestaña Gastos.</div>`
     +(rec.length?rec.map(r=>{
-      const cat=cats.find(c=>c.id===r.cat)||{icon:'📦'};
+      const cat=cats.find(c=>c.id===r.cat)||NO_CAT;
       const m=methodInfo(r.method);
       return`<div class="expense-item is-recurrent">
-        <div class="exp-icon">${esc(cat.icon)}</div>
+        <div class="exp-icon${cat.blank?' blank':''}">${esc(cat.icon)}</div>
         <div class="exp-info"><div class="exp-name">${esc(r.name)}</div>
         <div class="exp-meta">Estimado ${fmt(r.amount)} · ${m.icon} ${m.name} · día 1</div></div>
         <div class="exp-right"><button class="exp-act-btn" data-fijo-edit="${esc(r.id)}">✏️ Editar</button></div>
@@ -2874,21 +3125,16 @@ function buildMethodPills(containerId, sel, onSel){
 }
 function buildMCatPills(containerId){
   const cats=getCats();
-  if(!mSelectedCat&&cats.length)mSelectedCat=cats[0].id;
   const el=document.getElementById(containerId);
   el.innerHTML=cats.map(c=>`<button class="cpill${c.id===mSelectedCat?' sel':''}" data-cat="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)}</button>`).join('');
-  el.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{
-    mSelectedCat=p.dataset.cat;
-    el.querySelectorAll('.cpill').forEach(x=>x.classList.remove('sel'));
-    p.classList.add('sel');
-  }));
+  bindCatPills(el,()=>mSelectedCat,v=>{mSelectedCat=v;}); // v22: opcional, re-toque quita
 }
 
 // ── agregar / editar gasto del mes ──
 function openMAdd(){
   editingMExpId=null;
   mSelectedMethod='efectivo';
-  const cats=getCats();mSelectedCat=cats.length?cats[0].id:'';
+  mSelectedCat=''; // v22: sin categoría preseleccionada
   document.getElementById('modal-madd-title').textContent='Gasto del mes';
   document.getElementById('minp-name').value='';
   document.getElementById('minp-amount').value='';
@@ -2909,7 +3155,7 @@ function openMEdit(id,ym){
   const e=list.find(x=>x.id===id);if(!e)return;
   editingMExpId=id+'|'+ym;
   mSelectedMethod=e.method||'efectivo';
-  mSelectedCat=e.cat||getCats()[0]?.id||'';
+  mSelectedCat=e.cat||'';
   document.getElementById('modal-madd-title').textContent='Editar gasto del mes';
   document.getElementById('minp-name').value=e.name;
   document.getElementById('minp-amount').value=e.amount;
@@ -2981,18 +3227,17 @@ document.getElementById('modal-madd').addEventListener('click',function(e){if(e.
 // ── fijos mensuales (plantillas) ──
 function openFijo(id){
   editingFijoId=id;
-  const cats=getCats();
   if(id){
     const r=getMRec().find(x=>x.id===id);if(!r)return;
     mSelectedMethod=r.method||'transferencia';
-    mSelectedCat=r.cat||cats[0]?.id||'';
+    mSelectedCat=r.cat||'';
     document.getElementById('modal-mfijo-title').textContent='Editar fijo mensual';
     document.getElementById('finp-name').value=r.name;
     document.getElementById('finp-amount').value=r.amount;
     document.getElementById('mfijo-delete-row').style.display='';
   } else {
     mSelectedMethod='transferencia';
-    mSelectedCat=cats[0]?.id||'';
+    mSelectedCat='';
     document.getElementById('modal-mfijo-title').textContent='Nuevo fijo mensual';
     document.getElementById('finp-name').value='';
     document.getElementById('finp-amount').value='';
@@ -3097,6 +3342,423 @@ document.getElementById('mover-confirm').addEventListener('click',()=>{
 document.getElementById('mover-cancel').addEventListener('click',()=>closeModal('modal-mover'));
 document.getElementById('modal-mover').addEventListener('click',function(e){if(e.target===this)closeModal('modal-mover');});
 
+// ══════════════════════════════════════════════════════
+//  DEPÓSITOS (v22) — efectivo depositado a cuentas de banco
+// ══════════════════════════════════════════════════════
+let depMonthOffset = 0;       // 0 = mes actual
+let depShowArchived = false;
+let depSelAcc = '';           // cuenta elegida en el modal
+let editingDepId = null;      // id|YYYY-MM
+let editingDepAccId = null;
+const DEP_EPS = 0.004;        // tolerancia de centavos (montos en float)
+
+// "$15,000" en vez de "$15,000.00" cuando no hay centavos (vistas compactas)
+const fmtShort = n=>{const s=fmt(n);return Math.abs(n%1)<0.005?s.replace(/\.00$/,''):s;};
+// Desplazamiento de un YYYY-MM respecto al mes actual (0 = actual, 1 = anterior…)
+function ymOffset(ym){
+  const now=new Date();const p=ym.split('-').map(Number);
+  return Math.max(0,(now.getFullYear()-p[0])*12+(now.getMonth()+1-p[1]));
+}
+// Límite vigente en un mes: la última entrada con from <= ym. Los meses anteriores
+// al primer límite usan el primero (no había otro que conservar).
+function depLimitFor(ym){
+  const l=getDepLimits().slice().sort((a,b)=>a.from.localeCompare(b.from));
+  if(!l.length)return 0;
+  let v=l[0].amount;
+  l.forEach(x=>{if(x.from<=ym)v=x.amount;});
+  return parseFloat(v)||0;
+}
+// Meses con depósitos guardados (más reciente primero)
+function getDepMonths(){
+  const out=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.indexOf('mg_depm_')===0 && S.get(k,[]).length) out.push(k.slice(8));
+  }
+  return out.sort().reverse();
+}
+// Suma por cuenta de un mes; exceptId excluye un depósito (el que se está editando)
+function depTotals(ym, exceptId){
+  const t={};
+  getDeposits(ym).forEach(d=>{if(d.id!==exceptId)t[d.accId]=(t[d.accId]||0)+d.amount;});
+  return t;
+}
+// Cuentas que se muestran en un mes: activas que ya existían ese mes + cualquiera
+// (incluso archivada) que tenga depósitos en él.
+function depAccountsFor(ym, totals){
+  const all=getDepAccounts();
+  const list=all.filter(a=>(totals[a.id]||0)>0 || (!a.archived && (!a.createdYM || a.createdYM<=ym)));
+  // depósitos cuya cuenta ya no existe (respaldo editado a mano): no esconder dinero
+  Object.keys(totals).forEach(id=>{
+    if(!all.some(a=>a.id===id)) list.push({id,name:'Cuenta sin registro',icon:'🏦',archived:true,ghost:true});
+  });
+  return list;
+}
+function depStatus(dep, limit){
+  if(!(limit>0)) return {pct:0,cls:'',left:'sin límite'};
+  const pct=dep/limit*100;
+  const over=dep-limit>DEP_EPS;
+  return {
+    pct,
+    cls: over?'st-over':(pct>=80?'st-warn':''),
+    left: over?`excedida <b>+${fmtShort(dep-limit)}</b>`:`quedan <b>${fmtShort(Math.max(0,limit-dep))}</b>`,
+  };
+}
+
+function setDepTab(tab){
+  document.querySelectorAll('#dep-tabs .tab').forEach(b=>b.classList.toggle('active',b.dataset.dtab===tab));
+  ['dcuentas','dmovs','dhist'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===tab?'':'none';});
+  document.getElementById('dep-scroll').scrollTop=0;
+}
+
+function depositHTML(d, ym, accMap){
+  const a=accMap[d.accId]||{icon:'🏦',name:'Cuenta sin registro'};
+  return`<div class="expense-item">
+    <div class="exp-icon">${esc(a.icon)}</div>
+    <div class="exp-info">
+      <div class="exp-name">${esc(a.name)}</div>
+      <div class="exp-meta"><span>💵 Efectivo</span><span>· ${fmtDate(d.date)}</span>${a.archived?'<span>· archivada</span>':''}</div>
+      ${d.note?`<div class="exp-note">${esc(d.note)}</div>`:''}
+      <div class="exp-actions"><button class="exp-act-btn" data-dep-edit="${esc(d.id)}" data-dym="${esc(ym)}">✏️ Editar</button></div>
+    </div>
+    <div class="exp-right"><div class="exp-amount">${fmt(d.amount)}</div></div>
+  </div>`;
+}
+
+function renderDep(){
+  const $=id=>document.getElementById(id);
+  const ym=ymShift(depMonthOffset), isCur=depMonthOffset===0;
+  const deps=getDeposits(ym);
+  const totals=depTotals(ym);
+  const total=deps.reduce((s,d)=>s+d.amount,0);
+  const limit=depLimitFor(ym);
+  const accs=depAccountsFor(ym,totals);
+  const allAccs=getDepAccounts();
+
+  // ── Resumen ──
+  const sameYear=ym.slice(0,4)===currentYM().slice(0,4);
+  $('dep-sum-label').textContent='Depositado en efectivo · '+(sameYear?FM[parseInt(ym.slice(5))-1]:ymLabel(ym));
+  $('dep-sum-total').textContent=fmt(total);
+  if(limit>0){
+    const avail=accs.filter(a=>!a.archived).reduce((s,a)=>s+Math.max(0,limit-(totals[a.id]||0)),0);
+    $('dep-sum-avail').textContent=fmtShort(avail);
+    $('dep-sum-avail-lbl').textContent='disponible';
+    $('dep-sum-limit').textContent=fmtShort(limit);
+  } else {
+    $('dep-sum-avail').textContent='—';
+    $('dep-sum-avail-lbl').textContent='sin límite';
+    $('dep-sum-limit').textContent='—';
+  }
+  const overN=limit>0?accs.filter(a=>(totals[a.id]||0)-limit>DEP_EPS).length:0;
+  $('dep-sum-over').textContent=overN;
+  $('dep-sum-over-lbl').textContent=overN===1?'excedida':'excedidas';
+
+  // ── Barra del mes (rota sola) ──
+  $('dep-name').innerHTML=esc(ymLabel(ym))+(isCur?' &nbsp;<span class="cycle-open-badge">Rota solo</span>':'');
+  $('dep-prog-bar').style.width=(isCur?Math.min(100,(new Date().getDate()/daysInMonth(ym))*100):100).toFixed(0)+'%';
+
+  // ── Pestaña Cuentas ──
+  let h='';
+  if(!allAccs.length){
+    h=`<div class="empty"><div class="empty-icon">🏦</div><p>Agrega las cuentas donde depositas efectivo<br>para llevar la cuenta de cada mes.</p></div>`;
+  } else if(!accs.length){
+    h=`<div class="empty"><div class="empty-icon">🏦</div><p>Sin cuentas con depósitos en ${esc(ymLabel(ym))}.</p></div>`;
+  } else {
+    h=accs.map(a=>{
+      const dep=totals[a.id]||0;
+      const st=depStatus(dep,limit);
+      const p=Math.min(100,st.pct).toFixed(1);
+      const attrs=a.ghost?'':` data-acc-edit="${esc(a.id)}" role="button" tabindex="0"`;
+      return`<div class="acc-card ${st.cls}${a.archived?' is-archived':''}"${attrs}>
+        <div class="ring" style="--p:${p}"><span>${limit>0?Math.round(st.pct)+'%':'—'}</span></div>
+        <div class="acc-info">
+          <div class="acc-name">${esc(a.icon)} ${esc(a.name)}${a.archived?'<span class="acc-tag">archivada</span>':''}</div>
+          <div class="acc-amts"><span class="acc-dep">${fmt(dep)}</span><span class="acc-left">${st.left}</span></div>
+          <div class="acc-bar"><i style="width:0%" data-pct="${limit>0?p:0}"></i></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  h+=`<div class="limit-row"><span>${isCur?'Límite mensual por cuenta':'Límite en '+esc(ymLabel(ym))} <b>${limit>0?fmt(limit):'Sin límite'}</b></span><button class="exp-act-btn" data-dep-act="limit" style="flex-shrink:0;">✏️ Cambiar</button></div>
+    <button class="sec-btn" data-dep-act="add-acc" style="width:100%;">+ Agregar cuenta</button>`;
+  const archived=allAccs.filter(a=>a.archived);
+  if(archived.length){
+    const s=archived.length!==1?'s':'';
+    h+=`<button class="dep-arch-toggle" data-dep-act="toggle-arch">${archived.length} cuenta${s} archivada${s} · ${depShowArchived?'ocultar':'ver'}</button>`;
+    if(depShowArchived) h+=archived.map(a=>`<div class="cat-manage-item">
+        <span class="cat-manage-icon">${esc(a.icon)}</span><span class="cat-manage-name">${esc(a.name)}</span>
+        <button class="exp-act-btn" data-acc-restore="${esc(a.id)}">♻️ Reactivar</button>
+      </div>`).join('');
+  }
+  $('tab-dcuentas').innerHTML=h;
+
+  // ── Pestaña Movimientos ──
+  const accMap=Object.fromEntries(allAccs.map(a=>[a.id,a]));
+  const mEl=$('tab-dmovs');
+  if(!deps.length){
+    mEl.innerHTML=`<div class="empty"><div class="empty-icon">💵</div><p>Sin depósitos en ${esc(ymLabel(ym))}.<br>Toca el botón para registrar uno.</p></div>`;
+  } else {
+    const byDay={};
+    deps.forEach(d=>{const k=d.date||'sin-fecha';(byDay[k]=byDay[k]||[]).push(d);});
+    mEl.innerHTML=Object.keys(byDay).sort((a,b)=>b.localeCompare(a)).map(day=>{
+      const lbl=day==='sin-fecha'?'Sin fecha':new Date(day+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'long'});
+      return`<div class="day-lbl">${lbl}</div>${byDay[day].slice().reverse().map(d=>depositHTML(d,ym,accMap)).join('')}`;
+    }).join('');
+  }
+
+  // ── Pestaña Historial: meses anteriores al actual, cada uno contra SU límite ──
+  const hEl=$('tab-dhist');
+  const months=getDepMonths().filter(m=>m<currentYM());
+  if(!months.length){
+    hEl.innerHTML=`<div class="empty"><div class="empty-icon">📊</div><p>Aún no hay meses anteriores con depósitos.</p></div>`;
+  } else {
+    hEl.innerHTML=months.map(m=>{
+      const t=depTotals(m);
+      const tot=Object.values(t).reduce((s,v)=>s+v,0);
+      const lim=depLimitFor(m);
+      const accsM=depAccountsFor(m,t);
+      const maxDep=Math.max(...accsM.map(a=>t[a.id]||0),1);
+      const lines=accsM.map(a=>{
+        const dep=t[a.id]||0;
+        const st=depStatus(dep,lim);
+        const w=lim>0?Math.min(100,st.pct):(dep/maxDep*100);
+        const overTxt=lim>0&&dep-lim>DEP_EPS?` <b>+${fmtShort(dep-lim)}</b>`:'';
+        return`<div class="hist-line ${st.cls}"><span>${esc(a.icon)}</span><div class="hb"><i style="width:${w.toFixed(1)}%"></i></div><span class="hv">${fmtShort(dep)}${overTxt}</span></div>`;
+      }).join('');
+      return`<div class="hist-card" data-dep-month="${esc(m)}" role="button" tabindex="0">
+        <div class="hist-top"><span class="hist-month">${esc(ymLabel(m))}</span><span class="hist-total">${fmtShort(tot)}${lim>0?' · límite '+fmtShort(lim):''}</span></div>
+        ${lines}
+      </div>`;
+    }).join('');
+  }
+
+  // Barras de las cuentas: animan desde 0 (igual que A meses)
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.querySelectorAll('#tab-dcuentas .acc-bar i[data-pct]').forEach(b=>{b.style.width=b.dataset.pct+'%';});
+  }));
+}
+
+// Delegación: un solo listener para todo lo tocable de la pantalla
+document.getElementById('dep-scroll').addEventListener('click',e=>{
+  const t=e.target;
+  const act=t.closest('[data-dep-act]');
+  if(act){
+    const a=act.dataset.depAct;
+    if(a==='limit')openDepLimit();
+    else if(a==='add-acc')openDepAccount(null);
+    else if(a==='toggle-arch'){depShowArchived=!depShowArchived;renderDep();}
+    return;
+  }
+  const rs=t.closest('[data-acc-restore]');
+  if(rs){
+    saveDepAccounts(getDepAccounts().map(a=>a.id===rs.dataset.accRestore?{...a,archived:false}:a));
+    renderDep();showToast('♻️ Cuenta reactivada');return;
+  }
+  const de=t.closest('[data-dep-edit]');
+  if(de){openDepEdit(de.dataset.depEdit,de.dataset.dym);return;}
+  const ae=t.closest('[data-acc-edit]');
+  if(ae){openDepAccount(ae.dataset.accEdit);return;}
+  const hm=t.closest('[data-dep-month]');
+  if(hm){depMonthOffset=ymOffset(hm.dataset.depMonth);setDepTab('dcuentas');renderDep();}
+});
+// Teclado en tarjetas con role=button (Enter/Espacio)
+document.getElementById('dep-scroll').addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches('[role="button"]')){e.preventDefault();e.target.click();}
+});
+document.querySelectorAll('#dep-tabs .tab').forEach(b=>b.addEventListener('click',()=>setDepTab(b.dataset.dtab)));
+document.getElementById('dbtn-prev').addEventListener('click',()=>{
+  if(depMonthOffset<24){depMonthOffset++;renderDep();}
+  else showToast('Límite de historial alcanzado');
+});
+document.getElementById('dbtn-next').addEventListener('click',()=>{
+  if(depMonthOffset>0){depMonthOffset--;renderDep();}
+  else showToast('Este es el mes actual');
+});
+document.getElementById('fab-dep').addEventListener('click',()=>openDepAdd());
+
+// ── registrar / editar depósito ──
+function buildDepAccPills(){
+  const el=document.getElementById('dep-acc-pills');
+  const ym=ymOf(document.getElementById('dinp-date').value)||currentYM();
+  const lim=depLimitFor(ym);
+  const t=depTotals(ym, editingDepId?editingDepId.split('|')[0]:null);
+  // archivadas no se ofrecen, salvo la del depósito que se está editando
+  const accs=getDepAccounts().filter(a=>!a.archived||a.id===depSelAcc);
+  el.innerHTML=accs.map(a=>{
+    const dep=t[a.id]||0;
+    let sub='';
+    if(lim>0) sub=dep-lim>DEP_EPS?'excedida':(lim-dep<0.005?'al límite':'quedan '+fmtShort(lim-dep));
+    return`<button class="cpill dep-pill${a.id===depSelAcc?' sel':''}" data-acc="${esc(a.id)}">${esc(a.icon)} ${esc(a.name)}${sub?`<small>${sub}</small>`:''}</button>`;
+  }).join('');
+  el.querySelectorAll('.cpill').forEach(p=>p.addEventListener('click',()=>{
+    depSelAcc=p.dataset.acc;
+    el.querySelectorAll('.cpill').forEach(x=>x.classList.toggle('sel',x===p));
+    updateDepPreview();
+  }));
+}
+
+function updateDepPreview(){
+  const box=document.getElementById('dep-preview-box');
+  const amount=parseFloat(document.getElementById('dinp-amount').value)||0;
+  const ym=ymOf(document.getElementById('dinp-date').value);
+  const acc=getDepAccounts().find(a=>a.id===depSelAcc);
+  if(!acc||amount<=0||!ym){box.classList.remove('open');return;}
+  const lim=depLimitFor(ym);
+  const cur=depTotals(ym, editingDepId?editingDepId.split('|')[0]:null)[acc.id]||0;
+  const next=cur+amount;
+  let html=`${esc(acc.name)}: ${fmtShort(cur)} → <b>${fmtShort(next)}</b>`;
+  if(lim>0){
+    html+=` de ${fmtShort(lim)}<br>`+(next-lim>DEP_EPS
+      ?`<span class="dep-warn">⚠️ Con este depósito rebasas el límite por ${fmtShort(next-lim)}</span>`
+      :`Quedarían ${fmtShort(lim-next)} disponibles en ${esc(ymLabel(ym))}`);
+  }
+  document.getElementById('dep-preview-text').innerHTML=html;
+  box.classList.add('open');
+}
+document.getElementById('dinp-amount').addEventListener('input',updateDepPreview);
+document.getElementById('dinp-date').addEventListener('change',()=>{buildDepAccPills();updateDepPreview();});
+
+function openDepAdd(){
+  const active=getDepAccounts().filter(a=>!a.archived);
+  if(!active.length){showToast('🏦 Primero agrega una cuenta');openDepAccount(null);return;}
+  editingDepId=null;
+  depSelAcc=active.length===1?active[0].id:''; // con una sola cuenta, ya elegida
+  document.getElementById('modal-dep-title').textContent='Registrar depósito';
+  document.getElementById('dinp-amount').value='';
+  document.getElementById('dinp-note').value='';
+  document.getElementById('dinp-date').value=depMonthOffset===0?today():ymShift(depMonthOffset)+'-01';
+  document.getElementById('dep-delete-row').style.display='none';
+  buildDepAccPills();updateDepPreview();
+  document.getElementById('modal-dep').classList.add('open');
+  setTimeout(()=>document.getElementById('dinp-amount').focus(),350);
+}
+
+function openDepEdit(id, ym){
+  const d=getDeposits(ym).find(x=>x.id===id);if(!d)return;
+  editingDepId=id+'|'+ym;
+  depSelAcc=d.accId;
+  document.getElementById('modal-dep-title').textContent='Editar depósito';
+  document.getElementById('dinp-amount').value=d.amount;
+  document.getElementById('dinp-note').value=d.note||'';
+  document.getElementById('dinp-date').value=d.date||'';
+  document.getElementById('dep-delete-row').style.display='';
+  buildDepAccPills();updateDepPreview();
+  document.getElementById('modal-dep').classList.add('open');
+}
+
+document.getElementById('modal-dep-save').addEventListener('click',()=>{
+  const amount=parseFloat(document.getElementById('dinp-amount').value);
+  const date=document.getElementById('dinp-date').value;
+  const note=document.getElementById('dinp-note').value.trim();
+  if(!depSelAcc){showToast('⚠️ Elige la cuenta');return;}
+  if(!amount||amount<=0){showToast('⚠️ Ingresa el monto');return;}
+  if(!date){showToast('⚠️ Selecciona una fecha');return;}
+  const ym=ymOf(date); // el depósito vive en el mes de su fecha
+  let msg;
+  if(editingDepId){
+    const [id,src]=editingDepId.split('|');
+    const list=getDeposits(src);
+    const idx=list.findIndex(x=>x.id===id);
+    if(idx===-1){closeModal('modal-dep');return;}
+    const upd={...list[idx],accId:depSelAcc,amount,date,note};
+    if(ym===src){list[idx]=upd;saveDeposits(src,list);msg='✏️ Depósito actualizado';}
+    else{
+      list.splice(idx,1);saveDeposits(src,list);
+      const dst=getDeposits(ym);dst.push(upd);saveDeposits(ym,dst);
+      msg='📆 Actualizado y movido a '+ymLabel(ym);
+    }
+  } else {
+    const list=getDeposits(ym);
+    list.push({id:uid(),accId:depSelAcc,amount,date,note});
+    saveDeposits(ym,list);
+    msg='💵 Depósito guardado'+(ym!==currentYM()?' en '+ymLabel(ym):'');
+  }
+  // Aviso si la cuenta quedó por encima del límite de ese mes (se guarda de todos modos)
+  const lim=depLimitFor(ym);
+  const acc=getDepAccounts().find(a=>a.id===depSelAcc);
+  if(lim>0 && (depTotals(ym)[depSelAcc]||0)-lim>DEP_EPS && acc) msg=`⚠️ Guardado — ${acc.name} rebasó el límite`;
+  closeModal('modal-dep');
+  depMonthOffset=ymOffset(ym);
+  renderDep();
+  showToast(msg);
+});
+document.getElementById('modal-dep-delete').addEventListener('click',function(){
+  if(!editingDepId)return;
+  armDestructive(this,()=>{
+    const [id,ym]=editingDepId.split('|');
+    saveDeposits(ym,getDeposits(ym).filter(x=>x.id!==id));
+    closeModal('modal-dep');renderDep();showToast('Depósito eliminado');
+  });
+});
+document.getElementById('modal-dep-cancel').addEventListener('click',()=>closeModal('modal-dep'));
+document.getElementById('modal-dep').addEventListener('click',function(e){if(e.target===this)closeModal('modal-dep');});
+
+// ── cuentas ──
+function openDepAccount(id){
+  const a=id?getDepAccounts().find(x=>x.id===id):null;
+  if(id&&!a)return;
+  editingDepAccId=id;
+  document.getElementById('modal-depacc-title').textContent=a?'Editar cuenta':'Nueva cuenta';
+  document.getElementById('dacc-icon').value=a?a.icon:'';
+  document.getElementById('dacc-name').value=a?a.name:'';
+  document.getElementById('dacc-archive-row').style.display=a?'':'none';
+  document.getElementById('modal-depacc-archive').textContent=a&&a.archived?'♻️ Reactivar cuenta':'🗄️ Archivar cuenta';
+  document.getElementById('dacc-archive-desc').style.display=a&&a.archived?'none':'';
+  document.getElementById('modal-depacc').classList.add('open');
+  if(!a)setTimeout(()=>document.getElementById('dacc-name').focus(),350);
+}
+document.getElementById('modal-depacc-save').addEventListener('click',()=>{
+  const name=document.getElementById('dacc-name').value.trim();
+  const icon=document.getElementById('dacc-icon').value.trim()||'🏦';
+  if(!name){showToast('⚠️ Ingresa el nombre de la cuenta');return;}
+  const list=getDepAccounts();
+  if(editingDepAccId){
+    const idx=list.findIndex(x=>x.id===editingDepAccId);
+    if(idx>-1)list[idx]={...list[idx],name,icon};
+    saveDepAccounts(list);showToast('✏️ Cuenta actualizada');
+  } else {
+    list.push({id:uid(),name,icon,archived:false,createdYM:currentYM()});
+    saveDepAccounts(list);showToast('🏦 Cuenta agregada');
+  }
+  closeModal('modal-depacc');renderDep();
+});
+document.getElementById('modal-depacc-archive').addEventListener('click',function(){
+  if(!editingDepAccId)return;
+  const setArchived=v=>saveDepAccounts(getDepAccounts().map(a=>a.id===editingDepAccId?{...a,archived:v}:a));
+  const acc=getDepAccounts().find(a=>a.id===editingDepAccId);
+  if(acc&&acc.archived){
+    setArchived(false);closeModal('modal-depacc');renderDep();showToast('♻️ Cuenta reactivada');return;
+  }
+  armDestructive(this,()=>{
+    setArchived(true);closeModal('modal-depacc');renderDep();
+    showToast('🗄️ Cuenta archivada — su historial se conserva');
+  });
+});
+document.getElementById('modal-depacc-cancel').addEventListener('click',()=>closeModal('modal-depacc'));
+document.getElementById('modal-depacc').addEventListener('click',function(e){if(e.target===this)closeModal('modal-depacc');});
+
+// ── límite mensual por cuenta ──
+function openDepLimit(){
+  document.getElementById('dlim-amount').value=depLimitFor(currentYM())||'';
+  document.getElementById('modal-deplimit').classList.add('open');
+}
+document.getElementById('modal-deplimit-save').addEventListener('click',()=>{
+  const v=parseFloat(document.getElementById('dlim-amount').value);
+  const amount=v>0?v:0;
+  const ym=currentYM();
+  const all=getDepLimits();
+  if(!all.length&&!amount){closeModal('modal-deplimit');return;}
+  // un cambio en el mismo mes reemplaza la entrada de ese mes
+  const list=all.filter(x=>x.from!==ym);
+  list.push({from:ym,amount});
+  list.sort((a,b)=>a.from.localeCompare(b.from));
+  saveDepLimits(list);
+  closeModal('modal-deplimit');renderDep();
+  showToast(amount?`✅ Límite guardado — aplica desde ${ymLabel(ym)}`:'Límite desactivado desde este mes');
+});
+document.getElementById('modal-deplimit-cancel').addEventListener('click',()=>closeModal('modal-deplimit'));
+document.getElementById('modal-deplimit').addEventListener('click',function(e){if(e.target===this)closeModal('modal-deplimit');});
+
 // ── exportar resumen para Claude (.md) ──
 document.getElementById('cfg-export-claude').addEventListener('click',()=>{
   const cfg=getConfig(),cats=getCats();
@@ -3154,7 +3816,32 @@ document.getElementById('cfg-export-claude').addEventListener('click',()=>{
     rec.forEach(r=>{md+=`- ${r.name}: ${fmt(r.amount)} · ${methodInfo(r.method).name} · ${catName(r.cat)}\n`;});
   }
 
-  md+=`\n---\n*Regla de la app: el pago de la TDC y los retiros de cajero no se registran (evita doble conteo).*\n`;
+  // v22: depósitos en efectivo por cuenta (últimos 6 meses calendario con datos)
+  const depAccs=getDepAccounts();
+  const depYMs=[];for(let off=0;off<6;off++){const ym=ymShift(off);if(getDeposits(ym).length)depYMs.push(ym);}
+  if(depAccs.length||depYMs.length){
+    md+=`\n## 🏦 Depósitos en efectivo (por cuenta)\n`;
+    const limNow=depLimitFor(currentYM());
+    md+=`- Límite mensual por cuenta (vigente): ${limNow>0?fmt(limNow):'sin límite'}\n`;
+    md+=`- Cuentas activas: ${depAccs.filter(a=>!a.archived).map(a=>a.name).join(', ')||'ninguna'}\n`;
+    if(!depYMs.length)md+=`Sin depósitos en los últimos 6 meses.\n`;
+    depYMs.forEach(ym=>{
+      const ds=getDeposits(ym);
+      const t=depTotals(ym);
+      const tot=ds.reduce((s,d)=>s+d.amount,0);
+      const lim=depLimitFor(ym);
+      md+=`\n### ${ymLabel(ym)}\n`;
+      md+=`- Total depositado: ${fmt(tot)} en ${ds.length} depósito${ds.length!==1?'s':''}${lim>0?` · límite por cuenta ${fmt(lim)}`:''}\n`;
+      Object.entries(t).sort((a,b)=>b[1]-a[1]).forEach(([id,v])=>{
+        const a=depAccs.find(x=>x.id===id);
+        let line=`  - ${a?a.name+(a.archived?' (archivada)':''):'Cuenta sin registro'}: ${fmt(v)}`;
+        if(lim>0)line+=v-lim>DEP_EPS?` (EXCEDIDO por ${fmt(v-lim)})`:` (${Math.round(v/lim*100)}% · quedan ${fmt(lim-v)})`;
+        md+=line+'\n';
+      });
+    });
+  }
+
+  md+=`\n---\n*Regla de la app: el pago de la TDC y los retiros de cajero no se registran (evita doble conteo). Los depósitos en efectivo no son gastos: no suman a ningún total.*\n`;
 
   const blob=new Blob([md],{type:'text/markdown;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
